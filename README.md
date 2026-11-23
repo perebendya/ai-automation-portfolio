@@ -2,11 +2,11 @@
 
 I build tools for people who spend part of their day repeating the same task. At OBRIO (Genesis), I worked with growth, recruiting, and operations teams. I’m based in Kyiv and open to hybrid work in Kyiv or remote roles.
 
-## A platform for managing subscription funnels
+## Building subscription funnels from Figma with AI agents
 
-I built an internal Model Context Protocol (MCP) platform that the growth team used daily to manage changes to subscription funnels. An AI agent could prepare a targeted edit, the platform could validate it, and a teammate could approve it before it reached production. The platform kept an audit trail of changes.
+I built an internal MCP platform that the growth team used daily to build and update subscription funnels. Starting from a Figma design, an AI agent could assemble a draft from reusable quiz screens and paywalls, connect the screens, and flag missing assets or offer details for the team to fill in.
 
-One problem surfaced when a production write timed out. The change could already be live even though the agent saw an error. I fixed the retry behavior so a second attempt would not create a duplicate funnel. Localization was one module of the same platform. It preserved prices and placeholders and let the team reuse reviewed translations across domains.
+The platform checked that each route led to an existing screen. The team could review the draft on staging and approve it for production. I also built a localization module that preserved prices and placeholders, and fixed a retry issue that could create a duplicate funnel after a timeout.
 
 [Читати кейс українською](CASES.md#funnels)
 
