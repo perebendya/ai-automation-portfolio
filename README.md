@@ -6,9 +6,9 @@ At OBRIO (Genesis), I built a platform for creating subscription funnels, a sear
 
 ## Building subscription funnels from Figma with AI agents
 
-I built an MCP platform the growth team used daily to turn Figma designs into working subscription funnels. The agent generated the funnel JSON, built quiz screens and paywalls, and wired up navigation. The team could open the working funnel on staging, test the user journey and approve its release to production.
+I built an MCP platform the growth team used daily to turn Figma designs into working subscription funnels. The agent generated the funnel JSON, built quiz screens and paywalls, and wired up navigation. Automated tests checked screen transitions and translation keys. The growth team then walked through the funnel on staging, approved it and released it to production.
 
-![Fictional reading subscription. The Figma design becomes a working funnel on staging: choose a daily goal, see a reading plan, then open the subscription paywall. Screen transitions and translation keys are checked before release.](funnel-example.png)
+![Fictional reading subscription. The live funnel lets readers choose a daily goal, view their reading plan and open the paywall. The release path runs from Figma through automated tests, staging review and team approval to production.](funnel-example.png)
 
 I also built localization into the platform so the team could reuse reviewed translations across funnels.
 
