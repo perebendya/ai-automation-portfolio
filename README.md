@@ -44,15 +44,11 @@ If the model was unavailable, the workflow still delivered the counts and the mo
 
 ## Personal project · AI Rental Assistant
 
-My Telegram bot ranks apartment listings against my preferences. This small, runnable example shows how the text-ranking step handles a match, a contradiction, and missing information. It uses three synthetic listings and runs offline with Python 3.
+[**Try the apartment photo demo**](https://perebendya.github.io/ai-automation-portfolio/rental.html?lang=en)
 
-```sh
-python3 rental_demo.py
-```
+All three fictional flats pass the same price and room filters. Choose a muted kitchen, bare walls, a proper bed or a desk. The shortlist updates and shows which photo supports each finding. Open both photos to check the evidence yourself.
 
-The first listing scores **+6** for a bed, permission to keep pets, and a gas stove. The listing that mentions only a gas stove scores **+1**. Each result includes a breakdown by preference.
-
-[View the ranking code](rental_demo.py) · [Connect on LinkedIn](https://www.linkedin.com/in/dariia-kukla)
+The Telegram bot uses Gemini to inspect listing photos. The browser demo uses prepared observations and adds two visual preferences for kitchen colours and wall rugs. [Python text-ranking example](rental_demo.py) · [Connect on LinkedIn](https://www.linkedin.com/in/dariia-kukla)
 
 <a id="projects"></a>
 
