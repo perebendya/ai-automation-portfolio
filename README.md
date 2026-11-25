@@ -48,6 +48,8 @@ If the model was unavailable, the workflow still delivered the counts and the mo
 
 All three fictional flats pass the same price and room filters. Choose a muted kitchen, bare walls, a proper bed or a desk. The shortlist updates and shows which photo supports each finding. Open both photos to check the evidence yourself.
 
+I generated photos of three fictional flats for the public demo so I could show the assistant at work without republishing anyone’s listing photos. This also let me illustrate a distinction that matters in a rental search. One photo clearly shows a rug above the bed. Another shows only kitchen cabinets, so the assistant leaves the wall-rug preference unresolved for that flat.
+
 The Telegram bot uses Gemini to inspect listing photos. The browser demo uses prepared observations and adds two visual preferences for kitchen colours and wall rugs. [Python text-ranking example](rental_demo.py) · [Connect on LinkedIn](https://www.linkedin.com/in/dariia-kukla)
 
 <a id="projects"></a>
