@@ -30,6 +30,8 @@ I used sample queries from recruiters to check whether the results matched their
 
 ## Weekly reporting with n8n
 
+[Run the weekly report in your browser](https://perebendya.github.io/ai-automation-portfolio/report.html) · [Download the n8n workflow](https://perebendya.github.io/ai-automation-portfolio/weekly-report.json)
+
 A manager used to read moderation alerts and replies across Slack channels to write a weekly report. I built an n8n workflow that gathered the alerts, removed duplicates, and counted them in JavaScript. Claude drafted the summary for review.
 
 During the pilot, the manager told me they still checked every alert that had no response. I added a separate review of those alerts so the manager could see which ones might be false positives.
@@ -43,6 +45,8 @@ If the model was unavailable, the workflow still delivered the counts and the mo
 [Українською · щотижневий звіт](CASES.md#report)
 
 ## Personal project · AI Rental Assistant
+
+[Bot source, offline run and screenshots](https://github.com/perebendya/ai-rental-assistant)
 
 [**Try the apartment photo demo**](https://perebendya.github.io/ai-automation-portfolio/rental.html?lang=en)
 

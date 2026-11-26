@@ -1,0 +1,203 @@
+{
+  "id": "WeeklyReportDemo",
+  "name": "Weekly alert report · fictional inbox",
+  "active": false,
+  "nodes": [
+    {
+      "name": "Run report",
+      "id": "d3165039-0073-549e-9e66-e0ff28c9f5d4",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        120
+      ],
+      "parameters": {}
+    },
+    {
+      "name": "Fictional messages",
+      "id": "a23c41e2-5833-5652-8ec6-34b44c9cbc48",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        230,
+        120
+      ],
+      "parameters": {
+        "jsCode": "// Choose \"pilot\" or \"followup\". Use \"local-llm\" for Ollama, \"metrics\" for counts only.\nconst week = \"pilot\";\nconst mode = \"recorded\";\nconst exampleMessages = [\n  {week:\"pilot\", id:\"Q-31\", event:\"alert\", topic:\"Calendar\", text:\"The calendar export is delayed.\"},\n  {week:\"pilot\", id:\"Q-31\", event:\"reply\", topic:\"Calendar\", text:\"Restarted the calendar export and verified delivery.\"},\n  {week:\"pilot\", id:\"Q-32\", event:\"alert\", topic:\"Mail\", text:\"Two weekly digests entered the mail queue.\"},\n  {week:\"pilot\", id:\"Q-32\", event:\"alert\", topic:\"Mail\", text:\"Two weekly digests entered the mail queue.\"},\n  {week:\"pilot\", id:\"Q-33\", event:\"alert\", topic:\"Search\", text:\"The search index missed its scheduled refresh.\"},\n  {week:\"pilot\", id:\"Q-33\", event:\"reply\", topic:\"Search\", text:\"Rebuilt the search index and checked the results.\"},\n  {week:\"pilot\", id:\"Q-34\", event:\"alert\", topic:\"Mail\", text:\"The test mailbox rejected a digest.\"},\n  {week:\"followup\", id:\"Q-41\", event:\"alert\", topic:\"Mail\", text:\"The digest queue is growing.\"},\n  {week:\"followup\", id:\"Q-41\", event:\"reply\", topic:\"Mail\", text:\"Drained the mail queue and sent the delayed digests.\"},\n  {week:\"followup\", id:\"Q-42\", event:\"alert\", topic:\"Calendar\", text:\"A recurring calendar event appeared twice.\"},\n  {week:\"followup\", id:\"Q-42\", event:\"reply\", topic:\"Calendar\", text:\"Removed the duplicate event and checked the next scheduled run.\"}\n];\n\nreturn [{json:{week, mode, messages:exampleMessages.filter(m => m.week === week)}}];"
+      }
+    },
+    {
+      "name": "Count distinct alerts",
+      "id": "de96adeb-0b54-5569-8f1c-d2c0ed1242c6",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        120
+      ],
+      "parameters": {
+        "jsCode": "function countMessages(messages) {\n  const alerts = new Map();\n  const replies = new Map();\n  let duplicates = 0;\n  for (const message of messages) {\n    if (message.event === \"reply\") {\n      if (!replies.has(message.id)) replies.set(message.id, new Set());\n      replies.get(message.id).add(message.text);\n    } else if (message.event === \"alert\") {\n      if (alerts.has(message.id)) duplicates++;\n      else alerts.set(message.id, message);\n    }\n  }\n  const items = [...alerts.values()].map(alert => ({\n    id: alert.id, topic: alert.topic, text: alert.text,\n    replies: [...(replies.get(alert.id) || [])]\n  }));\n  const waiting = items.filter(item => item.replies.length === 0);\n  return {received: messages.length, unique: items.length, answered: items.length - waiting.length,\n    duplicates, waiting: waiting.map(item => item.id), items};\n}\n\n\nconst {week, mode, messages} = $input.first().json;\nreturn [{json:{week,mode,metrics:countMessages(messages)}}];"
+      }
+    },
+    {
+      "name": "Build report",
+      "id": "5bfaee17-8aa6-5bc6-af1f-4da726347bd0",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        690,
+        120
+      ],
+      "parameters": {
+        "jsCode": "// Extractive summarization: TextRank orders source sentences by weighted word overlap.\n// Ties keep source order, so reruns of a small or disconnected example stay reproducible.\nfunction selectEvidence(items) {\n  const sentences = items.flatMap(item => [item.text, ...item.replies].map(text => ({id:item.id, text})));\n  const stops = new Set(\"a an and are as at for from in its of on the to was were\".split(\" \"));\n  const tokens = sentences.map(s => new Set((s.text.toLowerCase().match(/[a-z]+/g) || []).filter(w => !stops.has(w))));\n  const edges = tokens.map((left,i) => tokens.map((right,j) => {\n    if (i === j || !left.size || !right.size) return 0;\n    let shared = 0;\n    for (const word of left) if (right.has(word)) shared++;\n    return shared / Math.sqrt(left.size * right.size);\n  }));\n  const n = sentences.length;\n  if (!n) return [];\n  const totals = edges.map(row => row.reduce((a,b) => a+b,0));\n  let scores = Array(n).fill(1/n);\n  for (let pass = 0; pass < 24; pass++) {\n    scores = sentences.map((_, i) => (1-.85)/n + .85*scores.reduce((sum, score, j) =>\n      sum + score * (totals[j] ? edges[j][i]/totals[j] : 1/n), 0));\n  }\n  return sentences.map((s,i) => ({...s,score:scores[i]})).sort((a,b) => b.score-a.score)\n    .slice(0,2).map(({id,text}) => ({id,text}));\n}\nconst recordedRuns = [\n  {\n    \"facts\": {\n      \"received\": 7,\n      \"unique\": 4,\n      \"answered\": 2,\n      \"duplicates\": 1,\n      \"waiting\": [\n        \"Q-32\",\n        \"Q-34\"\n      ],\n      \"items\": [\n        {\n          \"id\": \"Q-31\",\n          \"topic\": \"Calendar\",\n          \"text\": \"The calendar export is delayed.\",\n          \"replies\": [\n            \"Restarted the calendar export and verified delivery.\"\n          ]\n        },\n        {\n          \"id\": \"Q-32\",\n          \"topic\": \"Mail\",\n          \"text\": \"Two weekly digests entered the mail queue.\",\n          \"replies\": []\n        },\n        {\n          \"id\": \"Q-33\",\n          \"topic\": \"Search\",\n          \"text\": \"The search index missed its scheduled refresh.\",\n          \"replies\": [\n            \"Rebuilt the search index and checked the results.\"\n          ]\n        },\n        {\n          \"id\": \"Q-34\",\n          \"topic\": \"Mail\",\n          \"text\": \"The test mailbox rejected a digest.\",\n          \"replies\": []\n        }\n      ]\n    },\n    \"draft\": \"Two weekly digests entered the mail queue, while the test mailbox rejected a digest.\"\n  },\n  {\n    \"facts\": {\n      \"received\": 4,\n      \"unique\": 2,\n      \"answered\": 2,\n      \"duplicates\": 0,\n      \"waiting\": [],\n      \"items\": [\n        {\n          \"id\": \"Q-41\",\n          \"topic\": \"Mail\",\n          \"text\": \"The digest queue is growing.\",\n          \"replies\": [\n            \"Drained the mail queue and sent the delayed digests.\"\n          ]\n        },\n        {\n          \"id\": \"Q-42\",\n          \"topic\": \"Calendar\",\n          \"text\": \"A recurring calendar event appeared twice.\",\n          \"replies\": [\n            \"Removed the duplicate event and checked the next scheduled run.\"\n          ]\n        }\n      ]\n    },\n    \"draft\": \"All alerts have a reply.\"\n  }\n];\n\nfunction makeReport(metrics, mode) {\n  const lead = metrics.unique + \" unique alerts. \" + metrics.answered + \" received a reply. \" +\n    (metrics.waiting.length ? \"Follow up on \" + metrics.waiting.join(\", \") + \".\" : \"All alerts received a reply.\");\n  const evidence = mode === \"metrics\" ? [] : selectEvidence(metrics.items);\n  const result = {lead, evidence, metrics, method:mode === \"metrics\" ? \"Metrics only\" : \"TextRank · extractive summary\"};\n  if (mode === \"recorded\") {\n    const saved = recordedRuns.find(run => JSON.stringify(run.facts) === JSON.stringify(metrics));\n    if (saved) return {...result, method:\"Saved Qwen draft · verified against the same input\", draft:saved.draft};\n  }\n  return result;\n}\n\nconst {week, mode, metrics} = $input.first().json;\nreturn [{json:{week,mode,...makeReport(metrics, mode)}}];"
+      }
+    },
+    {
+      "name": "Use local LLM?",
+      "id": "2c55c330-9b5c-52ee-8935-2506f05472a2",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        920,
+        120
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "use-local-model",
+              "leftValue": "={{ $json.mode }}",
+              "rightValue": "local-llm",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "name": "Draft with Ollama",
+      "id": "759093bb-c66a-52c0-8a9b-18854f28ef8c",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1120,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:11434/v1/chat/completions",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({model:\"qwen2.5:0.5b\", stream:false, messages:[{role:\"user\",content:\"Complete this sentence in plain English, in one line, keeping any IDs. Example input: Q-12: Delivery is delayed. Example answer: Follow up on Q-12 about the delayed delivery. If the input is None, answer: All alerts have a reply. Input: \" + ($json.metrics.items.filter(x => x.replies.length === 0).map(x => x.id + \": \" + x.text).join(\" \") || \"None.\") + \" Answer:\"}], temperature:0, max_tokens:90, stop:[String.fromCharCode(10)]}) }}",
+        "options": {
+          "timeout": 90000
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "name": "Review report",
+      "id": "05494690-b148-521b-ba01-0c616cb7c4cd",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1380,
+        120
+      ],
+      "parameters": {
+        "jsCode": "const base = $('Build report').first().json;\nconst response = $input.first().json.choices?.[0]?.message?.content;\nif (base.mode === 'local-llm' && typeof response === 'string' && response.trim()) {\n  return [{json:{...base, method:'Ollama · generative draft for review', draft:response.trim()}}];\n}\nreturn [{json:{...base, modelStatus:base.mode === 'local-llm' ? 'Local model unavailable. Extractive report retained.' : 'Live inference not requested.'}}];"
+      }
+    }
+  ],
+  "connections": {
+    "Run report": {
+      "main": [
+        [
+          {
+            "node": "Fictional messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fictional messages": {
+      "main": [
+        [
+          {
+            "node": "Count distinct alerts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Count distinct alerts": {
+      "main": [
+        [
+          {
+            "node": "Build report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build report": {
+      "main": [
+        [
+          {
+            "node": "Use local LLM?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Use local LLM?": {
+      "main": [
+        [
+          {
+            "node": "Draft with Ollama",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Review report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Draft with Ollama": {
+      "main": [
+        [
+          {
+            "node": "Review report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

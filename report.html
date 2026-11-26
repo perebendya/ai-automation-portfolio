@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Weekly alert report · Dariia Kukla</title>
+<style>
+:root{font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#1e3330;background:#f6f5ef;font-size:16px;line-height:1.5}*{box-sizing:border-box}body{margin:0}main,header>div{width:min(1120px,92%);margin:auto}header{border-bottom:1px solid #ccd2c9;background:#fffefa}header>div{display:flex;justify-content:space-between;align-items:center;padding:15px 0;font-weight:650}a{color:#176254;text-underline-offset:3px}h1,h2,p{margin:0}h1{font-family:Georgia,serif;font-weight:500;font-size:clamp(2.35rem,6vw,4.8rem);line-height:1.05;letter-spacing:-.055em;margin:36px 0 12px}h2{font-size:1.25rem;margin-bottom:12px}main>p{max-width:640px;color:#455b54}.settings,.panels,footer{margin:24px 0}.settings{display:flex;flex-wrap:wrap;align-items:end;gap:14px}.settings label{display:grid;gap:4px;font-size:.85rem;font-weight:650}button,select{font:inherit;padding:10px 15px;border:1px solid #8caaa0;border-radius:8px;color:inherit;background:white;cursor:pointer}button.run{background:#155948;border-color:#155948;color:white;font-weight:650}.panels{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}.panel{background:#fffefa;border:1px solid #cbd4c9;border-radius:14px;padding:22px}.item{border-top:1px solid #dae0d8;padding:9px 0;font-size:.93rem}.item small,figcaption,small,.muted{color:#52665e}.id{font:600 .8rem ui-monospace,monospace;color:#176254}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:12px 0 17px}.stats>div{background:#e6f2e8;border-radius:6px;padding:10px}.stats strong{display:block;font-size:1.7rem;line-height:1.15}.stats span{font-size:.76rem}.draft{margin:14px 0;border-left:3px solid #d69f52;padding-left:12px}.draft strong{display:block;font-size:.85rem;margin-bottom:4px}section button.small{font-size:.85rem;padding:5px 9px;margin-top:4px}details{padding:12px 0}summary{font-weight:650;cursor:pointer}details p{margin:8px 0}footer{border-top:1px solid #cbd4c9;padding:15px 0 25px}.empty{padding:16px 0;color:#52665e}.action{display:inline-block;font-weight:650}button:focus-visible,select:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #be7e20;outline-offset:3px}@media(max-width:700px){.panels{grid-template-columns:1fr}.panel{padding:16px}header>div{gap:10px;font-size:.9rem}.settings{align-items:stretch}.settings>*{flex:auto}h1{margin-top:24px}}
+</style>
+<header><div><span>Dariia Kukla · Automation portfolio</span><a href="https://github.com/perebendya/ai-automation-portfolio">GitHub</a></div></header>
+<main><h1>Weekly alert report</h1><p>Turn a fictional team inbox into a handoff. Run the report, then add a reply to see which alerts still need attention.</p>
+<div class="settings"><label>Sample inbox<select id="week"><option value="pilot">Week one · pilot</option><option value="followup">Week two · follow-up</option></select></label>
+<button id="run" class="run">Run report →</button><a class="action" href="weekly-report.json" download>Download n8n workflow</a></div>
+<div class="panels"><section class="panel"><h2>Incoming messages</h2><div id="inbox"></div></section>
+<section class="panel" aria-live="polite"><h2>Weekly handoff</h2><div id="out"><p class="empty">Run the report to count alerts and prepare a draft.</p></div></section></div>
+<details><summary>Run it inside n8n</summary><p>Download the JSON above. In an empty n8n workflow choose <b>⋯ → Import from File</b>, then <b>Execute workflow</b>. Open <b>Review report</b> to inspect the result. The default run uses the built-in fictional messages and works without credentials.</p><p>In <b>Fictional messages</b>, change the week to <code>followup</code> for the second inbox. For a fresh generative draft on self-hosted n8n, run Ollama on the same machine with <code>ollama run qwen2.5:0.5b</code> and change the mode to <code>local-llm</code>. With containers, point <b>Draft with Ollama</b> to your Ollama service. The workflow keeps the counts and source excerpts if the model is offline.</p></details>
+<footer><small>The browser runs the same counting and extractive-summary code as the n8n workflow. The two original inboxes also include a saved model response from an actual local n8n run. Editing an inbox recalculates the report and shows excerpts from the new messages.</small></footer>
+</main><script>
+const exampleMessages = [
+  {week:"pilot", id:"Q-31", event:"alert", topic:"Calendar", text:"The calendar export is delayed."},
+  {week:"pilot", id:"Q-31", event:"reply", topic:"Calendar", text:"Restarted the calendar export and verified delivery."},
+  {week:"pilot", id:"Q-32", event:"alert", topic:"Mail", text:"Two weekly digests entered the mail queue."},
+  {week:"pilot", id:"Q-32", event:"alert", topic:"Mail", text:"Two weekly digests entered the mail queue."},
+  {week:"pilot", id:"Q-33", event:"alert", topic:"Search", text:"The search index missed its scheduled refresh."},
+  {week:"pilot", id:"Q-33", event:"reply", topic:"Search", text:"Rebuilt the search index and checked the results."},
+  {week:"pilot", id:"Q-34", event:"alert", topic:"Mail", text:"The test mailbox rejected a digest."},
+  {week:"followup", id:"Q-41", event:"alert", topic:"Mail", text:"The digest queue is growing."},
+  {week:"followup", id:"Q-41", event:"reply", topic:"Mail", text:"Drained the mail queue and sent the delayed digests."},
+  {week:"followup", id:"Q-42", event:"alert", topic:"Calendar", text:"A recurring calendar event appeared twice."},
+  {week:"followup", id:"Q-42", event:"reply", topic:"Calendar", text:"Removed the duplicate event and checked the next scheduled run."}
+];
+
+function countMessages(messages) {
+  const alerts = new Map();
+  const replies = new Map();
+  let duplicates = 0;
+  for (const message of messages) {
+    if (message.event === "reply") {
+      if (!replies.has(message.id)) replies.set(message.id, new Set());
+      replies.get(message.id).add(message.text);
+    } else if (message.event === "alert") {
+      if (alerts.has(message.id)) duplicates++;
+      else alerts.set(message.id, message);
+    }
+  }
+  const items = [...alerts.values()].map(alert => ({
+    id: alert.id, topic: alert.topic, text: alert.text,
+    replies: [...(replies.get(alert.id) || [])]
+  }));
+  const waiting = items.filter(item => item.replies.length === 0);
+  return {received: messages.length, unique: items.length, answered: items.length - waiting.length,
+    duplicates, waiting: waiting.map(item => item.id), items};
+}
+
+// Extractive summarization: TextRank orders source sentences by weighted word overlap.
+// Ties keep source order, so reruns of a small or disconnected example stay reproducible.
+function selectEvidence(items) {
+  const sentences = items.flatMap(item => [item.text, ...item.replies].map(text => ({id:item.id, text})));
+  const stops = new Set("a an and are as at for from in its of on the to was were".split(" "));
+  const tokens = sentences.map(s => new Set((s.text.toLowerCase().match(/[a-z]+/g) || []).filter(w => !stops.has(w))));
+  const edges = tokens.map((left,i) => tokens.map((right,j) => {
+    if (i === j || !left.size || !right.size) return 0;
+    let shared = 0;
+    for (const word of left) if (right.has(word)) shared++;
+    return shared / Math.sqrt(left.size * right.size);
+  }));
+  const n = sentences.length;
+  if (!n) return [];
+  const totals = edges.map(row => row.reduce((a,b) => a+b,0));
+  let scores = Array(n).fill(1/n);
+  for (let pass = 0; pass < 24; pass++) {
+    scores = sentences.map((_, i) => (1-.85)/n + .85*scores.reduce((sum, score, j) =>
+      sum + score * (totals[j] ? edges[j][i]/totals[j] : 1/n), 0));
+  }
+  return sentences.map((s,i) => ({...s,score:scores[i]})).sort((a,b) => b.score-a.score)
+    .slice(0,2).map(({id,text}) => ({id,text}));
+}
+const recordedRuns = [
+  {
+    "facts": {
+      "received": 7,
+      "unique": 4,
+      "answered": 2,
+      "duplicates": 1,
+      "waiting": [
+        "Q-32",
+        "Q-34"
+      ],
+      "items": [
+        {
+          "id": "Q-31",
+          "topic": "Calendar",
+          "text": "The calendar export is delayed.",
+          "replies": [
+            "Restarted the calendar export and verified delivery."
+          ]
+        },
+        {
+          "id": "Q-32",
+          "topic": "Mail",
+          "text": "Two weekly digests entered the mail queue.",
+          "replies": []
+        },
+        {
+          "id": "Q-33",
+          "topic": "Search",
+          "text": "The search index missed its scheduled refresh.",
+          "replies": [
+            "Rebuilt the search index and checked the results."
+          ]
+        },
+        {
+          "id": "Q-34",
+          "topic": "Mail",
+          "text": "The test mailbox rejected a digest.",
+          "replies": []
+        }
+      ]
+    },
+    "draft": "Two weekly digests entered the mail queue, while the test mailbox rejected a digest."
+  },
+  {
+    "facts": {
+      "received": 4,
+      "unique": 2,
+      "answered": 2,
+      "duplicates": 0,
+      "waiting": [],
+      "items": [
+        {
+          "id": "Q-41",
+          "topic": "Mail",
+          "text": "The digest queue is growing.",
+          "replies": [
+            "Drained the mail queue and sent the delayed digests."
+          ]
+        },
+        {
+          "id": "Q-42",
+          "topic": "Calendar",
+          "text": "A recurring calendar event appeared twice.",
+          "replies": [
+            "Removed the duplicate event and checked the next scheduled run."
+          ]
+        }
+      ]
+    },
+    "draft": "All alerts have a reply."
+  }
+];
+
+function makeReport(metrics, mode) {
+  const lead = metrics.unique + " unique alerts. " + metrics.answered + " received a reply. " +
+    (metrics.waiting.length ? "Follow up on " + metrics.waiting.join(", ") + "." : "All alerts received a reply.");
+  const evidence = mode === "metrics" ? [] : selectEvidence(metrics.items);
+  const result = {lead, evidence, metrics, method:mode === "metrics" ? "Metrics only" : "TextRank · extractive summary"};
+  if (mode === "recorded") {
+    const saved = recordedRuns.find(run => JSON.stringify(run.facts) === JSON.stringify(metrics));
+    if (saved) return {...result, method:"Saved Qwen draft · verified against the same input", draft:saved.draft};
+  }
+  return result;
+}
+
+const byId=id=>document.getElementById(id);
+const tag=(name,text,cls)=>{const el=document.createElement(name);el.textContent=text;if(cls)el.className=cls;return el};
+let messages, hasRun=false;
+function loadInbox(){messages=exampleMessages.filter(m=>m.week===byId('week').value).map(m=>({...m}));hasRun=false;byId('out').replaceChildren(tag('p','Run the report to count alerts and prepare a draft.','empty'));drawInbox()}
+function drawInbox(){
+ const container=byId('inbox');container.replaceChildren();
+ const metrics=countMessages(messages);
+ for(const m of messages){
+  const item=tag('div','','item');item.append(tag('span',m.id,'id'),tag('small',' · '+m.topic+' · '+m.event),tag('div',m.text));container.append(item);
+ }
+ if(metrics.waiting.length){
+  const id=metrics.waiting[0],b=tag('button','Add a sample reply to '+id,'small');
+  b.onclick=()=>{messages.push({week:byId('week').value,id,event:'reply',topic:metrics.items.find(m=>m.id===id).topic,text:'The team has picked this up for review.'});drawInbox();if(hasRun)render()};container.append(b);
+ }
+}
+function render(){
+ hasRun=true;const metrics=countMessages(messages);const report=makeReport(metrics,'recorded');const out=byId('out');out.replaceChildren();
+ const stats=tag('div','','stats');
+ for(const [label,value] of [['Unique alerts',metrics.unique],['With replies',metrics.answered],['Awaiting reply',metrics.waiting.length]]){
+  const cell=tag('div','');cell.append(tag('strong',value),tag('span',label));stats.append(cell)
+ }
+ out.append(stats,tag('p',metrics.duplicates+' duplicate alert events removed.','muted'));
+ if(report.draft){const d=tag('div','','draft');d.append(tag('strong','Saved AI draft · Qwen'),tag('p',report.draft));out.append(d)}
+ out.append(tag('h3','Source excerpts'));
+ for(const e of report.evidence){const p=tag('p','','item');p.append(tag('span',e.id+'  ','id'),document.createTextNode(e.text));out.append(p)}
+ out.append(tag('h3','Follow up'),tag('p',metrics.waiting.join(' · ')||'All alerts received a reply.'));
+}
+byId('run').onclick=render;byId('week').onchange=loadInbox;loadInbox();
+</script></html>
