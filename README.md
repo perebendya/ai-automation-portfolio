@@ -46,7 +46,9 @@ If the model was unavailable, the workflow still delivered the counts and the mo
 
 [**Try the apartment photo demo**](https://perebendya.github.io/ai-automation-portfolio/rental.html?lang=en)
 
-All three fictional flats pass the same price and room filters. Choose a muted kitchen, bare walls, a proper bed or a desk. The shortlist updates and shows which photo supports each finding. Open both photos to check the evidence yourself.
+I built a Telegram bot that collects rental listings from OLX, DIM.RIA and Telegram groups. Renters describe what they want in their own words. The bot distinguishes requirements from preferences and combines listing details with Gemini’s photo observations. If a double bed is essential and the only sleeping option is a sofa, the bot can rule the flat out. If neither the listing nor the photos show where you would sleep, it can add that question to a draft message for the owner.
+
+In the demo, type a request and check the results against four photos per flat. Wall rugs and kitchen colours are examples I added for the portfolio. The bot itself checks stove type, sleeping arrangements, usable tables and bathroom condition.
 
 I generated photos of three fictional flats for the public demo so I could show the assistant at work without republishing anyone’s listing photos. This also let me illustrate a distinction that matters in a rental search. One photo clearly shows a rug above the bed. Another shows only kitchen cabinets, so the assistant leaves the wall-rug preference unresolved for that flat.
 

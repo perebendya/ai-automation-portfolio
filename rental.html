@@ -68,7 +68,7 @@ const phrases = [
   [5,-1,/душ(?:ову|ова|овій|і|ем|у)?(?=\s|$)|shower(?:s|ing)?/gu]
 ];
 const indifferent = /байдуж|все одно|неважлив|не важлив|не принципов|не заважа|не хвилю|не проти|мені ок|можна залишити|без різниці|don't (?:mind|care)|do not (?:mind|care)|doesn't matter|is fine|are fine|no preference|okay with|ok with/i;
-const negBefore = /(?:без|жодн[а-яіїєґ]*|уника[а-яіїєґ]*|не(?:\s+(?:хочу|люблю|треба|потріб[а-яіїєґ]*|має бути|мала бути|була|було|були|висів|висіли|було видно|подоба[а-яіїєґ]*))?|\b(?:without|no|avoid|not|don't want|don't like|hate|rather than))\s+(?:(?:бабусин[а-яіїєґ]*|радянськ[а-яіїєґ]*|совков[а-яіїєґ]*|стар[а-яіїєґ]*|ніяких|жодних|ніякого|настінних|цих|той|такого|на|спати|навіть|дуже|надто|занадто|яскрав[а-яіїєґ]*|any|a|an|the|sleeping|sleep|on|wall|wall-mounted|very|too)\s+)*$/iu;
+const negBefore = /(?<![\p{L}\p{N}_])(?:без|жодн[а-яіїєґ]*|уника[а-яіїєґ]*|не(?:\s+(?:хочу|люблю|треба|потріб[а-яіїєґ]*|має бути|мала бути|була|було|були|висів|висіли|було видно|подоба[а-яіїєґ]*))?|\b(?:without|no|avoid|not|don't want|don't like|hate|rather than))\s+(?:(?:бабусин[а-яіїєґ]*|радянськ[а-яіїєґ]*|совков[а-яіїєґ]*|стар[а-яіїєґ]*|ніяких|жодних|ніякого|настінних|цих|той|такого|на|спати|навіть|дуже|надто|занадто|яскрав[а-яіїєґ]*|any|a|an|the|sleeping|sleep|on|wall|wall-mounted|very|too)\s+)*$/iu;
 const negAfter = /^\s*(?:на\s+стіні\s+|на\s+стінах\s+)?(?:не було|не було видно|не висів|не хочу|не люблю|не треба|не підходить|не подоба|не потріб|мені не треба|is a dealbreaker|are a dealbreaker)/iu;
 function parseRequest(raw) {
   const choices = new Map();
@@ -195,7 +195,7 @@ function translate(){
   submit:en("Підібрати квартири","Find my matches"),exampleLabel:en("Спробуй запит","Try a request"),
   results:en("Твоя добірка","Your shortlist"),filter:en("Київ · 1 кімната · 18 000 грн/міс.","Kyiv · 1 room · ₴18,000/month"),
   legend:en("Збіг +1 · Суперечність −1 · Не видно на фото 0","Match +1 · Conflict −1 · Not visible 0"),
-  note:en("У Telegram-боті Gemini перетворює розмову на критерії й аналізує знімки. Це автономне демо з локальним розбором фраз про шість побажань. Оголошення та фото вигадані, спостереження підготовлені заздалегідь.","In the Telegram bot, Gemini turns conversation into preferences and analyses photos. This standalone demo interprets phrases about six preferences locally, using fictional listings, generated photos and prepared observations."),
+  note:en("У Telegram-боті Gemini за фото визначає тип плити, спальне місце, наявність столу та стан санвузла. Килими й колір кухні я додала як приклади для демо. Тут запити розбираються локально, за підготовленими спостереженнями для трьох вигаданих квартир.","In the Telegram bot, Gemini checks photos for the stove type, sleeping arrangement, a usable table and bathroom condition. I added wall rugs and kitchen colours as examples for this demo. It interprets requests locally using prepared observations for three fictional flats."),
   "photo-origin":en("Фото згенеровано для демо, щоб показати різні інтер’єри без публікації чужих знімків з оголошень.","I generated these interiors for the demo so I could show a range of flats without republishing anyone’s listing photos."),
   portfolio:en("Портфоліо Дарії","Dariia’s portfolio"),close:en("Закрити","Close")};
  for(const [id,label] of Object.entries(copy))$(id).textContent=t(label);
