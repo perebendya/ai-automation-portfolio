@@ -3,187 +3,125 @@
 <title>Weekly alert report · Dariia Kukla</title>
 <style>
 :root{font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#1e3330;background:#f6f5ef;font-size:16px;line-height:1.5}*{box-sizing:border-box}body{margin:0}main,header>div{width:min(1120px,92%);margin:auto}header{border-bottom:1px solid #ccd2c9;background:#fffefa}header>div{display:flex;justify-content:space-between;align-items:center;padding:15px 0;font-weight:650}a{color:#176254;text-underline-offset:3px}h1,h2,p{margin:0}h1{font-family:Georgia,serif;font-weight:500;font-size:clamp(2.35rem,6vw,4.8rem);line-height:1.05;letter-spacing:-.055em;margin:36px 0 12px}h2{font-size:1.25rem;margin-bottom:12px}main>p{max-width:640px;color:#455b54}.settings,.panels,footer{margin:24px 0}.settings{display:flex;flex-wrap:wrap;align-items:end;gap:14px}.settings label{display:grid;gap:4px;font-size:.85rem;font-weight:650}button,select{font:inherit;padding:10px 15px;border:1px solid #8caaa0;border-radius:8px;color:inherit;background:white;cursor:pointer}button.run{background:#155948;border-color:#155948;color:white;font-weight:650}.panels{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}.panel{background:#fffefa;border:1px solid #cbd4c9;border-radius:14px;padding:22px}.item{border-top:1px solid #dae0d8;padding:9px 0;font-size:.93rem}.item small,figcaption,small,.muted{color:#52665e}.id{font:600 .8rem ui-monospace,monospace;color:#176254}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:12px 0 17px}.stats>div{background:#e6f2e8;border-radius:6px;padding:10px}.stats strong{display:block;font-size:1.7rem;line-height:1.15}.stats span{font-size:.76rem}.draft{margin:14px 0;border-left:3px solid #d69f52;padding-left:12px}.draft strong{display:block;font-size:.85rem;margin-bottom:4px}section button.small{font-size:.85rem;padding:5px 9px;margin-top:4px}details{padding:12px 0}summary{font-weight:650;cursor:pointer}details p{margin:8px 0}footer{border-top:1px solid #cbd4c9;padding:15px 0 25px}.empty{padding:16px 0;color:#52665e}.action{display:inline-block;font-weight:650}button:focus-visible,select:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #be7e20;outline-offset:3px}@media(max-width:700px){.panels{grid-template-columns:1fr}.panel{padding:16px}header>div{gap:10px;font-size:.9rem}.settings{align-items:stretch}.settings>*{flex:auto}h1{margin-top:24px}}
-</style>
-<header><div><span>Dariia Kukla · Automation portfolio</span><a href="https://github.com/perebendya/ai-automation-portfolio">GitHub</a></div></header>
-<main><h1>Weekly alert report</h1><p>Turn a fictional team inbox into a handoff. Run the report, then add a reply to see which alerts still need attention.</p>
-<div class="settings"><label>Sample inbox<select id="week"><option value="pilot">Week one · pilot</option><option value="followup">Week two · follow-up</option></select></label>
-<button id="run" class="run">Run report →</button><a class="action" href="weekly-report.json" download>Download n8n workflow</a></div>
-<div class="panels"><section class="panel"><h2>Incoming messages</h2><div id="inbox"></div></section>
-<section class="panel" aria-live="polite"><h2>Weekly handoff</h2><div id="out"><p class="empty">Run the report to count alerts and prepare a draft.</p></div></section></div>
-<details><summary>Run it inside n8n</summary><p>Download the JSON above. In an empty n8n workflow choose <b>⋯ → Import from File</b>, then <b>Execute workflow</b>. Open <b>Review report</b> to inspect the result. The default run uses the built-in fictional messages and works without credentials.</p><p>In <b>Fictional messages</b>, change the week to <code>followup</code> for the second inbox. For a fresh generative draft on self-hosted n8n, run Ollama on the same machine with <code>ollama run qwen2.5:0.5b</code> and change the mode to <code>local-llm</code>. With containers, point <b>Draft with Ollama</b> to your Ollama service. The workflow keeps the counts and source excerpts if the model is offline.</p></details>
-<footer><small>The browser runs the same counting and extractive-summary code as the n8n workflow. The two original inboxes also include a saved model response from an actual local n8n run. Editing an inbox recalculates the report and shows excerpts from the new messages.</small></footer>
-</main><script>
-const exampleMessages = [
-  {week:"pilot", id:"Q-31", event:"alert", topic:"Calendar", text:"The calendar export is delayed."},
-  {week:"pilot", id:"Q-31", event:"reply", topic:"Calendar", text:"Restarted the calendar export and verified delivery."},
-  {week:"pilot", id:"Q-32", event:"alert", topic:"Mail", text:"Two weekly digests entered the mail queue."},
-  {week:"pilot", id:"Q-32", event:"alert", topic:"Mail", text:"Two weekly digests entered the mail queue."},
-  {week:"pilot", id:"Q-33", event:"alert", topic:"Search", text:"The search index missed its scheduled refresh."},
-  {week:"pilot", id:"Q-33", event:"reply", topic:"Search", text:"Rebuilt the search index and checked the results."},
-  {week:"pilot", id:"Q-34", event:"alert", topic:"Mail", text:"The test mailbox rejected a digest."},
-  {week:"followup", id:"Q-41", event:"alert", topic:"Mail", text:"The digest queue is growing."},
-  {week:"followup", id:"Q-41", event:"reply", topic:"Mail", text:"Drained the mail queue and sent the delayed digests."},
-  {week:"followup", id:"Q-42", event:"alert", topic:"Calendar", text:"A recurring calendar event appeared twice."},
-  {week:"followup", id:"Q-42", event:"reply", topic:"Calendar", text:"Removed the duplicate event and checked the next scheduled run."}
-];
 
-function countMessages(messages) {
-  const alerts = new Map();
-  const replies = new Map();
-  let duplicates = 0;
-  for (const message of messages) {
-    if (message.event === "reply") {
-      if (!replies.has(message.id)) replies.set(message.id, new Set());
-      replies.get(message.id).add(message.text);
-    } else if (message.event === "alert") {
-      if (alerts.has(message.id)) duplicates++;
-      else alerts.set(message.id, message);
+.output{margin-bottom:22px}h3{margin:22px 0 5px;font-size:1rem}.output dl{margin:0}.output dl div{padding:6px 0;border-bottom:1px solid #dae0d8}.output dt{font-size:.83rem;color:#52665e}.output dd{margin:0}.item .muted{margin:4px 0}.settings small{align-self:center}@media(max-width:700px){.panels>section:nth-child(2){grid-row:1}}</style><header><div>Dariia Kukla <a href="https://github.com/perebendya/ai-automation-portfolio">Portfolio</a></div></header><main>
+<h1>Weekly moderation report</h1><p>Which alerts were false positives, and why? Run a week of fictional messages, then mark one alert and see its section change.</p>
+<div class="settings"><label>Report period<select id="week"><option value="pilot">6–12 November · sample week</option><option value="followup">13–19 November · sample week</option></select></label><button class="run" id="run">Run report</button><a href="weekly-report.json" download>Download n8n workflow</a></div>
+<div class="panels"><section class="panel"><h2>Alert messages</h2><div id="inbox"></div></section><section class="panel" aria-live="polite"><h2>Weekly report</h2><div id="out"></div></section></div>
+<details><summary>How this relates to the original workflow</summary><p>The original read Slack alerts, reactions and replies. JavaScript calculated counts for four sections. Claude summarized moderator notes and separately reviewed unmarked text and audio alerts for possible false positives.</p><p>This browser demo shows the offline report using sample messages and moderator notes. Unmarked items stay open for review. Each original sample week also includes a saved local model draft. Changing a reaction updates the counts and clears that draft.</p></details>
+<details><summary>Run it in n8n</summary><p>Download the workflow, select <b>Import from File</b> in n8n, then <b>Execute workflow</b>. Open <b>Review report</b> for the four sections. The default run works without accounts or keys for Slack or a model.</p><p>In <b>Fictional messages</b>, select <code>followup</code> for the second week or <code>local-llm</code> to draft a summary of moderator notes with Ollama. For that option, serve <code>qwen2.5:0.5b</code> locally and set the HTTP node address if n8n runs in a container.</p></details>
+</main><script>const samples={
+  "pilot": [
+    {"id":"T1","kind":"Text","key":"t1","type":"Possible contact details","body":"The paint swatch on my desk is 445566.","note":"False positive: the digits are a paint colour.","thumb":true},
+    {"id":"T2","kind":"Text","key":"t1","type":"Possible contact details","body":"The paint swatch on my desk is 445566."},
+    {"id":"T3","kind":"Text","key":"t3","type":"Possible contact details","body":"My parcel reference ends in 778899."},
+    {"id":"A1","kind":"Audio","key":"a1","type":"Transcript keyword","body":"Please pause the recording.","note":"Tech issue: the transcript repeated the final phrase."},
+    {"id":"P1","kind":"Photo","key":"p1","type":"Reference image","body":"A photo of a paint sample.","note":"Edge case: the handwritten colour code looks like a contact number."},
+    {"id":"B1","kind":"Expert blocks","key":"b1","type":"","body":"A user blocked an expert."}
+  ],
+  "followup": [
+    {"id":"T4","kind":"Text","key":"t4","type":"External contact","body":"An expert asked to move the conversation elsewhere.","note":"Critical: the expert shared a private contact."},
+    {"id":"A2","kind":"Audio","key":"a2","type":"Possible contact details","body":"The speaker reads out a ticket reference.","note":"False positive: the number belongs to a ticket."},
+    {"id":"A3","kind":"Audio","key":"a3","type":"Transcript keyword","body":"The speaker describes an account in a history book."},
+    {"id":"P2","kind":"Photo","key":"p2","type":"Document photo","body":"A picture of a blank receipt."},
+    {"id":"B2","kind":"Expert blocks","key":"b2","type":"","body":"A user blocked an expert."},
+    {"id":"B3","kind":"Expert blocks","key":"b3","type":"","body":"A different user blocked an expert."}
+  ]
+};
+function summarize(messages) {
+  const kinds = ['Text', 'Audio', 'Photo', 'Expert blocks'];
+  const sections = kinds.map(kind => {
+    const rows = messages.filter(row => row.kind === kind);
+    const groups = new Map();
+    for (const row of rows) {
+      const group = groups.get(row.key) || {row, notes: new Set(), thumb: false};
+      if (row.note) group.notes.add(row.note);
+      group.thumb ||= !!row.thumb;
+      groups.set(row.key, group);
     }
-  }
-  const items = [...alerts.values()].map(alert => ({
-    id: alert.id, topic: alert.topic, text: alert.text,
-    replies: [...(replies.get(alert.id) || [])]
-  }));
-  const waiting = items.filter(item => item.replies.length === 0);
-  return {received: messages.length, unique: items.length, answered: items.length - waiting.length,
-    duplicates, waiting: waiting.map(item => item.id), items};
+    const types = new Map();
+    const result = {kind, total: groups.size, duplicates: rows.length - groups.size,
+      types: [], falsePositives: 0, critical: 0, edge: 0, tech: 0, reasons: [], notes: [], review: []};
+    for (const {row, notes, thumb} of groups.values()) {
+      if (row.type) types.set(row.type, (types.get(row.type) || 0) + 1);
+      const comments = [...notes];
+      const reasons = comments.filter(note => /false positive/i.test(note));
+      if (thumb || reasons.length) result.falsePositives++;
+      result.reasons.push(...reasons);
+      result.notes.push(...comments);
+      if (comments.some(note => /critical:/i.test(note))) result.critical++;
+      if (comments.some(note => /edge case:/i.test(note))) result.edge++;
+      if (comments.some(note => /tech issue:/i.test(note))) result.tech++;
+      if (['Text','Audio'].includes(kind) && !thumb && !comments.length)
+        result.review.push({id: row.id, message: row.body});
+    }
+    result.types = [...types].sort((a,b) => b[1] - a[1]);
+    return result;
+  });
+  return sections;
 }
 
-// Extractive summarization: TextRank orders source sentences by weighted word overlap.
-// Ties keep source order, so reruns of a small or disconnected example stay reproducible.
-function selectEvidence(items) {
-  const sentences = items.flatMap(item => [item.text, ...item.replies].map(text => ({id:item.id, text})));
-  const stops = new Set("a an and are as at for from in its of on the to was were".split(" "));
-  const tokens = sentences.map(s => new Set((s.text.toLowerCase().match(/[a-z]+/g) || []).filter(w => !stops.has(w))));
-  const edges = tokens.map((left,i) => tokens.map((right,j) => {
-    if (i === j || !left.size || !right.size) return 0;
-    let shared = 0;
-    for (const word of left) if (right.has(word)) shared++;
-    return shared / Math.sqrt(left.size * right.size);
-  }));
-  const n = sentences.length;
-  if (!n) return [];
-  const totals = edges.map(row => row.reduce((a,b) => a+b,0));
-  let scores = Array(n).fill(1/n);
-  for (let pass = 0; pass < 24; pass++) {
-    scores = sentences.map((_, i) => (1-.85)/n + .85*scores.reduce((sum, score, j) =>
-      sum + score * (totals[j] ? edges[j][i]/totals[j] : 1/n), 0));
-  }
-  return sentences.map((s,i) => ({...s,score:scores[i]})).sort((a,b) => b.score-a.score)
-    .slice(0,2).map(({id,text}) => ({id,text}));
-}
-const recordedRuns = [
-  {
-    "facts": {
-      "received": 7,
-      "unique": 4,
-      "answered": 2,
-      "duplicates": 1,
-      "waiting": [
-        "Q-32",
-        "Q-34"
-      ],
-      "items": [
-        {
-          "id": "Q-31",
-          "topic": "Calendar",
-          "text": "The calendar export is delayed.",
-          "replies": [
-            "Restarted the calendar export and verified delivery."
-          ]
-        },
-        {
-          "id": "Q-32",
-          "topic": "Mail",
-          "text": "Two weekly digests entered the mail queue.",
-          "replies": []
-        },
-        {
-          "id": "Q-33",
-          "topic": "Search",
-          "text": "The search index missed its scheduled refresh.",
-          "replies": [
-            "Rebuilt the search index and checked the results."
-          ]
-        },
-        {
-          "id": "Q-34",
-          "topic": "Mail",
-          "text": "The test mailbox rejected a digest.",
-          "replies": []
-        }
-      ]
-    },
-    "draft": "Two weekly digests entered the mail queue, while the test mailbox rejected a digest."
-  },
-  {
-    "facts": {
-      "received": 4,
-      "unique": 2,
-      "answered": 2,
-      "duplicates": 0,
-      "waiting": [],
-      "items": [
-        {
-          "id": "Q-41",
-          "topic": "Mail",
-          "text": "The digest queue is growing.",
-          "replies": [
-            "Drained the mail queue and sent the delayed digests."
-          ]
-        },
-        {
-          "id": "Q-42",
-          "topic": "Calendar",
-          "text": "A recurring calendar event appeared twice.",
-          "replies": [
-            "Removed the duplicate event and checked the next scheduled run."
-          ]
-        }
-      ]
-    },
-    "draft": "All alerts have a reply."
-  }
-];
-
-function makeReport(metrics, mode) {
-  const lead = metrics.unique + " unique alerts. " + metrics.answered + " received a reply. " +
-    (metrics.waiting.length ? "Follow up on " + metrics.waiting.join(", ") + "." : "All alerts received a reply.");
-  const evidence = mode === "metrics" ? [] : selectEvidence(metrics.items);
-  const result = {lead, evidence, metrics, method:mode === "metrics" ? "Metrics only" : "TextRank · extractive summary"};
-  if (mode === "recorded") {
-    const saved = recordedRuns.find(run => JSON.stringify(run.facts) === JSON.stringify(metrics));
-    if (saved) return {...result, method:"Saved Qwen draft · verified against the same input", draft:saved.draft};
-  }
-  return result;
+function reportLines(section) {
+  const types = section.types.map(([name, n]) => name + ' (' + n + ')').join(', ');
+  if (section.kind === 'Expert blocks') return [
+    ['Blocks', String(section.total)],
+    ['Reasons', types || 'Unspecified in the alerts'],
+    ['Critical / non-critical', section.critical + ' / ' + (section.total - section.critical)]
+  ];
+  if (section.kind === 'Photo') return [
+    ['Sharing reasons', types || 'None'], ['Critical cases', String(section.critical)],
+    ['Edge cases', String(section.edge)], ...section.notes.map(note => ['Moderator note', note])
+  ];
+  const lines = [['Frequent alert types', types || 'None'],
+    ['False positives', String(section.falsePositives)],
+    ...section.reasons.map(note => ['Reason', note.replace(/^False positive:\s*/i, '')]),
+    ['Critical / edge cases', section.critical + ' / ' + section.edge]];
+  if (section.kind === 'Audio') lines.push(['Technical issues', String(section.tech)]);
+  if (section.duplicates) lines.push(['Duplicates excluded', String(section.duplicates)]);
+  for (const item of section.review) lines.push(['Awaiting context review', item.id + ' · ' + item.message]);
+  return lines;
 }
 
-const byId=id=>document.getElementById(id);
-const tag=(name,text,cls)=>{const el=document.createElement(name);el.textContent=text;if(cls)el.className=cls;return el};
-let messages, hasRun=false;
-function loadInbox(){messages=exampleMessages.filter(m=>m.week===byId('week').value).map(m=>({...m}));hasRun=false;byId('out').replaceChildren(tag('p','Run the report to count alerts and prepare a draft.','empty'));drawInbox()}
-function drawInbox(){
- const container=byId('inbox');container.replaceChildren();
- const metrics=countMessages(messages);
- for(const m of messages){
-  const item=tag('div','','item');item.append(tag('span',m.id,'id'),tag('small',' · '+m.topic+' · '+m.event),tag('div',m.text));container.append(item);
- }
- if(metrics.waiting.length){
-  const id=metrics.waiting[0],b=tag('button','Add a sample reply to '+id,'small');
-  b.onclick=()=>{messages.push({week:byId('week').value,id,event:'reply',topic:metrics.items.find(m=>m.id===id).topic,text:'The team has picked this up for review.'});drawInbox();if(hasRun)render()};container.append(b);
- }
+const byId = id => document.getElementById(id);
+const el = (tag,text,cls) => {const node=document.createElement(tag); node.textContent=text; if(cls) node.className=cls; return node;};
+const recorded = {"pilot":{"rows":[{"id":"T1","kind":"Text","key":"t1","type":"Possible contact details","body":"The paint swatch on my desk is 445566.","note":"False positive: the digits are a paint colour.","thumb":true},{"id":"T2","kind":"Text","key":"t1","type":"Possible contact details","body":"The paint swatch on my desk is 445566."},{"id":"T3","kind":"Text","key":"t3","type":"Possible contact details","body":"My parcel reference ends in 778899."},{"id":"A1","kind":"Audio","key":"a1","type":"Transcript keyword","body":"Please pause the recording.","note":"Tech issue: the transcript repeated the final phrase."},{"id":"P1","kind":"Photo","key":"p1","type":"Reference image","body":"A photo of a paint sample.","note":"Edge case: the handwritten colour code looks like a contact number."},{"id":"B1","kind":"Expert blocks","key":"b1","type":"","body":"A user blocked an expert."}],"draft":"The moderator's comments indicate that there is a false positive in the digit recognition system, a tech issue with the transcript repeating the final phrase, and an edge case where the handwritten colour code looks like a contact number."},"followup":{"rows":[{"id":"T4","kind":"Text","key":"t4","type":"External contact","body":"An expert asked to move the conversation elsewhere.","note":"Critical: the expert shared a private contact."},{"id":"A2","kind":"Audio","key":"a2","type":"Possible contact details","body":"The speaker reads out a ticket reference.","note":"False positive: the number belongs to a ticket."},{"id":"A3","kind":"Audio","key":"a3","type":"Transcript keyword","body":"The speaker describes an account in a history book."},{"id":"P2","kind":"Photo","key":"p2","type":"Document photo","body":"A picture of a blank receipt."},{"id":"B2","kind":"Expert blocks","key":"b2","type":"","body":"A user blocked an expert."},{"id":"B3","kind":"Expert blocks","key":"b3","type":"","body":"A different user blocked an expert."}],"draft":"The expert shared a private contact, which is a critical note. The number belongs to a ticket, which is a false positive note."}};
+function savedDraft(week,messages) {
+  const saved = recorded[week];
+  return saved && JSON.stringify(saved.rows) === JSON.stringify(messages) ? saved.draft : null;
 }
-function render(){
- hasRun=true;const metrics=countMessages(messages);const report=makeReport(metrics,'recorded');const out=byId('out');out.replaceChildren();
- const stats=tag('div','','stats');
- for(const [label,value] of [['Unique alerts',metrics.unique],['With replies',metrics.answered],['Awaiting reply',metrics.waiting.length]]){
-  const cell=tag('div','');cell.append(tag('strong',value),tag('span',label));stats.append(cell)
- }
- out.append(stats,tag('p',metrics.duplicates+' duplicate alert events removed.','muted'));
- if(report.draft){const d=tag('div','','draft');d.append(tag('strong','Saved AI draft · Qwen'),tag('p',report.draft));out.append(d)}
- out.append(tag('h3','Source excerpts'));
- for(const e of report.evidence){const p=tag('p','','item');p.append(tag('span',e.id+'  ','id'),document.createTextNode(e.text));out.append(p)}
- out.append(tag('h3','Follow up'),tag('p',metrics.waiting.join(' · ')||'All alerts received a reply.'));
+
+let messages;
+function drawInbox() {
+  const inbox=byId('inbox'); inbox.replaceChildren();
+  for(const row of messages) {
+    const item=el('div','','item');
+    item.append(el('small',row.id+' · '+row.kind),el('p',row.body));
+    if(row.note) item.append(el('p','Thread · '+row.note,'muted'));
+    if(row.thumb) item.append(el('small','👍 Marked as a false positive'));
+    if(['T3','A3'].includes(row.id) && !row.thumb) {
+      const button=el('button','Mark as false positive','small');
+      button.onclick=()=>{row.thumb=true;drawInbox();drawReport()};item.append(button);
+    }
+    inbox.append(item);
+  }
 }
-byId('run').onclick=render;byId('week').onchange=loadInbox;loadInbox();
+function drawReport() {
+  const out=byId('out');out.replaceChildren();
+  const draft=savedDraft(byId('week').value,messages);
+  for(const s of summarize(messages)) {
+    const article=el('article','','output'),list=el('dl','');
+    article.append(el('h3',s.kind),list);
+    for(const [label,value] of reportLines(s)) {
+      const line=el('div','');line.append(el('dt',label),el('dd',value));list.append(line);
+    }
+    out.append(article);
+  }
+  if(draft){
+    const detail=el('details','');
+    detail.append(el('summary','Read the saved model draft'),el('p',draft),el('small','Local Qwen output for the original sample week. The counts above come from code.'));
+    out.append(detail);
+  }
+}
+function loadWeek(){messages=samples[byId('week').value].map(row=>({...row}));drawInbox();byId('out').replaceChildren(el('p','Run the report to see the week by alert type.','muted'));}
+byId('week').onchange=loadWeek;byId('run').onclick=drawReport;loadWeek();
 </script></html>
