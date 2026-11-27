@@ -15,6 +15,21 @@
     description.textContent = "My System Analysis thesis. Find a game for your group in a catalogue of 30,224 board games.";
     description.dataset.uk = "Дипломна із системного аналізу. Знайди гру для своєї компанії в каталозі з 30 224 настільних ігор.";
   }
+  const caseLinks = [];
+  for (const [id, image, en, uk] of [
+    ["funnels", "funnel-review", "View the reading quiz example", "Відкрити сценарій із квізом про читання"],
+    ["search", "candidate-search", "View the fictional profile search", "Відкрити сценарій пошуку за вигаданими профілями"]
+  ]) {
+    const card = document.getElementById(id);
+    if (!card?.matches(".casework details")) continue;
+    const link = document.createElement("a");
+    link.className = "case-example-link";
+    link.textContent = en;
+    link.dataset.uk = uk;
+    card.append(link);
+    card.open = true;
+    caseLinks.push({link, image});
+  }
   const translations = Array.from(document.querySelectorAll("[data-uk]"), node => ({
     node, en: node.textContent, uk: node.dataset.uk
   }));
@@ -25,6 +40,7 @@
   function render() {
     const uk = language === "uk";
     document.documentElement.lang = language;
+    for (const {link, image} of caseLinks) link.href = "assets/" + image + "-" + language + ".png";
     for (const entry of translations) entry.node.textContent = entry[language];
     document.querySelectorAll("[data-only]").forEach(node => { node.hidden = node.dataset.only !== language; });
     for (const link of document.querySelectorAll("a[data-site-link]")) {
