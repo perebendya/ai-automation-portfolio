@@ -70,4 +70,3 @@ dialog::backdrop { background:#14251dd1; }
   .gallery { padding:0 .7rem .7rem; }
   .stage img { height:37vh; }
 }
-@media(max-width:365px) { .masthead .signature .monogram { display:none; } }

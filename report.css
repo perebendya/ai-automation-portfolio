@@ -18,7 +18,10 @@ h1 em { color:#466773; font-weight:400; }
 .bar-count { text-align:end; font-family:var(--mono); }
 .settings { display:flex; align-items:end; flex-wrap:wrap; gap:.7rem 1rem; background:#e8edeb; border:1px solid #cdd7d3; border-radius:9px; padding:1rem 1.3rem; }
 .settings label { display:grid; gap:.35rem; font-weight:600; font-size:.85rem; min-width:min(220px,100%); }
-.settings select { width:100%; min-height:46px; font:inherit; font-size:1rem; font-weight:400; padding:.5rem 1.85rem .5rem .75rem; border:1px solid #96aaa9; border-radius:6px; background:var(--surface); }
+.settings select { width:100%; min-height:46px; font:inherit; font-size:1rem; font-weight:400; appearance:none; -webkit-appearance:none; padding:.5rem 2.85rem .5rem .9rem; border:1px solid #96aaa9; border-radius:6px; background:var(--surface); }
+.select-control { display:block; position:relative; }
+.select-control::after { content:""; position:absolute; inset-inline-end:1.125rem; top:50%; width:.55rem; height:.55rem; border:solid currentColor; border-width:0 1.7px 1.7px 0; transform:translateY(-70%) rotate(45deg); pointer-events:none; }
+@media (forced-colors:active) { .select-control::after { color:ButtonText; } }
 .settings .primary:hover { background:#182f3a; }
 .download { margin-inline-start:auto; align-self:center; padding:.35rem 0; font-size:.92rem; font-weight:600; }
 .panels { display:grid; grid-template-columns:1.12fr .88fr; gap:clamp(1rem,2vw,1.75rem); align-items:start; margin:1.65rem 0; }
@@ -74,10 +77,16 @@ details summary { cursor:pointer; font-weight:600; text-wrap:pretty; }
   .settings { padding:.9rem; }
   .settings label { width:100%; }
   .settings .download { font-size:.84rem; }
-  .masthead nav { gap:.6rem; }
   .panel-head, #out { padding:1rem; }
   #inbox { padding:0 1rem; }
   .metric { padding:.55rem .45rem; }
   .output dl div { grid-template-columns:1fr; gap:.1rem; }
 }
-@media(max-width:365px) { .masthead .signature .monogram { display:none; } }
+@media(max-width:390px) {
+  .metrics { grid-template-columns:1fr; }
+  .metric { display:flex; align-items:center; gap:.65rem; }
+  .metric + .metric { border-inline-start:0; border-top:1px solid #cdd8d2; }
+  .metric strong { min-width:1.2em; text-align:center; }
+  .metric span { margin:0; }
+}
+#mix-bars li { grid-template-columns:minmax(0, 10rem) minmax(2rem,1fr) 2ch; }

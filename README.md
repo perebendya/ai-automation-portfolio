@@ -2,7 +2,7 @@
 
 I build tools for people doing repetitive work. At OBRIO, that meant helping the growth team ship subscription funnels and helping recruiters search profiles in their own words.
 
-[Українською](CASES.md) · [LinkedIn](https://www.linkedin.com/in/dariia-kukla)
+[Українською](CASES.md) · [Interactive portfolio](https://perebendya.github.io/ai-automation-portfolio/?lang=en) · [LinkedIn](https://www.linkedin.com/in/dariia-kukla)
 
 ## From a Figma design to a live subscription funnel
 

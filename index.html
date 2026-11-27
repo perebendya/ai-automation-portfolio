@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en"><head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title data-uk="Проєкти · Дарія Кукла">Projects · Dariia Kukla</title>
+  <meta name="description" content="Explore Dariia Kukla’s AI automation projects, interactive demos and work at OBRIO." data-uk-description="Проєкти Дарії Кукли з AI-автоматизації, інтерактивні демо й робочі кейси з OBRIO.">
+  <link rel="stylesheet" href="demo.css"><link rel="stylesheet" href="projects.css">
+</head><body>
+<a class="skip" href="#projects" data-uk="До проєктів">Skip to projects</a>
+<header class="masthead"><div class="wrap">
+  <a class="signature" data-site-link href="index.html"><span class="monogram" aria-hidden="true">dk</span><span data-uk="Дарія Кукла">Dariia Kukla</span></a>
+  <nav aria-label="Portfolio navigation">
+    <a data-site-link href="index.html" aria-current="page" data-uk="Проєкти">Projects</a>
+    <a data-site-link href="rental.html" data-uk="Пошук житла">Rental assistant</a>
+    <a data-site-link href="report.html" data-uk="Звіт n8n">n8n report</a>
+  </nav>
+  <button id="lang" class="language" type="button" lang="uk">Українською</button>
+</div></header>
+<main class="wrap">
+  <header class="portfolio-intro">
+    <p class="kicker" data-uk="Портфоліо · Дарія Кукла">Portfolio · Dariia Kukla</p>
+    <h1 data-uk="Проєкти з AI-автоматизації">AI automation projects</h1>
+    <p class="intro" data-uk="Я збираю інструменти, які беруть на себе ручну роботу. Тут можна підібрати квартиру за фото або зібрати тижневий звіт із повідомлень модераторів.">I build tools that take care of repetitive work. Here you can find a flat using its photos or turn a week of moderator messages into a report.</p>
+  </header>
+  <section id="projects" aria-labelledby="demo-heading">
+    <h2 id="demo-heading" data-uk="Інтерактивні демо">Interactive demos</h2>
+    <div class="project-grid">
+      <a class="project-card" href="rental.html" data-site-link>
+        <div class="card-art rental-art"><img src="assets/rental/c-1.webp" alt="" fetchpriority="high"></div>
+        <div class="card-copy"><h3 data-uk="Помічник із пошуку житла">AI Rental Assistant</h3>
+          <p data-uk="Опиши квартиру, яку шукаєш. Порівняй три варіанти й перевір на фото, звідки взялася кожна оцінка.">Describe the flat you want. Compare three listings and check the photos behind each score.</p>
+          <span class="card-action" data-uk="Підібрати квартиру">Find a flat</span>
+        </div>
+      </a>
+      <a class="project-card" href="report.html" data-site-link>
+        <div class="card-art report-art" aria-hidden="true">
+          <div class="sheet-preview"><div class="sheet-head"><span data-uk="Звіт за тиждень">Weekly report</span><span data-uk="6–12 листопада">6–12 Nov</span></div>
+          <div class="sheet-metrics"><div><b>5</b><span data-uk="Унікальних">Distinct alerts</span></div><div><b>1</b><span data-uk="Хибних">False positives</span></div><div><b>1</b><span data-uk="На перевірці">Awaiting review</span></div></div></div>
+        </div>
+        <div class="card-copy"><h3 data-uk="Звіт про модерацію в n8n">Moderation report in n8n</h3>
+          <p data-uk="Вибери тиждень, переглянь повідомлення й познач хибне спрацювання. Звіт одразу перерахує показники.">Choose a week, inspect the alerts and mark a false positive. See the report update with your decision.</p>
+          <span class="card-action" data-uk="Зібрати звіт">Build a report</span>
+        </div>
+      </a>
+    </div>
+  </section>
+  <section class="casework" aria-labelledby="case-heading">
+    <h2 id="case-heading" data-uk="Робочі кейси з OBRIO">Projects at OBRIO</h2>
+    <details id="funnels"><summary><span data-uk="Від макета Figma до воронки підписки">From a Figma design to a subscription funnel</span><small>Figma / MCP</small></summary>
+      <p data-uk="Я зібрала більшу частину внутрішньої MCP-платформи. Агент перетворював макет на квіз із переходами між екранами й пейволом. Автоматичні перевірки знаходили зламані переходи й пропущені ключі перекладу ще до релізу.">I built most of the internal MCP platform. An agent turned a design into a quiz with connected screens and a paywall. Automated checks caught broken links and missing translation keys before release.</p>
+    </details>
+    <details id="search"><summary><span data-uk="Пошук кандидатів звичайною мовою">Candidate search in plain language</span><small>PostgreSQL / pgvector</small></summary>
+      <p data-uk="Я зібрала інструмент від імпорту профілів до пошукового інтерфейсу. Рекрутерка могла попросити знайти людей, які нещодавно змінили роботу й мають досвід в онбордингу. Спочатку пошук перевіряв обов’язкові умови, потім ранжував профілі за змістом досвіду.">I built the tool end to end, from importing profiles to the search interface. Recruiters could ask for people who had recently changed jobs and worked on onboarding. The search applied the required filters first, then ranked profiles by the meaning of their experience.</p>
+    </details>
+  </section>
+</main>
+<footer class="footer"><div class="wrap"><p data-uk="Дарія Кукла · Київ">Dariia Kukla · Kyiv</p><div class="profile-links"><a href="https://github.com/perebendya/ai-automation-portfolio">GitHub</a><a href="https://www.linkedin.com/in/dariia-kukla">LinkedIn</a></div></div></footer>
+<script src="portfolio.js"></script>
+</body></html>

@@ -2,7 +2,7 @@
 
 Я будую інструменти для команд, у яких багато ручної роботи. В OBRIO допомагала growth-команді запускати воронки підписки, а рекрутерам — знаходити кандидатів за запитом звичайною мовою.
 
-[English](README.md) · [LinkedIn](https://www.linkedin.com/in/dariia-kukla)
+[English](README.md) · [Інтерактивне портфоліо](https://perebendya.github.io/ai-automation-portfolio/?lang=uk) · [LinkedIn](https://www.linkedin.com/in/dariia-kukla)
 
 <a id="funnels"></a>
 

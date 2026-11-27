@@ -3,20 +3,25 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Compare three fictional Kyiv rentals using the evidence in their photos. An interactive portfolio project by Dariia Kukla.">
-  <title>AI Rental Assistant · Dariia Kukla</title>
+  <meta data-uk-description="Порівняй три тестові київські квартири за тим, що видно на фото. Інтерактивний проєкт Дарії Кукли." name="description" content="Compare three fictional Kyiv rentals using the evidence in their photos. An interactive portfolio project by Dariia Kukla.">
+  <title data-uk="Пошук житла · Дарія Кукла">AI Rental Assistant · Dariia Kukla</title>
   <link rel="stylesheet" href="demo.css">
   <link rel="stylesheet" href="rental.css">
 </head>
 <body>
 <a class="skip" href="#query" id="skip"></a>
 <header class="masthead"><div class="wrap">
-  <a class="signature" href="https://github.com/perebendya/ai-automation-portfolio"><span class="monogram" aria-hidden="true">dk</span><span>Dariia Kukla</span></a>
-  <nav aria-label="Portfolio"><a href="report.html" id="otherDemo"></a><button id="lang" class="language" type="button"></button></nav>
+  <a class="signature" data-site-link href="index.html"><span class="monogram" aria-hidden="true">dk</span><span data-uk="Дарія Кукла">Dariia Kukla</span></a>
+  <nav aria-label="Portfolio navigation">
+    <a data-site-link href="index.html" data-uk="Проєкти">Projects</a>
+    <a data-site-link href="rental.html" aria-current="page" data-uk="Пошук житла">Rental assistant</a>
+    <a data-site-link href="report.html" data-uk="Звіт n8n">n8n report</a>
+  </nav>
+  <button id="lang" class="language" type="button" lang="uk">Українською</button>
 </div></header>
 <main class="wrap">
   <section class="hero" aria-labelledby="hero-title">
-    <div><p class="kicker">AI Rental Assistant</p><h1 id="hero-title"><span id="title1"></span><br><em id="title2"></em></h1><p class="intro" id="intro"></p></div>
+    <div><p class="kicker" data-uk="Помічник із пошуку житла">AI Rental Assistant</p><h1 id="hero-title"><span id="title1"></span><br><em id="title2"></em></h1><p class="intro" id="intro"></p></div>
     <button type="button" class="hero-image" id="cover"><img src="assets/rental/c-1.webp" alt="" fetchpriority="high"><span id="cover-caption"></span></button>
   </section>
   <section class="controls" aria-labelledby="question"><form id="query">
@@ -26,7 +31,7 @@
     <p id="understood"></p><p id="unmatched"></p><p id="legend"></p><div id="status" class="sronly" role="status"></div><div class="grid" id="grid"></div>
   </section>
 </main>
-<footer class="footer"><div class="wrap"><p id="note"></p><a href="https://github.com/perebendya/ai-automation-portfolio" id="portfolio"></a></div></footer>
+<footer class="footer"><div class="wrap"><p id="note"></p><a href="index.html" data-site-link id="portfolio"></a></div></footer>
 <dialog id="detail" aria-labelledby="dtitle">
   <div class="dhead"><h2 id="dtitle"></h2><button class="close" id="close" type="button" autofocus></button></div>
   <div class="gallery"><div class="stage"><div id="large"></div><button type="button" id="prev" class="arrow back">‹</button><button type="button" id="next" class="arrow forward">›</button></div>
@@ -34,6 +39,7 @@
   </div>
 </dialog>
 
+<script src="portfolio.js"></script>
 <script>
 const en = (uk, english) => [uk, english];
 const traits = [
@@ -154,8 +160,7 @@ function parseRequest(raw) {
   return {choices,ignored:[...new Set(ignored)]};
 }
 
-const initialLang = new URLSearchParams(location.search).get("lang");
-let lang = initialLang==="en" ? 1 : initialLang==="uk" ? 0 : Number(!navigator.language.toLowerCase().startsWith("uk"));
+let lang = Number(document.documentElement.lang === "en");
 const $ = id => document.getElementById(id);
 const t = pair => pair[lang];
 const text = (uk,english) => t(en(uk,english));
@@ -242,10 +247,9 @@ function markExample(){
  [...$("examples").children].forEach((button,i)=>button.setAttribute("aria-pressed",String(i===lastExample)));
 }
 function translate(){
- document.documentElement.lang=lang?"en":"uk";$("lang").textContent=lang?"Українською":"English";
  const copy={
   title1:en("Одна ціна.","One rent."),title2:en("Три різні квартири.","Three different flats."),
-  skip:en("До пошуку","Skip to search"),otherDemo:en("Звіт n8n","n8n report"),
+  skip:en("До пошуку","Skip to search"),
   "cover-caption":en("Поділ · переглянути кухню","Podil · explore the kitchen"),
   intro:en("Три квартири з однаковою ціною й кількістю кімнат. Розкажи, як хочеш жити, і перевір на фото, чому одна з них підходить тобі краще.","Three flats with the same rent and room count. Describe how you want to live, then inspect the photos behind your shortlist."),
   question:en("Яку квартиру ти шукаєш?","What are you looking for in a flat?"),
@@ -276,12 +280,12 @@ $("query").onsubmit=e=>{
 $("request").oninput=()=>$("request").setCustomValidity("");
 $("cover").onclick=()=>openDetail(flats[2],0,$("cover"));
 $("request").onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();$("query").requestSubmit()}};
-$("lang").onclick=()=>{
+document.addEventListener("portfolio-language",()=>{
  const wasPreset=lastExample!==null && $("request").value===t(examples[lastExample]);
- lang=1-lang;const u=new URL(location.href);u.searchParams.set("lang",lang?"en":"uk");try{history.replaceState(null,"",u)}catch{}
+ lang=Number(document.documentElement.lang === "en");
  if(wasPreset){$("request").value=t(examples[lastExample]);applyQuery($("request").value,lastExample)}
  translate();
-};
+});
 $("close").onclick=()=>$("detail").close();
 $("detail").onclose=()=>{gallery?.trigger.focus({preventScroll:true});gallery=null;};
 $("detail").onclick=e=>{
