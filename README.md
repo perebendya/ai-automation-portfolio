@@ -112,7 +112,7 @@ The demo uses generated apartment photos to avoid republishing real listings. It
 <details>
 <summary><strong>University projects</strong> · recommendations and data analysis</summary>
 
-- **Board-game recommendations** — combined adaptive questions with learning to rank for my System Analysis degree.
+- **Board Game Finder** — my System Analysis thesis. I used adaptive questions to narrow a board-game catalogue and tested a gradient boosting model on synthetic preference scenarios. [Try the quiz](https://perebendya.github.io/ai-automation-portfolio/boardgames.html?lang=en) · [Python source and evaluation](board-game-finder/)
 - **Board-game catalogue** — designed a PostgreSQL database, indexes and analytical queries. Modelled game localization as an ontology in separate coursework.
 - **Marketing spend** — compared acquisition costs, revenue and return in Python and proposed a budget shift.
 - **Graph analysis** — compared centrality measures and identified communities in a generated network.

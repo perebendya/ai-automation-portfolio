@@ -1,0 +1,66 @@
+{
+  "model_name": "best_boardgame_ranking_model_no_leakage",
+  "model_type": "HistGradientBoostingRegressor (sklearn)",
+  "created_at": "2026-06-07T20:44:47.466592+00:00",
+  "created_from": "scripts/train_no_leakage_model.py",
+  "dataset_path": "boardgames_features.csv",
+  "n_games": 30224,
+  "n_features": 94,
+  "feature_count": 94,
+  "train_scenarios": 23,
+  "test_scenarios": 7,
+  "hyperparameters": {
+    "max_iter": 300,
+    "learning_rate": 0.05,
+    "max_depth": 5,
+    "min_samples_leaf": 20,
+    "random_state": 42
+  },
+  "metrics": {
+    "Popularity": {
+      "NDCG@10": 0.5359,
+      "P@10": 0.4143,
+      "MRR@10": 0.5714,
+      "HR@10": 0.8571,
+      "Recall@10": 0.0004
+    },
+    "ML (HGBR)": {
+      "NDCG@10": 0.8262,
+      "P@10": 0.8571,
+      "MRR@10": 0.8571,
+      "HR@10": 0.8571,
+      "Recall@10": 0.0005
+    },
+    "Label oracle": {
+      "NDCG@10": 1.0,
+      "P@10": 1.0,
+      "MRR@10": 1.0,
+      "HR@10": 1.0,
+      "Recall@10": 0.0009
+    }
+  },
+  "leakage_columns_excluded": [
+    "final_relevance",
+    "final_score",
+    "label",
+    "match_hard_features",
+    "match_players",
+    "match_soft_features",
+    "match_time",
+    "match_weight",
+    "penalty_undesired_features",
+    "popularity_score",
+    "quality_score",
+    "relevance",
+    "rule_match_score",
+    "score",
+    "synthetic_relevance",
+    "target"
+  ],
+  "note": "Synthetic relevance labels are proxy labels, not real user ratings. Model trained on static game attributes only. Labels computed per-scenario using player count, time, weight and feature matching.",
+  "limitations": [
+    "Labels are synthetic — model cannot capture true user preferences.",
+    "ML reranking adds a general quality signal on top of rule-based quiz results.",
+    "The label oracle sorts the synthetic targets and is an upper bound by construction."
+  ]
+}

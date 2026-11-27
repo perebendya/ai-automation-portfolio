@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en"><head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-uk="Підбір настільної гри · Дарія Кукла">Board Game Finder · Dariia Kukla</title>
+  <meta name="description" content="Find a game for your table with Dariia Kukla’s adaptive board-game recommender." data-uk-description="Підбери настільну гру для своєї компанії за допомогою рекомендаційної системи Дарії Кукли.">
+  <link rel="stylesheet" href="demo.css"><link rel="stylesheet" href="boardgames.css">
+</head><body>
+<a class="skip" href="#finder" data-uk="До підбору гри">Skip to the finder</a>
+<header class="masthead"><div class="wrap">
+  <a class="signature" data-site-link href="index.html"><span class="monogram" aria-hidden="true">dk</span><span data-uk="Дарія Кукла">Dariia Kukla</span></a>
+  <nav aria-label="Portfolio navigation">
+    <a data-site-link href="index.html" data-uk="Проєкти">Projects</a>
+    <a data-site-link href="rental.html" data-uk="Пошук житла">Rental assistant</a>
+    <a data-site-link href="report.html" data-uk="Звіт n8n">n8n report</a>
+    <a data-site-link href="boardgames.html" aria-current="page" data-uk="Настільні ігри">Board games</a>
+  </nav>
+  <button id="lang" class="language" type="button" lang="uk">Українською</button>
+</div></header>
+<main class="wrap">
+  <header class="intro"><p class="kicker" data-uk="Бакалаврська робота · Системний аналіз">Bachelor’s thesis · System Analysis</p>
+    <h1 data-uk="У що зіграємо?">What should we play?</h1>
+    <p data-uk="Вибери кількість гравців. Потім відповідай на запитання й дивись, як змінюється трійка ігор. Демо працює на вибірці з 500 настільних ігор.">Choose your group size, then answer the questions and watch your shortlist change. This demo uses a sample of 500 board games.</p>
+  </header>
+  <noscript><p>Enable JavaScript to try the quiz. Для опитування потрібно увімкнути JavaScript.</p></noscript>
+  <p id="status" role="status" data-uk="Завантажую каталог…">Loading the catalogue…</p>
+  <div id="finder" class="finder" hidden>
+    <section class="quiz-panel" aria-labelledby="question">
+      <label for="players" data-uk="Скільки людей гратиме?">How many people are playing?</label>
+      <select id="players"><option>2</option><option>4</option><option>6</option></select>
+      <div class="question-area" aria-live="polite" aria-atomic="true"><p id="step"></p><h2 id="question" tabindex="-1"></h2></div>
+      <div class="answers" id="answers">
+        <button type="button" data-answer="y" data-uk="Так">Yes</button>
+        <button type="button" data-answer="n" data-uk="Ні">No</button>
+        <button type="button" data-answer="s" data-uk="Байдуже">No preference</button>
+      </div>
+      <button type="button" id="back" data-uk="Назад">Back</button>
+      <button type="button" id="restart" data-uk="Пройти ще раз">Start again</button>
+    </section>
+    <section class="results" aria-labelledby="results-title">
+      <h2 id="results-title" data-uk="Три гри для твоєї компанії">Three games for your table</h2>
+      <label class="model"><input type="checkbox" id="model"> <span data-uk="Додати оцінку ML-моделі">Blend in the ML model</span></label>
+      <ol id="games" aria-live="polite"></ol>
+    </section>
+  </div>
+  <section class="method"><h2 data-uk="Як працює підбір">How the ranking works</h2>
+    <p data-uk="Я починала з популярності ігор на BoardGameGeek. Після кожної відповіді алгоритм переглядає оцінки й обирає питання, яке краще розділяє ігри на початку списку. Кількість гравців лишається обов’язковою умовою.">I started with game popularity on BoardGameGeek. After each answer, the algorithm updates the scores and looks for a question that splits the leading games into two groups. Every game on the list fits the selected group size.</p>
+    <p data-uk="Перемикач додає оцінку моделі з вагою 30%. Модель навчалася на характеристиках 30 224 ігор і синтетичних сценаріях. Твої відповіді визначають решту 70% оцінки разом із початковим рейтингом ігор.">The toggle gives the model a 30% weight. I trained it on attributes from 30,224 games using synthetic preference scenarios. Your answers and the games’ starting scores supply the other 70%.</p>
+    <a href="https://github.com/perebendya/ai-automation-portfolio/tree/main/board-game-finder" data-uk="Код, модель та інструкція із запуску на GitHub">Source code, model and setup on GitHub</a>
+  </section>
+</main>
+<footer class="footer"><div class="wrap"><p data-uk="Дарія Кукла · Київ">Dariia Kukla · Kyiv</p><a href="index.html" data-site-link data-uk="Усі проєкти">All projects</a></div></footer>
+<script src="portfolio.js"></script><script src="boardgames.js"></script>
+</body></html>

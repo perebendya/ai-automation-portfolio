@@ -2,7 +2,7 @@
 .portfolio-intro h1 { max-width: 19ch; }
 .portfolio-intro .intro { margin-top:1rem; max-width:64ch; color:var(--muted); font-size:clamp(1rem,1.4vw,1.15rem); }
 #demo-heading, .casework h2 { margin-bottom:1rem; }
-.project-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:clamp(1rem,2.4vw,2rem); }
+.project-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:clamp(1rem,2.4vw,2rem); }
 .project-card { display:flex; flex-direction:column; overflow:hidden; border:1px solid var(--line); border-radius:10px; color:var(--ink); background:var(--surface); text-decoration:none; }
 .project-card:hover { border-color:var(--pine); }
 .project-card:hover .card-action { text-decoration-thickness:2px; }
@@ -29,10 +29,25 @@
 .casework details[open] summary::after { content:"−"; }
 .casework p { max-width:73ch; padding:0 .3rem 1.25rem; color:var(--muted); }
 .profile-links { display:flex; column-gap:1rem; }
-@media(max-width:640px) {
+@media(max-width:760px) {
   .project-grid { grid-template-columns:1fr; }
   .casework summary { grid-template-columns:1fr auto; gap:.15rem .6rem; }
   .casework summary small { grid-row:2; font-weight:400; }
   .casework summary::after { grid-column:2; grid-row:1 / span 2; }
 }
 
+
+.game-art {
+  display:flex; align-items:center; justify-content:center; gap:1.05rem;
+  background-color:#b6c5ab;
+  background-image:conic-gradient(#a6b99b 25%,transparent 0 50%,#a6b99b 0 75%,transparent 0);
+  background-size:3.75rem 3.75rem;
+}
+.die {
+  --pip:radial-gradient(circle,#253e30 0 9%,transparent 10%);
+  width:3.9rem; height:3.9rem; border-radius:.7rem; background-color:#fff9e6;
+  box-shadow:0 .32rem 0 #c9c4a9,0 .65rem .8rem #20372745;
+}
+.die.five { transform:rotate(-14deg); background-image:var(--pip),var(--pip),var(--pip),var(--pip),var(--pip);
+  background-position:center,top left,top right,bottom left,bottom right; background-size:100% 100%,50% 50%,50% 50%,50% 50%,50% 50%; background-repeat:no-repeat; }
+.die.two { transform:translateY(.7rem) rotate(14deg); background-image:radial-gradient(circle at 27% 27%,#253e30 0 8%,transparent 9%),radial-gradient(circle at 73% 73%,#253e30 0 8%,transparent 9%); }

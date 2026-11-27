@@ -75,3 +75,7 @@ small { font-size:.845rem; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior:auto !important; transition:none !important; animation:none !important; }
 }
+@media (max-width:480px) {
+  .masthead nav { gap:.15rem clamp(.4rem,2.3vw,.7rem); }
+  .masthead nav a { font-size:.8rem; }
+}
