@@ -7,6 +7,8 @@ import joblib
 import numpy as np
 import pandas as pd
 
+from .recommender_core import RULES
+
 
 def predict_catalogue_scores(games: pd.DataFrame, models_dir: Path) -> np.ndarray:
     features = json.loads((models_dir / "model_features_no_leakage.json").read_text())
@@ -25,4 +27,5 @@ def apply_ml_reranking(games: pd.DataFrame, predictions: np.ndarray) -> pd.DataF
         spread = np.ptp(values)
         return (values - values.min()) / spread if spread else np.zeros_like(values)
 
-    return games.assign(final_score=0.7 * normalize(games["score"]) + 0.3 * normalize(predictions))
+    alpha = RULES["quizWeight"]
+    return games.assign(final_score=alpha * normalize(games["score"]) + (1 - alpha) * normalize(predictions))

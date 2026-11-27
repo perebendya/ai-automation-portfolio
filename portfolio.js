@@ -5,6 +5,16 @@
   let saved;
   try { saved = localStorage.getItem("dariia-portfolio-language"); } catch {}
   let language = choose(requested) || choose(saved) || (navigator.language.startsWith("uk") ? "uk" : "en");
+  // Project cards share the language switcher with the apps they launch.
+  const finderCard = document.querySelector('.project-card[href="boardgames.html"]');
+  if (finderCard) {
+    const sectionTitle = finderCard.closest("section").querySelector("h2");
+    sectionTitle.textContent = "Interactive projects";
+    sectionTitle.dataset.uk = "Інтерактивні проєкти";
+    const description = finderCard.querySelector(".card-copy p");
+    description.textContent = "My System Analysis thesis. Find a game for your group in a catalogue of 30,224 board games.";
+    description.dataset.uk = "Дипломна із системного аналізу. Знайди гру для своєї компанії в каталозі з 30 224 настільних ігор.";
+  }
   const translations = Array.from(document.querySelectorAll("[data-uk]"), node => ({
     node, en: node.textContent, uk: node.dataset.uk
   }));

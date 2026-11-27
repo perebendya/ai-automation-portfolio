@@ -22,6 +22,7 @@ train_no_leakage_model.py
 from __future__ import annotations
 
 import json
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -33,6 +34,9 @@ from sklearn.metrics import ndcg_score
 
 
 PROJECT_ROOT = Path(__file__).parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+from src.recommender_core import load_games
+
 DATA_DIR     = PROJECT_ROOT / "data"
 MODELS_DIR   = PROJECT_ROOT / "models"
 
@@ -319,12 +323,9 @@ def main():
     print("=" * 60)
 
     # 1. Завантаження даних
-    primary  = DATA_DIR / "boardgames_features.csv"
-    fallback = DATA_DIR / "boardgames_recommender_features.csv"
-    data_path = primary if primary.exists() else fallback
-    print(f"\n[1] Завантаження: {data_path.name}")
-    games_df = pd.read_csv(data_path, low_memory=False)
-    games_df = games_df.drop_duplicates(subset=["id"], keep="first").reset_index(drop=True)
+    games_df = load_games(DATA_DIR)
+    data_path = next(path for path in (DATA_DIR / "boardgames_features.csv",
+                     DATA_DIR / "boardgames_recommender_features.csv", DATA_DIR / "catalogue.json") if path.exists())
     print(f"    Ігор: {len(games_df)}, колонок: {len(games_df.columns)}")
 
     # 2. Визначення no-leakage ознак
@@ -373,15 +374,9 @@ def main():
     # 4. Генерація навчальних даних
     # Ключовий принцип: relevance — TARGET, не ознака
     print("\n[4] Генерація навчальних даних (proxy relevance labels)…")
-    X_parts, y_parts = [], []
-    for sc in train_scenarios:
-        y_sc = compute_relevance(sc, games_df).values
-        X_sc = games_df[NO_LEAKAGE_FEATURES].fillna(0).values
-        X_parts.append(X_sc)
-        y_parts.append(y_sc)
-
-    X_train = np.vstack(X_parts)
-    y_train = np.concatenate(y_parts)
+    static_features = games_df[NO_LEAKAGE_FEATURES].fillna(0).to_numpy()
+    X_train = np.tile(static_features, (len(train_scenarios), 1))
+    y_train = np.concatenate([compute_relevance(sc, games_df).to_numpy() for sc in train_scenarios])
     print(f"    Рядків навчання: {len(X_train)} ({len(train_scenarios)} сценарії × {len(games_df)} ігор)")
     print(f"    Relevance min={y_train.min():.3f}, mean={y_train.mean():.3f}, max={y_train.max():.3f}")
 

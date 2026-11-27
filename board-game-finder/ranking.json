@@ -1,0 +1,725 @@
+{
+  "maxQuestions": 12,
+  "poolSize": 200,
+  "hardPhase": 6,
+  "hardWeight": 1.6,
+  "softWeight": 1.0,
+  "rankBonus": 10,
+  "priorityBonus": 0.1,
+  "categoryPenalty": 0.04,
+  "quizWeight": 0.7,
+  "questions": [
+    {
+      "feature": "supports_1p",
+      "kind": "hard",
+      "category": "players",
+      "priority": 1,
+      "question": "Чи плануєте іноді грати наодинці?",
+      "en": "Would you like to play solo sometimes?",
+      "label_en": "Solo play",
+      "label_uk": "підтримує гру наодинці",
+      "group_size": true,
+      "requiresPositive": [
+        "minplayers",
+        "maxplayers"
+      ],
+      "samePreference": "solo-capable"
+    },
+    {
+      "feature": "is_two_player",
+      "kind": "hard",
+      "category": "players",
+      "priority": 1,
+      "question": "Чи найчастіше гратимете вдвох?",
+      "en": "Will you usually play as a pair?",
+      "label_en": "Seats two",
+      "label_uk": "можна грати вдвох",
+      "group_size": true,
+      "requiresPositive": [
+        "minplayers",
+        "maxplayers"
+      ]
+    },
+    {
+      "feature": "supports_3p",
+      "kind": "hard",
+      "category": "players",
+      "priority": 1,
+      "question": "Чи часто за столом буде рівно троє гравців?",
+      "en": "Will three people often play together?",
+      "label_en": "Seats three",
+      "label_uk": "підтримує трьох гравців",
+      "group_size": true,
+      "requiresPositive": [
+        "minplayers",
+        "maxplayers"
+      ]
+    },
+    {
+      "feature": "supports_4p",
+      "kind": "hard",
+      "category": "players",
+      "priority": 1,
+      "question": "Чи часто гратимете вчотирьох?",
+      "en": "Will four people often play together?",
+      "label_en": "Seats four",
+      "label_uk": "підтримує чотирьох гравців",
+      "group_size": true,
+      "requiresPositive": [
+        "minplayers",
+        "maxplayers"
+      ]
+    },
+    {
+      "feature": "supports_5p",
+      "kind": "hard",
+      "category": "players",
+      "priority": 2,
+      "question": "Чи буває, що за столом збирається п'ятеро?",
+      "en": "Do you sometimes have five players?",
+      "label_en": "Seats five",
+      "label_uk": "підтримує п'ятьох гравців",
+      "group_size": true,
+      "requiresPositive": [
+        "minplayers",
+        "maxplayers"
+      ]
+    },
+    {
+      "feature": "supports_6p",
+      "kind": "hard",
+      "category": "players",
+      "priority": 2,
+      "question": "Чи потрібна гра для шістьох і більше?",
+      "en": "Would you like a game that seats six?",
+      "label_en": "Seats six",
+      "label_uk": "підтримує шість+ гравців",
+      "group_size": true,
+      "requiresPositive": [
+        "minplayers",
+        "maxplayers"
+      ]
+    },
+    {
+      "feature": "is_six_plus",
+      "kind": "hard",
+      "category": "players",
+      "priority": 2,
+      "question": "Чи шукаєте гру для великої компанії (6+)?",
+      "en": "Would you like room for a larger group?",
+      "label_en": "Large groups",
+      "label_uk": "для великої компанії",
+      "group_size": true,
+      "requiresPositive": [
+        "minplayers",
+        "maxplayers"
+      ]
+    },
+    {
+      "feature": "has_solo_mode",
+      "kind": "hard",
+      "category": "players",
+      "priority": 2,
+      "question": "Чи важливо, щоб у грі був окремо розроблений соло-режим?",
+      "en": "Would you like a dedicated solo mode?",
+      "label_en": "Solo mode",
+      "label_uk": "є соло-режим",
+      "group_size": true
+    },
+    {
+      "feature": "is_solo",
+      "kind": "hard",
+      "category": "players",
+      "priority": 3,
+      "question": "Чи важлива можливість грати наодинці?",
+      "en": "Should the game support solo play?",
+      "label_en": "Supports solo play",
+      "label_uk": "можна грати наодинці",
+      "group_size": true,
+      "requiresPositive": [
+        "minplayers",
+        "maxplayers"
+      ],
+      "samePreference": "solo-capable"
+    },
+    {
+      "feature": "is_short_game",
+      "kind": "hard",
+      "category": "time",
+      "priority": 1,
+      "question": "Чи має партія тривати не більше 45 хвилин?",
+      "en": "Should a session take 45 minutes or less?",
+      "label_en": "Short sessions",
+      "label_uk": "коротка партія (≤45 хв)",
+      "group_size": false,
+      "requiresPositive": [
+        "playingtime"
+      ]
+    },
+    {
+      "feature": "is_quick_setup",
+      "kind": "hard",
+      "category": "time",
+      "priority": 2,
+      "question": "Чи важливо мати варіант партії до 30 хвилин?",
+      "en": "Would you like the option of a session lasting 30 minutes or less?",
+      "label_en": "Short session possible",
+      "label_uk": "можлива партія до 30 хв",
+      "group_size": false,
+      "requiresPositive": [
+        "minplaytime"
+      ]
+    },
+    {
+      "feature": "is_light_game",
+      "kind": "hard",
+      "category": "complexity",
+      "priority": 1,
+      "question": "Чи хочеться легкої гри без складних правил?",
+      "en": "Would you prefer light rules?",
+      "label_en": "Light rules",
+      "label_uk": "легка за складністю",
+      "group_size": false,
+      "requiresPositive": [
+        "averageweight"
+      ]
+    },
+    {
+      "feature": "is_medium_weight",
+      "kind": "hard",
+      "category": "complexity",
+      "priority": 1,
+      "question": "Чи підходить гра середньої складності?",
+      "en": "Would you enjoy moderate complexity?",
+      "label_en": "Moderate complexity",
+      "label_uk": "середня складність",
+      "group_size": false,
+      "requiresPositive": [
+        "averageweight"
+      ]
+    },
+    {
+      "feature": "is_heavy_game",
+      "kind": "hard",
+      "category": "complexity",
+      "priority": 1,
+      "question": "Чи цікавить стратегічно глибока й складна гра?",
+      "en": "Are you looking for a complex, demanding game?",
+      "label_en": "Heavy strategy",
+      "label_uk": "глибока й складна",
+      "group_size": false,
+      "requiresPositive": [
+        "averageweight"
+      ]
+    },
+    {
+      "feature": "is_family_friendly",
+      "kind": "hard",
+      "category": "players",
+      "priority": 1,
+      "question": "Чи важливо, щоб гра підходила для всієї родини?",
+      "en": "Should the game suit the whole family?",
+      "label_en": "Family friendly",
+      "label_uk": "підходить для сім'ї",
+      "group_size": false,
+      "requiresPositive": [
+        "minage"
+      ]
+    },
+    {
+      "feature": "has_cooperative",
+      "kind": "hard",
+      "category": "interaction",
+      "priority": 1,
+      "question": "Чи хочеться грати разом проти гри, а не один проти одного?",
+      "en": "Would you like to play together against the game?",
+      "label_en": "Cooperative play",
+      "label_uk": "кооперативна механіка",
+      "group_size": false
+    },
+    {
+      "feature": "has_take_that",
+      "kind": "soft",
+      "category": "interaction",
+      "priority": 2,
+      "question": "Чи підходять ігри, де можна безпосередньо заважати суперникам?",
+      "en": "Do you enjoy making moves that directly disrupt opponents?",
+      "label_en": "Direct interaction",
+      "label_uk": "пряма взаємодія із суперниками",
+      "group_size": false
+    },
+    {
+      "feature": "has_negotiation",
+      "kind": "soft",
+      "category": "interaction",
+      "priority": 2,
+      "question": "Чи подобаються ігри з переговорами й угодами між гравцями?",
+      "en": "Would you like to negotiate and make deals?",
+      "label_en": "Negotiation",
+      "label_uk": "є переговори",
+      "group_size": false
+    },
+    {
+      "feature": "has_hidden_roles",
+      "kind": "soft",
+      "category": "interaction",
+      "priority": 2,
+      "question": "Чи подобаються ігри з прихованими ролями або зрадником у команді?",
+      "en": "Would you enjoy hidden roles or a traitor on the team?",
+      "label_en": "Hidden roles",
+      "label_uk": "є приховані ролі",
+      "group_size": false
+    },
+    {
+      "feature": "has_area_control",
+      "kind": "soft",
+      "category": "mechanics",
+      "priority": 2,
+      "question": "Чи подобається боротися за контроль над територіями?",
+      "en": "Do you like competing for control of territory?",
+      "label_en": "Area control",
+      "label_uk": "боротьба за терени",
+      "group_size": false
+    },
+    {
+      "feature": "has_dice_rolling",
+      "kind": "soft",
+      "category": "mechanics",
+      "priority": 2,
+      "question": "Чи підходить гра з активним киданням кубиків?",
+      "en": "Do you enjoy rolling dice?",
+      "label_en": "Dice rolling",
+      "label_uk": "є кидання кубиків",
+      "group_size": false
+    },
+    {
+      "feature": "has_drafting",
+      "kind": "soft",
+      "category": "mechanics",
+      "priority": 2,
+      "question": "Чи подобається вибирати карти зі спільного набору (драфт)?",
+      "en": "Would you like to choose cards from a shared pool?",
+      "label_en": "Drafting",
+      "label_uk": "механіка драфту",
+      "group_size": false
+    },
+    {
+      "feature": "has_worker_placement",
+      "kind": "soft",
+      "category": "mechanics",
+      "priority": 2,
+      "question": "Чи подобається механіка розміщення робітників?",
+      "en": "Do you like assigning workers to actions?",
+      "label_en": "Worker placement",
+      "label_uk": "розміщення робітників",
+      "group_size": false
+    },
+    {
+      "feature": "has_deck_building",
+      "kind": "soft",
+      "category": "mechanics",
+      "priority": 2,
+      "question": "Чи подобається поступово будувати й покращувати власну колоду?",
+      "en": "Would you like to build your deck as you play?",
+      "label_en": "Deck building",
+      "label_uk": "deck-building механіка",
+      "group_size": false
+    },
+    {
+      "feature": "has_tile_placement",
+      "kind": "soft",
+      "category": "mechanics",
+      "priority": 2,
+      "question": "Чи подобається викладати тайли й формувати ігрове поле?",
+      "en": "Do you like building a board from tiles?",
+      "label_en": "Tile placement",
+      "label_uk": "розміщення тайлів",
+      "group_size": false
+    },
+    {
+      "feature": "has_hand_management",
+      "kind": "soft",
+      "category": "mechanics",
+      "priority": 3,
+      "question": "Чи важливо вміло розпоряджатися картами в руці?",
+      "en": "Do you enjoy deciding how to use the cards in your hand?",
+      "label_en": "Hand management",
+      "label_uk": "управління картами в руці",
+      "group_size": false
+    },
+    {
+      "feature": "has_set_collection",
+      "kind": "soft",
+      "category": "mechanics",
+      "priority": 3,
+      "question": "Чи подобається збирати набори карт або жетонів?",
+      "en": "Would you enjoy collecting sets of cards or tokens?",
+      "label_en": "Set collection",
+      "label_uk": "збір наборів",
+      "group_size": false
+    },
+    {
+      "feature": "has_auction",
+      "kind": "soft",
+      "category": "mechanics",
+      "priority": 3,
+      "question": "Чи подобаються торги й аукціони між гравцями?",
+      "en": "Do you like bidding against other players?",
+      "label_en": "Auctions",
+      "label_uk": "аукціони й торги",
+      "group_size": false
+    },
+    {
+      "feature": "has_push_your_luck",
+      "kind": "soft",
+      "category": "mechanics",
+      "priority": 3,
+      "question": "Чи подобається ризикувати заради кращого результату?",
+      "en": "Would you risk what you have for a bigger reward?",
+      "label_en": "Push your luck",
+      "label_uk": "push your luck",
+      "group_size": false
+    },
+    {
+      "feature": "has_modular_board",
+      "kind": "soft",
+      "category": "mechanics",
+      "priority": 3,
+      "question": "Чи подобається, коли ігрове поле унікальне в кожній партії?",
+      "en": "Do you enjoy a board that changes between sessions?",
+      "label_en": "Modular board",
+      "label_uk": "модульне поле",
+      "group_size": false
+    },
+    {
+      "feature": "has_trick_taking",
+      "kind": "soft",
+      "category": "mechanics",
+      "priority": 3,
+      "question": "Чи подобаються карткові ігри на взятки?",
+      "en": "Do you like trick-taking card games?",
+      "label_en": "Trick taking",
+      "label_uk": "механіка взяток",
+      "group_size": false
+    },
+    {
+      "feature": "desc_cards",
+      "kind": "soft",
+      "category": "components",
+      "priority": 2,
+      "question": "Чи хочеться гри, де карти є центральним елементом?",
+      "en": "Would you like cards to be central to the game?",
+      "label_en": "Card-driven play",
+      "label_uk": "картки — головна механіка",
+      "group_size": false
+    },
+    {
+      "feature": "is_card_game",
+      "kind": "soft",
+      "category": "components",
+      "priority": 2,
+      "question": "Чи хочеться саме карткової гри (без великого ігрового поля)?",
+      "en": "Are you looking for a card game?",
+      "label_en": "Card game",
+      "label_uk": "карткова гра",
+      "group_size": false
+    },
+    {
+      "feature": "is_miniatures",
+      "kind": "soft",
+      "category": "components",
+      "priority": 3,
+      "question": "Чи важлива наявність детальних мініатюр у грі?",
+      "en": "Would you enjoy playing with miniatures?",
+      "label_en": "Miniatures",
+      "label_uk": "є мініатюри",
+      "group_size": false
+    },
+    {
+      "feature": "is_strategy_game",
+      "kind": "soft",
+      "category": "mood",
+      "priority": 2,
+      "question": "Чи важливо планувати ходи наперед і продумувати стратегію?",
+      "en": "Do you like planning your moves ahead?",
+      "label_en": "Strategic play",
+      "label_uk": "стратегічна гра",
+      "group_size": false
+    },
+    {
+      "feature": "is_party_game",
+      "kind": "soft",
+      "category": "mood",
+      "priority": 1,
+      "question": "Чи підходить легка й весела гра для великої компанії?",
+      "en": "Would you like a lively party game?",
+      "label_en": "Party game",
+      "label_uk": "вечіркова гра",
+      "group_size": false
+    },
+    {
+      "feature": "is_family_game",
+      "kind": "soft",
+      "category": "players",
+      "priority": 2,
+      "question": "Чи потрібна гра, що підходить для гравців різного рівня досвіду?",
+      "en": "Should it suit people with different levels of experience?",
+      "label_en": "Family game",
+      "label_uk": "сімейна гра",
+      "group_size": true
+    },
+    {
+      "feature": "is_thematic_game",
+      "kind": "soft",
+      "category": "mood",
+      "priority": 2,
+      "question": "Чи важливо, щоб тема гри добре відчувалась у механіках?",
+      "en": "Would you like the theme to drive the gameplay?",
+      "label_en": "Thematic play",
+      "label_uk": "сильна тема й атмосфера",
+      "group_size": false
+    },
+    {
+      "feature": "is_deduction",
+      "kind": "soft",
+      "category": "mood",
+      "priority": 2,
+      "question": "Чи подобаються дедуктивні ігри й логічні загадки?",
+      "en": "Do you enjoy deduction and logic puzzles?",
+      "label_en": "Deduction",
+      "label_uk": "дедукція й логіка",
+      "group_size": false
+    },
+    {
+      "feature": "is_exploration",
+      "kind": "soft",
+      "category": "mood",
+      "priority": 2,
+      "question": "Чи подобається досліджувати нові місця й поступово відкривати карту?",
+      "en": "Do you like exploring and revealing a map?",
+      "label_en": "Exploration",
+      "label_uk": "дослідження й відкриття",
+      "group_size": false
+    },
+    {
+      "feature": "desc_story",
+      "kind": "soft",
+      "category": "mood",
+      "priority": 2,
+      "question": "Чи хочеться гри з розвинутою сюжетною лінією?",
+      "en": "Would you like a game with a strong storyline?",
+      "label_en": "Storytelling",
+      "label_uk": "сильна сюжетна лінія",
+      "group_size": false
+    },
+    {
+      "feature": "desc_humor",
+      "kind": "soft",
+      "category": "mood",
+      "priority": 3,
+      "question": "Чи подобається гумористичний і невимушений настрій у грі?",
+      "en": "Would you enjoy a lighthearted, humorous game?",
+      "label_en": "Humour",
+      "label_uk": "гумор і легкий настрій",
+      "group_size": false
+    },
+    {
+      "feature": "is_fantasy",
+      "kind": "soft",
+      "category": "theme",
+      "priority": 2,
+      "question": "Чи цікавить фентезійна тематика — магія, дракони, пригоди?",
+      "en": "Do you enjoy fantasy settings?",
+      "label_en": "Fantasy",
+      "label_uk": "фентезійна тематика",
+      "group_size": false
+    },
+    {
+      "feature": "is_scifi",
+      "kind": "soft",
+      "category": "theme",
+      "priority": 2,
+      "question": "Чи цікавить наукова фантастика й космічна тематика?",
+      "en": "Do you enjoy science fiction?",
+      "label_en": "Science fiction",
+      "label_uk": "наукова фантастика",
+      "group_size": false
+    },
+    {
+      "feature": "is_economic",
+      "kind": "soft",
+      "category": "theme",
+      "priority": 2,
+      "question": "Чи подобаються ігри про торгівлю й управління ресурсами?",
+      "en": "Do you like trading and managing resources?",
+      "label_en": "Economics",
+      "label_uk": "економічна тематика",
+      "group_size": false
+    },
+    {
+      "feature": "is_civilization",
+      "kind": "soft",
+      "category": "theme",
+      "priority": 2,
+      "question": "Чи цікавлять ігри про розвиток цивілізацій?",
+      "en": "Would you like to develop a civilization?",
+      "label_en": "Civilization",
+      "label_uk": "цивілізаційна тема",
+      "group_size": false
+    },
+    {
+      "feature": "is_adventure",
+      "kind": "soft",
+      "category": "theme",
+      "priority": 2,
+      "question": "Чи хочеться пригодницької атмосфери й відчуття подорожі?",
+      "en": "Would you like an adventure or a journey?",
+      "label_en": "Adventure",
+      "label_uk": "пригодницька гра",
+      "group_size": false
+    },
+    {
+      "feature": "desc_space",
+      "kind": "soft",
+      "category": "theme",
+      "priority": 2,
+      "question": "Чи цікавить космічна тематика — кораблі, планети, дослідження Всесвіту?",
+      "en": "Are you interested in space exploration?",
+      "label_en": "Space",
+      "label_uk": "космічна тематика",
+      "group_size": false
+    },
+    {
+      "feature": "is_wargame",
+      "kind": "soft",
+      "category": "theme",
+      "priority": 2,
+      "question": "Чи цікавлять ігри-реконструкції воєнних операцій?",
+      "en": "Are you interested in historical wargames?",
+      "label_en": "Wargame",
+      "label_uk": "воєнна стратегія",
+      "group_size": false
+    },
+    {
+      "feature": "is_medieval",
+      "kind": "soft",
+      "category": "theme",
+      "priority": 3,
+      "question": "Чи подобається середньовічна тематика?",
+      "en": "Would you enjoy a medieval setting?",
+      "label_en": "Medieval setting",
+      "label_uk": "середньовічна атмосфера",
+      "group_size": false
+    },
+    {
+      "feature": "is_horror",
+      "kind": "soft",
+      "category": "theme",
+      "priority": 3,
+      "question": "Чи подобається напружена або моторошна атмосфера?",
+      "en": "Would you like a tense or spooky atmosphere?",
+      "label_en": "Horror",
+      "label_uk": "хоррор-тематика",
+      "group_size": false
+    },
+    {
+      "feature": "desc_magic",
+      "kind": "soft",
+      "category": "theme",
+      "priority": 3,
+      "question": "Чи хочеться гри з магічними елементами?",
+      "en": "Would you like a game that features magic?",
+      "label_en": "Magic",
+      "label_uk": "магічна тематика",
+      "group_size": false
+    },
+    {
+      "feature": "desc_pirates",
+      "kind": "soft",
+      "category": "theme",
+      "priority": 3,
+      "question": "Чи цікавить піратська тематика — море й морські пригоди?",
+      "en": "Would you enjoy a pirate adventure?",
+      "label_en": "Pirates",
+      "label_uk": "піратська романтика",
+      "group_size": false
+    },
+    {
+      "feature": "desc_zombies",
+      "kind": "soft",
+      "category": "theme",
+      "priority": 3,
+      "question": "Чи цікавлять ігри із зомбі-тематикою?",
+      "en": "Are you interested in games about zombies?",
+      "label_en": "Zombies",
+      "label_uk": "зомбі",
+      "group_size": false
+    },
+    {
+      "feature": "desc_nature",
+      "kind": "soft",
+      "category": "theme",
+      "priority": 3,
+      "question": "Чи подобається тема природи й екосистем?",
+      "en": "Would you like a game about nature and ecosystems?",
+      "label_en": "Nature",
+      "label_uk": "природа й довкілля",
+      "group_size": false
+    },
+    {
+      "feature": "is_war",
+      "kind": "soft",
+      "category": "theme",
+      "priority": 3,
+      "question": "Чи подобаються ігри з воєнними конфліктами й тактикою?",
+      "en": "Do you enjoy military tactics in games?",
+      "label_en": "Military tactics",
+      "label_uk": "воєнний конфлікт",
+      "group_size": false
+    },
+    {
+      "feature": "is_farming",
+      "kind": "soft",
+      "category": "theme",
+      "priority": 3,
+      "question": "Чи подобаються ігри про сільське господарство й фермерство?",
+      "en": "Would you like a game about farming?",
+      "label_en": "Farming",
+      "label_uk": "фермерська тема",
+      "group_size": false
+    },
+    {
+      "feature": "is_trains",
+      "kind": "soft",
+      "category": "theme",
+      "priority": 3,
+      "question": "Чи цікавлять ігри про залізниці й маршрути?",
+      "en": "Are you interested in railways and routes?",
+      "label_en": "Railways",
+      "label_uk": "поїзди й логістика",
+      "group_size": false
+    },
+    {
+      "feature": "is_city_building",
+      "kind": "soft",
+      "category": "theme",
+      "priority": 3,
+      "question": "Чи подобається будівництво й розвиток міст?",
+      "en": "Would you like to build and develop a city?",
+      "label_en": "City building",
+      "label_uk": "будівництво міста",
+      "group_size": false
+    },
+    {
+      "feature": "is_animals",
+      "kind": "soft",
+      "category": "theme",
+      "priority": 3,
+      "question": "Чи цікавить тематика, де тварини є головними персонажами?",
+      "en": "Would you like animals as the main characters?",
+      "label_en": "Animals",
+      "label_uk": "тема тварин",
+      "group_size": false
+    }
+  ]
+}

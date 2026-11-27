@@ -2,97 +2,55 @@
 
 from __future__ import annotations
 
+import gzip
+import json
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
-HARD_WEIGHT = 1.6
-SOFT_WEIGHT = 1.0
-HARD_PHASE  = 6
-RANK_BONUS  = 10
-
-QUESTIONS: list[dict] = [
-    {"feature": "supports_1p",      "kind": "hard", "category": "players",     "priority": 1, "polarity": "positive", "question": "Чи плануєте іноді грати наодинці?"},
-    {"feature": "is_two_player",    "kind": "hard", "category": "players",     "priority": 1, "polarity": "positive", "question": "Чи найчастіше гратимете вдвох?"},
-    {"feature": "supports_3p",      "kind": "hard", "category": "players",     "priority": 1, "polarity": "positive", "question": "Чи часто за столом буде рівно троє гравців?"},
-    {"feature": "supports_4p",      "kind": "hard", "category": "players",     "priority": 1, "polarity": "positive", "question": "Чи часто гратимете вчотирьох?"},
-    {"feature": "supports_5p",      "kind": "hard", "category": "players",     "priority": 2, "polarity": "positive", "question": "Чи буває, що за столом збирається п'ятеро?"},
-    {"feature": "supports_6p",      "kind": "hard", "category": "players",     "priority": 2, "polarity": "positive", "question": "Чи потрібна гра для шістьох і більше?"},
-    {"feature": "is_six_plus",      "kind": "hard", "category": "players",     "priority": 2, "polarity": "positive", "question": "Чи шукаєте гру для великої компанії (6+)?"},
-    {"feature": "has_solo_mode",    "kind": "hard", "category": "players",     "priority": 2, "polarity": "positive", "question": "Чи важливо, щоб у грі був окремо розроблений соло-режим?"},
-    {"feature": "is_solo",          "kind": "hard", "category": "players",     "priority": 3, "polarity": "positive", "question": "Чи підходить гра, призначена виключно для одного гравця?"},
-    {"feature": "is_short_game",    "kind": "hard", "category": "time",        "priority": 1, "polarity": "positive", "question": "Чи має партія тривати не більше 45 хвилин?"},
-    {"feature": "is_quick_setup",   "kind": "hard", "category": "time",        "priority": 2, "polarity": "positive", "question": "Чи важливо швидко розкласти компоненти й одразу почати?"},
-    {"feature": "is_light_game",    "kind": "hard", "category": "complexity",  "priority": 1, "polarity": "positive", "question": "Чи хочеться легкої гри без складних правил?"},
-    {"feature": "is_medium_weight", "kind": "hard", "category": "complexity",  "priority": 1, "polarity": "positive", "question": "Чи підходить гра середньої складності?"},
-    {"feature": "is_heavy_game",    "kind": "hard", "category": "complexity",  "priority": 1, "polarity": "positive", "question": "Чи цікавить стратегічно глибока й складна гра?"},
-    {"feature": "is_family_friendly","kind": "hard","category": "players",     "priority": 1, "polarity": "positive", "question": "Чи важливо, щоб гра підходила для всієї родини?"},
-    {"feature": "has_cooperative",  "kind": "hard", "category": "interaction", "priority": 1, "polarity": "positive", "question": "Чи хочеться грати разом проти гри, а не один проти одного?"},
-    {"feature": "has_take_that",    "kind": "soft", "category": "interaction", "priority": 2, "polarity": "positive", "question": "Чи підходять ігри, де можна безпосередньо заважати суперникам?"},
-    {"feature": "has_negotiation",  "kind": "soft", "category": "interaction", "priority": 2, "polarity": "positive", "question": "Чи подобаються ігри з переговорами й угодами між гравцями?"},
-    {"feature": "has_hidden_roles", "kind": "soft", "category": "interaction", "priority": 2, "polarity": "positive", "question": "Чи подобаються ігри з прихованими ролями або зрадником у команді?"},
-    {"feature": "has_area_control", "kind": "soft", "category": "mechanics",   "priority": 2, "polarity": "positive", "question": "Чи подобається боротися за контроль над територіями?"},
-    {"feature": "has_dice_rolling", "kind": "soft", "category": "mechanics",   "priority": 2, "polarity": "positive", "question": "Чи підходить гра з активним киданням кубиків?"},
-    {"feature": "has_drafting",     "kind": "soft", "category": "mechanics",   "priority": 2, "polarity": "positive", "question": "Чи подобається вибирати карти зі спільного набору (драфт)?"},
-    {"feature": "has_worker_placement","kind":"soft","category": "mechanics",  "priority": 2, "polarity": "positive", "question": "Чи подобається механіка розміщення робітників?"},
-    {"feature": "has_deck_building","kind": "soft", "category": "mechanics",   "priority": 2, "polarity": "positive", "question": "Чи подобається поступово будувати й покращувати власну колоду?"},
-    {"feature": "has_tile_placement","kind":"soft", "category": "mechanics",   "priority": 2, "polarity": "positive", "question": "Чи подобається викладати тайли й формувати ігрове поле?"},
-    {"feature": "has_hand_management","kind":"soft","category": "mechanics",   "priority": 3, "polarity": "positive", "question": "Чи важливо вміло розпоряджатися картами в руці?"},
-    {"feature": "has_set_collection","kind":"soft", "category": "mechanics",   "priority": 3, "polarity": "positive", "question": "Чи подобається збирати набори карт або жетонів?"},
-    {"feature": "has_auction",      "kind": "soft", "category": "mechanics",   "priority": 3, "polarity": "positive", "question": "Чи подобаються торги й аукціони між гравцями?"},
-    {"feature": "has_push_your_luck","kind":"soft", "category": "mechanics",   "priority": 3, "polarity": "positive", "question": "Чи подобається ризикувати заради кращого результату?"},
-    {"feature": "has_modular_board","kind": "soft", "category": "mechanics",   "priority": 3, "polarity": "positive", "question": "Чи подобається, коли ігрове поле унікальне в кожній партії?"},
-    {"feature": "has_trick_taking", "kind": "soft", "category": "mechanics",   "priority": 3, "polarity": "positive", "question": "Чи подобаються карткові ігри на взятки?"},
-    {"feature": "desc_cards",       "kind": "soft", "category": "components",  "priority": 2, "polarity": "positive", "question": "Чи хочеться гри, де карти є центральним елементом?"},
-    {"feature": "is_card_game",     "kind": "soft", "category": "components",  "priority": 2, "polarity": "positive", "question": "Чи хочеться саме карткової гри (без великого ігрового поля)?"},
-    {"feature": "is_miniatures",    "kind": "soft", "category": "components",  "priority": 3, "polarity": "positive", "question": "Чи важлива наявність детальних мініатюр у грі?"},
-    {"feature": "is_strategy_game", "kind": "soft", "category": "mood",        "priority": 2, "polarity": "positive", "question": "Чи важливо планувати ходи наперед і продумувати стратегію?"},
-    {"feature": "is_party_game",    "kind": "soft", "category": "mood",        "priority": 1, "polarity": "positive", "question": "Чи підходить легка й весела гра для великої компанії?"},
-    {"feature": "is_family_game",   "kind": "soft", "category": "players",     "priority": 2, "polarity": "positive", "question": "Чи потрібна гра, що підходить для гравців різного рівня досвіду?"},
-    {"feature": "is_thematic_game", "kind": "soft", "category": "mood",        "priority": 2, "polarity": "positive", "question": "Чи важливо, щоб тема гри добре відчувалась у механіках?"},
-    {"feature": "is_deduction",     "kind": "soft", "category": "mood",        "priority": 2, "polarity": "positive", "question": "Чи подобаються дедуктивні ігри й логічні загадки?"},
-    {"feature": "is_exploration",   "kind": "soft", "category": "mood",        "priority": 2, "polarity": "positive", "question": "Чи подобається досліджувати нові місця й поступово відкривати карту?"},
-    {"feature": "desc_story",       "kind": "soft", "category": "mood",        "priority": 2, "polarity": "positive", "question": "Чи хочеться гри з розвинутою сюжетною лінією?"},
-    {"feature": "desc_humor",       "kind": "soft", "category": "mood",        "priority": 3, "polarity": "positive", "question": "Чи подобається гумористичний і невимушений настрій у грі?"},
-    {"feature": "is_fantasy",       "kind": "soft", "category": "theme",       "priority": 2, "polarity": "positive", "question": "Чи цікавить фентезійна тематика — магія, дракони, пригоди?"},
-    {"feature": "is_scifi",         "kind": "soft", "category": "theme",       "priority": 2, "polarity": "positive", "question": "Чи цікавить наукова фантастика й космічна тематика?"},
-    {"feature": "is_economic",      "kind": "soft", "category": "theme",       "priority": 2, "polarity": "positive", "question": "Чи подобаються ігри про торгівлю й управління ресурсами?"},
-    {"feature": "is_civilization",  "kind": "soft", "category": "theme",       "priority": 2, "polarity": "positive", "question": "Чи цікавлять ігри про розвиток цивілізацій?"},
-    {"feature": "is_adventure",     "kind": "soft", "category": "theme",       "priority": 2, "polarity": "positive", "question": "Чи хочеться пригодницької атмосфери й відчуття подорожі?"},
-    {"feature": "desc_space",       "kind": "soft", "category": "theme",       "priority": 2, "polarity": "positive", "question": "Чи цікавить космічна тематика — кораблі, планети, дослідження Всесвіту?"},
-    {"feature": "is_wargame",       "kind": "soft", "category": "theme",       "priority": 2, "polarity": "positive", "question": "Чи цікавлять ігри-реконструкції воєнних операцій?"},
-    {"feature": "is_medieval",      "kind": "soft", "category": "theme",       "priority": 3, "polarity": "positive", "question": "Чи подобається середньовічна тематика?"},
-    {"feature": "is_horror",        "kind": "soft", "category": "theme",       "priority": 3, "polarity": "positive", "question": "Чи подобається напружена або моторошна атмосфера?"},
-    {"feature": "desc_magic",       "kind": "soft", "category": "theme",       "priority": 3, "polarity": "positive", "question": "Чи хочеться гри з магічними елементами?"},
-    {"feature": "desc_pirates",     "kind": "soft", "category": "theme",       "priority": 3, "polarity": "positive", "question": "Чи цікавить піратська тематика — море й морські пригоди?"},
-    {"feature": "desc_zombies",     "kind": "soft", "category": "theme",       "priority": 3, "polarity": "positive", "question": "Чи цікавлять ігри із зомбі-тематикою?"},
-    {"feature": "desc_nature",      "kind": "soft", "category": "theme",       "priority": 3, "polarity": "positive", "question": "Чи подобається тема природи й екосистем?"},
-    {"feature": "is_war",           "kind": "soft", "category": "theme",       "priority": 3, "polarity": "positive", "question": "Чи подобаються ігри з воєнними конфліктами й тактикою?"},
-    {"feature": "is_farming",       "kind": "soft", "category": "theme",       "priority": 3, "polarity": "positive", "question": "Чи подобаються ігри про сільське господарство й фермерство?"},
-    {"feature": "is_trains",        "kind": "soft", "category": "theme",       "priority": 3, "polarity": "positive", "question": "Чи цікавлять ігри про залізниці й маршрути?"},
-    {"feature": "is_city_building", "kind": "soft", "category": "theme",       "priority": 3, "polarity": "positive", "question": "Чи подобається будівництво й розвиток міст?"},
-    {"feature": "is_animals",       "kind": "soft", "category": "theme",       "priority": 3, "polarity": "positive", "question": "Чи цікавить тематика, де тварини є головними персонажами?"},
-]
+ROOT = Path(__file__).resolve().parents[1]
+RULES = json.loads((ROOT / "ranking.json").read_text())
+HARD_WEIGHT = RULES["hardWeight"]
+SOFT_WEIGHT = RULES["softWeight"]
+HARD_PHASE = RULES["hardPhase"]
+RANK_BONUS = RULES["rankBonus"]
+QUESTIONS = RULES["questions"]
+BY_FEATURE = {q["feature"]: q for q in QUESTIONS}
+LABELS = {q["feature"]: q["label_uk"] for q in QUESTIONS}
 
 
 def load_games(data_dir: Path) -> pd.DataFrame:
-    """Завантажує датасет ігор (пріоритет: boardgames_features.csv)."""
-    primary  = data_dir / "boardgames_features.csv"
-    fallback = data_dir / "boardgames_recommender_features.csv"
-    path = primary if primary.exists() else fallback
-    if not path.exists():
-        raise FileNotFoundError(f"Не знайдено файлів даних у {data_dir}")
-    df = pd.read_csv(path, low_memory=False)
-    df = df.drop_duplicates(subset=["id"], keep="first")
+    """Read the original research CSV or the public, lossless feature projection."""
+    for name in ("boardgames_features.csv", "boardgames_recommender_features.csv"):
+        if (data_dir / name).exists():
+            return pd.read_csv(data_dir / name, low_memory=False).drop_duplicates("id").reset_index(drop=True)
+    manifest = json.loads((data_dir / "catalogue.json").read_text())
+    rows = []
+    for name in manifest["parts"]:
+        with gzip.open(data_dir / name, "rt", encoding="utf-8") as part:
+            rows.extend(json.load(part))
+    df = pd.DataFrame(rows, columns=manifest["columns"])
+    if len(df) != manifest["count"] or not df.id.is_unique:
+        raise ValueError("Incomplete or duplicated catalogue")
     return df
 
 
-def filter_questions(questions: list, df: pd.DataFrame) -> list:
-    """
-    Залишає тільки питання, ознаки яких є у датасеті.
-    """
-    return [q for q in questions if q["feature"] in df.columns]
+def filter_questions(questions, df, players=None):
+    return [q for q in questions if q["feature"] in df and not (players and q["group_size"])]
+
+
+def eligible_games(games, players=0, minutes=0, weight=0, rating=0):
+    selected = games
+    if players:
+        selected = selected[selected.minplayers.between(1, players) & selected.maxplayers.ge(players)]
+    if minutes:
+        selected = selected[selected.playingtime.between(1, minutes)]
+    if weight:
+        selected = selected[selected.averageweight.gt(0) & selected.averageweight.le(weight)]
+    if rating:
+        selected = selected[selected.bayesaverage.ge(rating)]
+    return selected
 
 
 # ── Компоненти score [0; 1] ───────────────────────────────────
@@ -135,6 +93,22 @@ def prepare_games(df: pd.DataFrame) -> pd.DataFrame:
 
 # ── Оновлення score після відповіді ──────────────────────────
 
+def quiz_values(df, feature):
+    """Keep source model inputs intact while treating undocumented quiz facts as unknown."""
+    values = df[feature]
+    for column in BY_FEATURE.get(feature, {}).get("requiresPositive", []):
+        if column in df:
+            values = values.where(df[column].gt(0))
+    return values
+
+
+def answer_delta(df, feature, answer, weight):
+    if answer not in ("так", "ні"):
+        return 0.0
+    values = quiz_values(df, feature)
+    return np.where(values.isna(), 0.0, np.where(values.eq(int(answer == "так")), weight, -weight))
+
+
 def update_scores(
     df: pd.DataFrame, feature: str, answer: str, weight: float = 1.2
 ) -> pd.DataFrame:
@@ -146,10 +120,7 @@ def update_scores(
     "не знаю" → без змін
     """
     updated = df.copy()
-    if answer == "так":
-        updated["score"] += np.where(updated[feature] == 1, weight, -weight)
-    elif answer == "ні":
-        updated["score"] += np.where(updated[feature] == 0, weight, -weight)
+    updated["score"] += answer_delta(df, feature, answer, weight)
     return updated
 
 
@@ -180,7 +151,7 @@ def score_question_information_value(candidates: pd.DataFrame, feature: str) -> 
     """
     if feature not in candidates.columns:
         return 0.0
-    values = candidates[feature].dropna()
+    values = quiz_values(candidates, feature).dropna()
     n = len(values)
     if n == 0:
         return 0.0
@@ -194,7 +165,7 @@ def choose_next_question(
     df: pd.DataFrame,
     questions: list,
     asked_features: set,
-    candidate_pool_size: int = 200,
+    candidate_pool_size: int = RULES["poolSize"],
 ) -> dict | None:
     """
     Адаптивно обирає наступне питання за ентропією Шеннона.
@@ -206,7 +177,7 @@ def choose_next_question(
            combined(q) = H(q) + priority_bonus(q) - category_penalty(q)
        де:
            H(q)               — ентропія (інформаційна цінність)
-           priority_bonus     = (4 - priority) * 0.10
+           priority_bonus     = (4 - priority) * RULES["priorityBonus"]
            category_penalty   = count_asked_in_category * 0.04
     4. Повертаємо питання з максимальним combined(q).
     """
@@ -217,9 +188,10 @@ def choose_next_question(
         if q["feature"] in asked_features and q.get("kind") == "hard"
     )
 
+    covered = {q.get("samePreference", q["feature"]) for q in questions if q["feature"] in asked_features}
     pool_questions = [
         q for q in questions
-        if q["feature"] not in asked_features and q["feature"] in pool.columns
+        if q.get("samePreference", q["feature"]) not in covered and q["feature"] in pool.columns
     ]
 
     entropies = {
@@ -251,10 +223,10 @@ def choose_next_question(
         h = entropies[feature]
 
         priority = question.get("priority", 2)
-        priority_bonus = max(0.0, (4 - priority) * 0.10)
+        priority_bonus = max(0.0, (4 - priority) * RULES["priorityBonus"])
 
         cat = question.get("category", "other")
-        category_penalty = category_asked.get(cat, 0) * 0.04
+        category_penalty = category_asked.get(cat, 0) * RULES["categoryPenalty"]
 
         combined = h + priority_bonus - category_penalty
 
@@ -282,8 +254,9 @@ def explain_recommendation(row: pd.Series, answers: dict) -> list[str]:
     for feature, answer in answers.items():
         if feature.startswith("__"):
             continue
-        if answer == "так" and feature in row.index and row.get(feature, 0) == 1:
-            label = _feature_label(feature)
+        known = all(row.get(c, 0) > 0 for c in BY_FEATURE.get(feature, {}).get("requiresPositive", []))
+        if known and answer == "так" and row.get(feature, 0) == 1:
+            label = LABELS.get(feature)
             if label:
                 reasons.append(label)
 
@@ -291,70 +264,3 @@ def explain_recommendation(row: pd.Series, answers: dict) -> list[str]:
         reasons.append("висока оцінка спільноти BGG")
 
     return reasons[:4]
-
-
-def _feature_label(feature: str) -> str:
-    """Перетворює назву ознаки на зрозумілий рядок для користувача."""
-    LABELS = {
-        "supports_1p":       "підтримує гру наодинці",
-        "is_two_player":     "чудово підходить для двох",
-        "supports_2p":       "можна грати удвох",
-        "supports_3p":       "підтримує трьох гравців",
-        "supports_4p":       "підтримує чотирьох гравців",
-        "supports_5p":       "підтримує п'ятьох гравців",
-        "supports_6p":       "підтримує шість+ гравців",
-        "is_six_plus":       "для великої компанії",
-        "is_solo":           "можна грати наодинці",
-        "has_solo_mode":     "є соло-режим",
-        "is_short_game":     "коротка партія (≤45 хв)",
-        "is_quick_setup":    "швидке розкладання",
-        "is_light_game":     "легка за складністю",
-        "is_medium_weight":  "середня складність",
-        "is_heavy_game":     "глибока й складна",
-        "is_family_friendly": "підходить для сім'ї",
-        "is_family_game":    "сімейна гра",
-        "has_cooperative":   "кооперативна механіка",
-        "has_dice_rolling":  "є кидання кубиків",
-        "has_deck_building": "deck-building механіка",
-        "has_worker_placement": "розміщення робітників",
-        "has_drafting":      "механіка драфту",
-        "has_area_control":  "боротьба за терени",
-        "has_negotiation":   "є переговори",
-        "has_hidden_roles":  "є приховані ролі",
-        "has_set_collection": "збір наборів",
-        "has_tile_placement": "розміщення тайлів",
-        "has_modular_board": "модульне поле",
-        "has_trick_taking":  "механіка взяток",
-        "has_push_your_luck": "push your luck",
-        "has_auction":       "аукціони й торги",
-        "has_hand_management": "управління картами в руці",
-        "is_strategy_game":  "стратегічна гра",
-        "is_economic":       "економічна тематика",
-        "is_fantasy":        "фентезійна тематика",
-        "is_scifi":          "наукова фантастика",
-        "is_adventure":      "пригодницька гра",
-        "is_horror":         "хоррор-тематика",
-        "is_deduction":      "дедукція й логіка",
-        "is_exploration":    "дослідження й відкриття",
-        "is_thematic_game":  "сильна тема й атмосфера",
-        "is_party_game":     "вечіркова гра",
-        "is_civilization":   "цивілізаційна тема",
-        "is_wargame":        "воєнна стратегія",
-        "is_medieval":       "середньовічна атмосфера",
-        "is_card_game":      "карткова гра",
-        "is_miniatures":     "є мініатюри",
-        "is_war":            "воєнний конфлікт",
-        "is_animals":        "тема тварин",
-        "is_farming":        "фермерська тема",
-        "is_trains":         "поїзди й логістика",
-        "is_city_building":  "будівництво міста",
-        "desc_story":        "сильна сюжетна лінія",
-        "desc_magic":        "магічна тематика",
-        "desc_space":        "космічна тематика",
-        "desc_nature":       "природа й довкілля",
-        "desc_humor":        "гумор і легкий настрій",
-        "desc_pirates":      "піратська романтика",
-        "desc_zombies":      "зомбі",
-        "desc_cards":        "картки — головна механіка",
-    }
-    return LABELS.get(feature, "")
