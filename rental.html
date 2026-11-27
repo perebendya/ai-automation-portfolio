@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta data-uk-description="Порівняй три тестові київські квартири за тим, що видно на фото. Інтерактивний проєкт Дарії Кукли." name="description" content="Compare three fictional Kyiv rentals using the evidence in their photos. An interactive portfolio project by Dariia Kukla.">
   <title data-uk="Пошук житла · Дарія Кукла">AI Rental Assistant · Dariia Kukla</title>
-  <link rel="stylesheet" href="demo.css">
-  <link rel="stylesheet" href="rental.css">
+  <link rel="stylesheet" href="demo.css?v=footer2">
+  <link rel="stylesheet" href="rental.css?v=footer2">
 </head>
 <body>
 <a class="skip" href="#query" id="skip"></a>
@@ -22,7 +22,7 @@
 </div></header>
 <main class="wrap">
   <section class="hero" aria-labelledby="hero-title">
-    <div><p class="kicker" data-uk="Помічник із пошуку житла">AI Rental Assistant</p><h1 id="hero-title"><span id="title1"></span><br><em id="title2"></em></h1><p class="intro" id="intro"></p></div>
+    <div><h1 id="hero-title"><span id="title1"></span><br><em id="title2"></em></h1><p class="intro" id="intro"></p></div>
     <button type="button" class="hero-image" id="cover"><img src="assets/rental/c-1.webp" alt="" fetchpriority="high"><span id="cover-caption"></span></button>
   </section>
   <section class="controls" aria-labelledby="question"><form id="query">
@@ -30,9 +30,15 @@
   </form><div class="samples"><small id="exampleLabel"></small><div id="examples" class="chips"></div></div></section>
   <section aria-labelledby="results"><div class="linehead"><h2 id="results" tabindex="-1"></h2><span id="filter"></span></div>
     <p id="understood"></p><p id="unmatched"></p><p id="legend"></p><div id="status" class="sronly" role="status"></div><div class="grid" id="grid"></div>
+    <p class="rental-note" id="note"></p>
   </section>
 </main>
-<footer class="footer"><div class="wrap"><p id="note"></p><a href="index.html" data-site-link id="portfolio"></a></div></footer>
+<footer id="project-footer" class="footer project-footer">
+  <div class="wrap">
+    <p data-uk="Дарія Кукла · Київ">Dariia Kukla · Kyiv</p>
+    <a href="index.html#projects" data-site-link data-uk="Усі проєкти">All projects</a>
+  </div>
+</footer>
 <dialog id="detail" aria-labelledby="dtitle">
   <div class="dhead"><h2 id="dtitle"></h2><button class="close" id="close" type="button" autofocus></button></div>
   <div class="gallery"><div class="stage"><div id="large"></div><button type="button" id="prev" class="arrow back">‹</button><button type="button" id="next" class="arrow forward">›</button></div>
@@ -259,7 +265,7 @@ function translate(){
   legend:en("Збіг +1 · Суперечність −1 · Не видно на фото 0","Match +1 · Conflict −1 · Not visible 0"),
   note:en("У Telegram-боті Gemini за фото визначає тип плити, спальне місце, наявність столу та стан санвузла. Килими й колір кухні я додала як приклади для демо. Тут запити розбираються локально, за підготовленими спостереженнями для трьох вигаданих квартир.","In the Telegram bot, Gemini checks photos for the stove type, sleeping arrangement, a usable table and bathroom condition. I added wall rugs and kitchen colours as examples for this demo. It interprets requests locally using prepared observations for three fictional flats."),
   "photo-origin":en("Фото згенеровано для демо, щоб показати різні інтер’єри без публікації чужих знімків з оголошень.","I generated these interiors for the demo so I could show a range of flats without republishing anyone’s listing photos."),
-  portfolio:en("Портфоліо Дарії","Dariia’s portfolio"),close:en("Закрити","Close")};
+  close:en("Закрити","Close")};
  for(const [id,label] of Object.entries(copy))$(id).textContent=t(label);
  $("request").placeholder=t(examples[0]);$("examples").replaceChildren();
  const labels=[en("Про кухню й килими","Kitchen and wall rugs"),en("Працюю з дому","I work from home"),en("Кава на балконі","Coffee on the balcony")];

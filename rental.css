@@ -40,6 +40,7 @@
 .ico { color:var(--pine); font-weight:700; width:1rem; flex:none; }
 .ico.bad { color:#9a4b33; } .ico.unknown { color:var(--muted); }
 .inspect { align-self:flex-start; background:transparent; border:0; color:var(--pine); padding:.25rem 0; margin-top:auto; font-weight:620; text-decoration:underline; text-underline-offset:.22em; }
+.rental-note { max-width:80ch; margin-top:1.4rem; color:var(--muted); font-size:.875rem; }
 dialog { width:min(820px,calc(100% - 24px)); max-height:90vh; max-height:90dvh; padding:0; border:1px solid var(--line); border-radius:14px; color:var(--ink); background:var(--surface); overscroll-behavior:contain; }
 dialog::backdrop { background:#14251dd1; }
 .dhead { display:flex; align-items:center; justify-content:space-between; padding:1rem 1.25rem; gap:.5rem; }
@@ -61,7 +62,6 @@ dialog::backdrop { background:#14251dd1; }
   .hero .intro { margin-top:.65rem; }
   .grid { grid-template-columns:1fr; }
   .shot img { aspect-ratio:2; }
-  .kicker { margin-bottom:.5rem; }
 }
 @media(max-width:560px) {
   .query-row { flex-direction:column; }

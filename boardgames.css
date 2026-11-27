@@ -48,7 +48,7 @@
 .intro { padding:0; max-width:57ch; }
 .intro h1 { max-width:16ch; }
 .intro h1 em { color:#356681; font-weight:400; }
-.intro > p:not(.kicker) { color:var(--muted); margin:1rem 0 .65rem; font-size:clamp(1.02rem,1.5vw,1.19rem); }
+.intro > p { color:var(--muted); margin:1rem 0 .65rem; font-size:clamp(1.02rem,1.5vw,1.19rem); }
 .intro a, .method a { font-weight:600; }
 .setup { color:#fffefa; background:#233d47; border-radius:.45rem 1.6rem .45rem .45rem; padding:clamp(1.25rem,2.8vw,2.25rem); }
 .filters { border:0; padding:0; margin:0 0 1.1rem; grid-template-columns:repeat(2,minmax(0,1fr)); }
