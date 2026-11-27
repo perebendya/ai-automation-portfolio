@@ -26,9 +26,9 @@ In this example, six fictional messages become a weekly moderation report. Mark 
 
 I built this recommender for my System Analysis thesis to help a group pick a game for the evening. The website and the Python app use the same catalogue of 30,224 games and the same ranking rules.
 
-**“There are four of us. We have 45 minutes and like simple rules.”** Group size and time give you a first shortlist. Answer the question about light rules and Azul comes first. Its card shows why it fits.
+**“There are four of us. We have 45 minutes and like simple rules.”** Group size and time give you a first shortlist. Answer the question about light rules and Codenames comes first with the model enabled. Its card shows why it fits.
 
-![Azul at the top of a four-player shortlist after one answer, alongside the next preference question.](../assets/boardgames-en.png)
+![Codenames at the top of a four-player shortlist after one answer, alongside the next preference question.](../assets/boardgames-en.png)
 
 [Find a game](https://perebendya.github.io/ai-automation-portfolio/boardgames.html?lang=en) · [Python source](../board-game-finder/app.py) · [Model evaluation](../board-game-finder/README.md#training-and-verification)
 

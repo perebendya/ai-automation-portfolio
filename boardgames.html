@@ -4,9 +4,9 @@
   <title data-uk="Підбір настільної гри · Дарія Кукла">Board Game Finder · Dariia Kukla</title>
   <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48 64x64" type="image/x-icon">
   <meta name="description" content="Find a game for your table with Dariia Kukla’s adaptive board-game recommender." data-uk-description="Підбери настільну гру для своєї компанії за допомогою рекомендаційної системи Дарії Кукли.">
-  <link rel="stylesheet" href="demo.css?v=footer2"><link rel="stylesheet" href="boardgames.css?v=5">
+  <link rel="stylesheet" href="demo.css?v=footer2"><link rel="stylesheet" href="boardgames.css?v=6">
 </head><body>
-<a class="skip" href="#finder" data-uk="До підбору гри">Skip to the finder</a>
+<a class="skip" href="#main-content" data-uk="До підбору гри">Skip to the finder</a>
 <header class="masthead"><div class="wrap">
   <a class="signature" data-site-link href="index.html"><span class="monogram" aria-hidden="true">dk</span><span data-uk="Дарія Кукла">Dariia Kukla</span></a>
   <nav aria-label="Portfolio navigation">
@@ -17,15 +17,23 @@
   </nav>
   <button id="lang" class="language" type="button" lang="uk">Українською</button>
 </div></header>
-<main class="wrap">
+<main class="wrap" id="main-content" tabindex="-1">
   <div class="opening">
     <header class="intro">
       <h1><span data-uk="У що зіграти">What should we play</span> <em data-uk="сьогодні?">tonight?</em></h1>
-      <p data-uk="Для бакалаврської роботи із системного аналізу я побудувала систему, яка підбирає настільні ігри. Вкажи, скільки вас і скільки є часу на партію, щоб отримати добірку з каталогу на 30 224 гри.">For my bachelor’s thesis in systems analysis, I built a recommender for 30,224 board games. Choose your group size and time budget to find games for your table.</p>
-      <a href="#method" data-uk="Як я побудувала рекомендації">How I built the recommender</a>
+      <p data-uk="Обери, скільки вас за столом і скільки маєте часу на гру. Із 30 224 настільних ігор у добірку потраплять лише ті, що підходять за обома умовами.">Choose how many people are playing and how much time you have. From a catalogue of 30,224 board games, only games that fit both conditions make your shortlist.</p>
+      <p data-uk="Любите вигравати разом чи змагатися між собою? Кілька простих відповідей та оцінка моделі машинного навчання допоможуть знайти гру до смаку без довгих пошуків.">Would you rather win as a team or compete with your friends? A few answers like that, together with a machine learning model, help you find a game without reading through dozens of rulebooks.</p>
+      <button class="primary" type="button" id="start" hidden aria-controls="finder" aria-expanded="false" data-uk="Почати підбір">Find my game</button>
     </header>
-    <form id="finder" class="setup">
-      <fieldset class="filters"><legend data-uk="Твій ігровий вечір">Your game night</legend>
+    <img class="game-night" src="assets/game-night.webp" alt="" width="1200" height="800" fetchpriority="high">
+  </div>
+  <form id="finder" class="setup" aria-labelledby="setup-title" hidden>
+    <div class="setup-copy">
+      <h2 id="setup-title" tabindex="-1" data-uk="Хто грає і скільки є часу?">Who’s playing, and for how long?</h2>
+      <p data-uk="Наприклад, якщо вас четверо й маєте 45 хвилин, кожна гра у списку має підходити для чотирьох і тривати до 45 хвилин за даними каталогу.">For example, if four of you have 45 minutes, every game on your list must support four players and have a listed playtime of 45 minutes or less.</p>
+    </div>
+    <div>
+      <fieldset class="filters"><legend class="sronly" data-uk="Умови гри">Table settings</legend>
       <div><label for="players" data-uk="Кількість гравців">Players</label>
         <span class="select-shell"><select id="players">
           <option value="0" data-uk="Будь-яка">Any</option>
@@ -45,7 +53,7 @@
         <option value="180" data-uk="До 180 хв">Up to 180 min</option>
         <option value="240" data-uk="До 240 хв">Up to 240 min</option>
       </select></span></div>
-      <details class="advanced"><summary data-uk="Складність і рейтинг">Complexity and rating</summary><div class="extra-fields">
+      <details class="advanced"><summary data-uk="Додаткові умови">More filters</summary><div class="extra-fields">
       <div><label for="weight" data-uk="Макс. складність">Max. complexity</label><span class="select-shell"><select id="weight">
         <option value="0" data-uk="Будь-яка">Any</option>
         <option value="1.5">1.5 / 5</option>
@@ -59,20 +67,18 @@
       <div><label for="rating" data-uk="Мін. рейтинг BGG">Min. BGG rating</label><input id="rating" type="number" value="0" min="0" max="10" step="0.1"></div>
         </div></details>
       </fieldset>
-      <button class="go" type="submit" data-uk="Підібрати ігри">Find games</button>
-    </form>
-  </div>
+      <button class="go" type="submit" data-uk="Показати добірку">Show my shortlist</button>
+    </div>
+  </form>
   <noscript><p>Увімкни JavaScript для підбору. Enable JavaScript to find games.</p></noscript>
   <p id="status" hidden role="status"></p>
   <button id="retry" hidden type="button" data-uk="Повторити завантаження">Retry loading</button>
   <section id="selection" hidden aria-labelledby="results-title">
-    <header class="selection-head"><h2 id="results-title" tabindex="-1" data-uk="Ігри для твого вечора">Games for your table</h2><p id="count" role="status"></p></header>
+    <header class="selection-head"><h2 id="results-title" tabindex="-1" data-uk="Ігри для твого вечора">Games for your table</h2><p id="count" role="status"></p><a href="#setup-title" data-uk="Змінити умови гри">Change table settings</a></header>
     <div class="workspace">
-      <section class="quiz-panel" aria-labelledby="refine-title">
-        <h3 id="refine-title" data-uk="Які ігри тобі до вподоби?">What do you like to play?</h3>
-        <p id="refine-help" data-uk="Добірка вже готова. Хочеш підлаштувати її під свій смак? Кожна відповідь допомагає визначити, які ігри підняти вище.">Your shortlist is ready. Want a closer match? Each answer helps decide which games move up your list.</p>
-        <button type="button" class="refine-button" id="refine" data-uk="Уточнити мій смак">Refine my picks</button>
-        <div id="quiz" hidden>
+      <section class="quiz-panel" id="preferences" aria-labelledby="refine-title">
+        <h3 id="refine-title" data-uk="Що вам до смаку?">What does your group enjoy?</h3>
+        <p id="refine-help" data-uk="Ці запитання змінюють порядок ігор у добірці. Можна пропустити будь-яке або одразу перейти до ігор.">These questions change the order of your shortlist. Skip any question or go straight to your games.</p>
         <div class="question-area"><p id="step"></p><h3 id="question" tabindex="-1"></h3><p id="hint"></p></div>
         <div class="answers" id="answers">
           <button type="button" data-answer="y" data-uk="Так">Yes</button>
@@ -81,28 +87,31 @@
         </div>
         <div class="quiz-actions">
           <button type="button" id="back" hidden data-uk="Назад">Back</button>
-          <button type="button" id="finish" data-uk="До моєї добірки">See my picks</button>
+          <button type="button" id="finish" data-uk="Завершити й переглянути ігри">Finish and see my picks</button>
           <button type="button" id="restart" hidden data-uk="Пройти ще раз">Start again</button>
 
         </div>
-        <p id="feedback" role="status"></p></div>
+        <p id="feedback" role="status"></p>
       </section>
       <div class="results" id="list" tabindex="-1">
         <h3 class="list-title" data-uk="Добірка ігор">Your shortlist</h3>
         <button type="button" id="clear" hidden data-uk="Скинути умови гри">Clear table settings</button>
+        <details class="rank-settings"><summary data-uk="Налаштування добірки">Shortlist settings</summary>
         <div class="result-controls">
-          <label class="model"><input type="checkbox" id="model"><span data-uk="Урахувати ML-модель">Include the ML model</span></label>
+          <label class="model"><input type="checkbox" id="model" checked><span data-uk="Урахувати ML-модель">Include the ML model</span></label>
           <label class="limit"><span data-uk="Показати">Show</span><span class="select-shell"><select id="limit"><option>5</option><option selected>10</option><option>15</option><option>20</option></select></span></label>
         </div>
+        </details>
         <ol id="games"></ol>
       </div>
     </div>
   </section>
-  <section class="method" id="method"><h2 data-uk="Як працює підбір">How the ranking works</h2>
-    <p data-uk="У моїй дипломній базі 30 224 настільні гри з BoardGameGeek. Спочатку система залишає ігри, які відповідають твоїм умовам. Після кожної відповіді вона перераховує бали й обирає наступне запитання за тим, як добре воно розділяє перших 200 кандидатів.">My thesis catalogue contains 30,224 games from BoardGameGeek. The finder filters games to fit your table, updates their scores after each answer, and picks the next question by how well it separates the leading 200 candidates.</p>
-    <p data-uk="Перемикач запускає навчену модель градієнтного бустингу. Її прогноз за 94 характеристиками гри дає 30% оцінки. Решта 70% — відповіді та початковий рейтинг. Для навчання я використовувала синтетичні сценарії.">The optional gradient boosting model scores each game from 94 catalogue features. Its prediction supplies 30% of the final score. Your answers and the starting rank supply the other 70%. I trained the model on synthetic preference scenarios.</p>
+  <details class="method" id="method">
+    <summary data-uk="Про дипломну та алгоритм підбору">About the thesis and the ranking algorithm</summary>
+    <p data-uk="Для бакалаврської роботи із системного аналізу я побудувала систему рекомендацій на даних BoardGameGeek. Спочатку система залишає ігри, які відповідають твоїм умовам. Після кожної відповіді вона перераховує бали й обирає наступне запитання за тим, як добре воно розділяє перших 200 кандидатів.">For my bachelor’s thesis in systems analysis, I built this recommender using BoardGameGeek data. The finder filters games to fit your table, updates their scores after each answer, and picks the next question by how well it separates the leading 200 candidates.</p>
+    <p data-uk="Навчена модель оцінює кожну гру за 94 характеристиками й дає 30% підсумкового бала. Решта 70% — початковий рейтинг і твої відповіді. Для навчання я використовувала синтетичні сценарії. У налаштуваннях добірки можна вимкнути модель і порівняти результат.">The gradient boosting model scores each game using 94 features and supplies 30% of the final score. The starting rank and your answers supply the other 70%. I trained the model on synthetic scenarios. Turn it off in the shortlist settings to compare the results.</p>
     <a href="https://github.com/perebendya/ai-automation-portfolio/tree/main/board-game-finder" data-uk="Код, модель і запуск на Python">Source code, model and Python app</a>
-  </section>
+  </details>
 </main>
 <footer id="project-footer" class="footer project-footer">
   <div class="wrap">
@@ -110,5 +119,5 @@
     <a href="index.html#projects" data-site-link data-uk="Усі проєкти">All projects</a>
   </div>
 </footer>
-<script src="portfolio.js?v=3"></script><script type="module" src="board-game-finder/site.js?v=3"></script>
+<script src="portfolio.js?v=3"></script><script type="module" src="board-game-finder/site.js?v=4"></script>
 </body></html>

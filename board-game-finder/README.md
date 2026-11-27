@@ -1,6 +1,6 @@
 # Board Game Finder
 
-I built this recommender for my bachelor’s thesis in System Analysis. Choose a table size, time budget and complexity, then answer questions about the games you enjoy. Both the website and the Python app use the full thesis snapshot of **30,224 board games**, the same 60 questions and the same trained model.
+I built this recommender for my bachelor’s thesis in System Analysis. Choose a table size and time budget to see games that fit. Optional preference questions then reorder the shortlist. Both the website and the Python app use the full thesis snapshot of **30,224 board games**, the same 60 questions and the same trained model.
 
 [Find a board game](https://perebendya.github.io/ai-automation-portfolio/boardgames.html?lang=en) · [Підібрати настільну гру](https://perebendya.github.io/ai-automation-portfolio/boardgames.html?lang=uk)
 
@@ -9,7 +9,7 @@ I built this recommender for my bachelor’s thesis in System Analysis. Choose a
 1. The finder filters the catalogue by player count, time, complexity and minimum BoardGameGeek Bayesian rating. A game with unknown playing time cannot pass a time limit.
 2. Every eligible game starts with a score based on BGG rank, vote count and Bayesian rating. After each answer, matches gain points and mismatches lose points. Skipping a question leaves scores intact.
 3. The quiz uses Shannon entropy to choose a question that separates the leading 200 candidates. It skips questions with no information gain and avoids redundant group-size questions once the player count is fixed. You can stop early, undo answers, or answer up to twelve.
-4. The optional histogram gradient boosting model evaluates each game’s 94 static features. The final ranking combines the normalized quiz score (70%) with the normalized model score (30%). Each result includes a link to the original BGG entry and shows relevant game characteristics when available.
+4. The website includes the model by default. You can turn it off in the shortlist settings to compare rankings. The histogram gradient boosting model evaluates each game’s 94 static features. The final ranking combines the normalized quiz score (70%) with the normalized model score (30%). Each result includes a link to the original BGG entry and shows relevant game characteristics when available.
 
 ## Run locally
 
