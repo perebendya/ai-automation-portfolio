@@ -46,7 +46,8 @@
 :root { --paper:#f5f6f4; --surface:#fffefa; --ink:#21343d; --muted:#51646b; --line:#c7d1d2; --pine:#274350; --pine-soft:#e3ebeb; --focus:#ad571f; }
 .opening { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,.85fr); align-items:center; gap:clamp(2rem,6vw,6rem); padding:clamp(1.75rem,4.5vw,4rem) 0; }
 .intro { padding:0; max-width:57ch; }
-.intro h1 { max-width:13ch; }
+.intro h1 { max-width:16ch; }
+.intro h1 em { color:#356681; font-weight:400; }
 .intro > p:not(.kicker) { color:var(--muted); margin:1rem 0 .65rem; font-size:clamp(1.02rem,1.5vw,1.19rem); }
 .intro a, .method a { font-weight:600; }
 .setup { color:#fffefa; background:#233d47; border-radius:.45rem 1.6rem .45rem .45rem; padding:clamp(1.25rem,2.8vw,2.25rem); }
