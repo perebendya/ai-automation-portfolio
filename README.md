@@ -25,6 +25,8 @@ I built the recruiter tool end to end, from importing and updating profiles to t
 - **Eligibility** — exact filters narrowed the pool by criteria such as when someone changed jobs.
 - **Ranking** — pgvector ranked the remaining profiles by the meaning of their experience. I checked search results with recruiters using their own queries.
 
+![Fictional search for employee onboarding experience. Bohdan and Marta changed companies in the past 90 days. Marta ranks first by experience because her skills include new hire orientation. Lida lists onboarding directly but changed companies 112 days ago and appears in neither list.](assets/candidate-search-en.png)
+
 ## Weekly moderation report in n8n
 
 I automated the weekly review of Slack alerts. JavaScript merged duplicates and counted cases. Claude summarized moderator comments and reviewed unmarked text and audio alerts for possible false positives.
