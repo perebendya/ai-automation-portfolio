@@ -13,12 +13,9 @@ I built an MCP platform the growth team used daily. An AI agent turned a Figma d
 - **Before release** — automated checks caught broken screen links and missing translation mappings.
 - **In production** — the team walked through the tested funnel, approved it and published it. They could use the same platform to update it later.
 
-<details>
-<summary>See a fictional funnel from design to release</summary>
+![Funnel approval screen showing the old and new destinations after the reading-goal question, both button translations, and the separate control for authorizing a production write.](assets/funnel-review-en.png)
 
-![A design for a reading quiz becomes a connected quiz and subscription paywall, then reaches production after testing and approval.](funnel-example.png)
-
-</details>
+*Recreated approval screen for a fictional reading quiz. After choosing a goal, readers will now see book picks before the paywall. The team can check the new route and button copy before publishing.*
 
 ## Candidate search in plain language
 
@@ -27,7 +24,9 @@ I built the recruiter tool end to end, from importing and updating profiles to t
 - **Eligibility** — exact filters narrowed the pool by criteria such as when someone changed jobs.
 - **Ranking** — pgvector ranked the remaining profiles by the meaning of their experience. I checked search results with recruiters using their own queries.
 
-![Fictional search for employee onboarding experience. Bohdan and Marta changed companies in the past 90 days. Marta ranks first by experience because her skills include new hire orientation. Lida lists onboarding directly but changed companies 112 days ago and appears in neither list.](assets/candidate-search-en.png)
+![Recruiter search for people who changed jobs in the last 90 days and have onboarding experience. Marta Lisova is selected in the results. Her profile on the right shows her work with new hires and a recent company move.](assets/candidate-search-en.png)
+
+*Recreated search screen. All profiles and companies in this example are fictional.*
 
 ## Weekly moderation report in n8n
 
