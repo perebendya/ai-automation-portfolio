@@ -3,7 +3,7 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title data-uk="Проєкти · Дарія Кукла">Projects · Dariia Kukla</title>
   <meta name="description" content="Explore Dariia Kukla’s AI automation projects, interactive demos and work at OBRIO." data-uk-description="Проєкти Дарії Кукли з AI-автоматизації, інтерактивні демо й робочі кейси з OBRIO.">
-  <link rel="stylesheet" href="demo.css"><link rel="stylesheet" href="projects.css">
+  <link rel="stylesheet" href="demo.css"><link rel="stylesheet" href="projects.css?v=3">
 </head><body>
 <a class="skip" href="#projects" data-uk="До проєктів">Skip to projects</a>
 <header class="masthead"><div class="wrap">
@@ -23,7 +23,7 @@
     <p class="intro" data-uk="Я збираю інструменти, які беруть на себе ручну роботу. Тут можна підібрати квартиру за фото, зібрати тижневий звіт із повідомлень модераторів або вибрати настільну гру для компанії.">I build tools that take care of repetitive work. Here you can find a flat using its photos, turn a week of moderator messages into a report, or find a board game for your group.</p>
   </header>
   <section id="projects" aria-labelledby="demo-heading">
-    <h2 id="demo-heading" data-uk="Інтерактивні демо">Interactive demos</h2>
+    <h2 id="demo-heading" data-uk="Основні проєкти">Featured projects</h2>
     <div class="project-grid">
       <a class="project-card" href="rental.html" data-site-link>
         <div class="card-art rental-art"><img src="assets/rental/c-1.webp" alt="" fetchpriority="high"></div>
@@ -45,7 +45,7 @@
       <a class="project-card" href="boardgames.html" data-site-link>
         <div class="card-art game-art" aria-hidden="true"><span class="die five"></span><span class="die two"></span></div>
         <div class="card-copy"><h3 data-uk="Підбір настільної гри">Board Game Finder</h3>
-          <p data-uk="Дипломна із системного аналізу. Підбери гру за чотири запитання й подивись, як модель змінює трійку рекомендацій.">My System Analysis thesis. Answer four questions and see how a machine-learning model changes the shortlist.</p>
+          <p data-uk="Для дипломної я побудувала систему рекомендацій на 30 224 настільних іграх. Вкажи, скільки вас і скільки є часу, щоб отримати добірку.">I built a recommender for my thesis using 30,224 board games. Choose your group size and time budget to get a shortlist.</p>
           <span class="card-action" data-uk="Підібрати гру">Find a board game</span>
         </div>
       </a>
@@ -53,15 +53,25 @@
   </section>
   <section class="casework" aria-labelledby="case-heading">
     <h2 id="case-heading" data-uk="Робочі кейси з OBRIO">Projects at OBRIO</h2>
-    <p data-uk="Через політику OBRIO я не можу надавати доступ до робочих версій внутрішніх інструментів. Для портфоліо я відтворила окремі сценарії на вигаданих даних.">OBRIO’s policy prevents me from sharing live demos of its internal tools. I use fictional data to show how they work.</p>
-    <details id="funnels"><summary><span data-uk="Від макета Figma до воронки підписки">From a Figma design to a subscription funnel</span><small>Figma / MCP</small></summary>
-      <p data-uk="Я зібрала більшу частину внутрішньої MCP-платформи. Агент перетворював макет на квіз із переходами між екранами й пейволом. Автоматичні перевірки знаходили зламані переходи й пропущені ключі перекладу ще до релізу.">I built most of the internal MCP platform. An agent turned a design into a quiz with connected screens and a paywall. Automated checks caught broken links and missing translation keys before release.</p>
-    </details>
-    <details id="search"><summary><span data-uk="Пошук кандидатів звичайною мовою">Candidate search in plain language</span><small>PostgreSQL / pgvector</small></summary>
-      <p data-uk="Я зібрала інструмент від імпорту профілів до пошукового інтерфейсу. Рекрутерка могла попросити знайти людей, які нещодавно змінили роботу й мають досвід в онбордингу. Спочатку пошук перевіряв обов’язкові умови, потім ранжував профілі за змістом досвіду.">I built the tool end to end, from importing profiles to the search interface. Recruiters could ask for people who had recently changed jobs and worked on onboarding. The search applied the required filters first, then ranked profiles by the meaning of their experience.</p>
-    </details>
+    <p data-uk="Обидва сценарії я відтворила на вигаданих даних для портфоліо.">I recreated these two scenarios with fictional data for my portfolio.</p>
+    <article id="funnels">
+      <h3 data-uk="Від макета Figma до воронки підписки">From a Figma design to a subscription funnel</h3>
+      <p data-uk="Я зібрала більшу частину MCP-платформи для команди зростання. У цьому прикладі редакторка перевіряє, куди веде кнопка у квізі про читання і як вона підписана двома мовами.">I built most of the MCP platform for the growth team. In this example, an editor checks where a button leads in a reading quiz and reviews its label in two languages.</p>
+      <figure>
+        <div class="screen-scroll" tabindex="0" role="group" aria-label="Screenshot"><img class="case-screen" src="assets/funnel-review-en.png" data-uk-src="assets/funnel-review-uk.png" alt="Reading quiz review showing the new route to book picks and the button text in two languages." data-uk-alt="Погодження квіза про читання. Видно новий перехід до добірки книжок і текст кнопки двома мовами." width="2840" height="1504" loading="lazy"></div>
+        <figcaption class="pan-hint" data-uk="Проведи по зображенню, щоб роздивитися весь екран.">Swipe across the screenshot to see the full screen.</figcaption>
+      </figure>
+    </article>
+    <article id="search">
+      <h3 data-uk="Пошук кандидатів звичайною мовою">Candidate search in plain language</h3>
+      <p data-uk="Я зібрала інструмент від імпорту профілів до пошуку. На екрані рекрутерка шукає людей, які нещодавно змінили роботу й мають досвід онбордингу. У профілі праворуч вона бачить, чому кандидатка потрапила до добірки.">I built the tool from profile import through search. Here a recruiter looks for people who recently changed jobs and worked on onboarding. The profile on the right shows why the selected candidate made the shortlist.</p>
+      <figure>
+        <div class="screen-scroll" tabindex="0" role="group" aria-label="Screenshot"><img class="case-screen" src="assets/candidate-search-en.png" data-uk-src="assets/candidate-search-uk.png" alt="Fictional search results with a selected candidate’s onboarding experience and recent job change." data-uk-alt="Список вигаданих кандидатів. Праворуч видно досвід онбордингу та недавній перехід обраної кандидатки." width="2768" height="1664" loading="lazy"></div>
+        <figcaption class="pan-hint" data-uk="Проведи по зображенню, щоб роздивитися весь екран.">Swipe across the screenshot to see the full screen.</figcaption>
+      </figure>
+    </article>
   </section>
 </main>
 <footer class="footer"><div class="wrap"><p data-uk="Дарія Кукла · Київ">Dariia Kukla · Kyiv</p><div class="profile-links"><a href="https://github.com/perebendya/ai-automation-portfolio">GitHub</a><a href="https://www.linkedin.com/in/dariia-kukla">LinkedIn</a></div></div></footer>
-<script src="portfolio.js"></script>
+<script src="portfolio.js?v=3"></script>
 </body></html>

@@ -5,37 +5,9 @@
   let saved;
   try { saved = localStorage.getItem("dariia-portfolio-language"); } catch {}
   let language = choose(requested) || choose(saved) || (navigator.language.startsWith("uk") ? "uk" : "en");
-  // Project cards share the language switcher with the apps they launch.
-  const finderCard = document.querySelector('.project-card[href="boardgames.html"]');
-  if (finderCard) {
-    const sectionTitle = finderCard.closest("section").querySelector("h2");
-    sectionTitle.textContent = "Interactive projects";
-    sectionTitle.dataset.uk = "Інтерактивні проєкти";
-    const description = finderCard.querySelector(".card-copy p");
-    description.textContent = "My System Analysis thesis. Find a game for your group in a catalogue of 30,224 board games.";
-    description.dataset.uk = "Дипломна із системного аналізу. Знайди гру для своєї компанії в каталозі з 30 224 настільних ігор.";
-  }
-  const caseScreens = [];
-  for (const {id, file, width, height, en, uk} of [
-    {id: "funnels", file: "funnel-review", width: 2840, height: 1504,
-      en: "Reading quiz review showing the book picks step before the paywall and the updated button copy.",
-      uk: "Погодження зміни у квізі про читання. Добірка книжок з’являється перед пейволом, текст кнопки оновлено."},
-    {id: "search", file: "candidate-search", width: 2768, height: 1664,
-      en: "Fictional search results for a job change in the last 90 days and onboarding experience, with a matching profile selected.",
-      uk: "Пошук за зміною роботи за 90 днів і досвідом онбордингу. Поруч зі списком видно профіль вигаданої кандидатки."}
-  ]) {
-    const card = document.getElementById(id);
-    if (!card?.matches(".casework details")) continue;
-    const image = document.createElement("img");
-    image.className = "case-screen";
-    image.width = width;
-    image.height = height;
-    image.loading = "lazy";
-    image.decoding = "async";
-    card.append(image);
-    card.open = true;
-    caseScreens.push({image, file, en, uk});
-  }
+  const caseScreens = Array.from(document.querySelectorAll("img[data-uk-src]"), image => ({
+    image, en: [image.getAttribute("src"), image.alt], uk: [image.dataset.ukSrc, image.dataset.ukAlt]
+  }));
   const translations = Array.from(document.querySelectorAll("[data-uk]"), node => ({
     node, en: node.textContent, uk: node.dataset.uk
   }));
@@ -43,12 +15,25 @@
   const englishDescription = meta.content;
   const toggle = document.getElementById("lang");
 
+  const narrowScreen = window.matchMedia("(max-width: 640px)");
+  function positionScreens() {
+    for (const {image} of caseScreens) {
+      const frame = image.parentElement;
+      // Start with the selected record in view, with the rest available by swiping.
+      frame.scrollLeft = narrowScreen.matches ? (frame.scrollWidth - frame.clientWidth) * .55 : 0;
+    }
+  }
+  narrowScreen.addEventListener("change", positionScreens);
+  positionScreens();
+
   function render() {
     const uk = language === "uk";
     document.documentElement.lang = language;
     for (const screen of caseScreens) {
-      screen.image.alt = screen[language];
-      screen.image.src = "assets/" + screen.file + "-" + language + ".png";
+      const [src, alt] = screen[language];
+      if (screen.image.getAttribute("src") !== src) screen.image.src = src;
+      screen.image.alt = alt;
+      screen.image.parentElement.setAttribute("aria-label", uk ? "Скріншот сценарію" : "Scenario screenshot");
     }
     for (const entry of translations) entry.node.textContent = entry[language];
     document.querySelectorAll("[data-only]").forEach(node => { node.hidden = node.dataset.only !== language; });

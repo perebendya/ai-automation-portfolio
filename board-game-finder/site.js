@@ -4,6 +4,7 @@ const tr = (en, uk) => lang() === "uk" ? uk : en;
 const number = value => new Intl.NumberFormat(lang()).format(value);
 const rules = new Map();
 let worker, request = 0, result, maxQuestions = 12, ready = false;
+let started = false, refining = false, focusTarget = null, lastAnswer = null;
 let history = [], finished = false, failed = false, progress = null;
 
 function textElement(tag, text, className) {
@@ -20,7 +21,7 @@ function filters() {
 }
 
 function update() {
-  if (!ready) return;
+  if (!ready || !started) return;
   request++;
   const custom = el("players").value === "custom";
   el("custom-size").hidden = !custom;
@@ -80,24 +81,45 @@ function gameCard(g) {
 
 function render() {
   if (!ready) {
+    el("status").hidden = !started && !failed;
     el("status").textContent = failed ? tr("The catalogue could not load.", "Каталог не завантажився.") :
       tr("Loading the catalogue…","Завантажую каталог…") + (progress ? " " + number(progress.loaded) + " / " + number(progress.total) : "");
     return;
   }
-  if (!result) return;
+  if (!started || !result) return;
   const {count, next, results} = result;
   const q = rules.get(next);
-  el("step").textContent = !count ? tr("Your filters","Умови гри") : q ?
-    tr(`Question ${history.length + 1} of ${maxQuestions}`,`Питання ${history.length + 1} з ${maxQuestions}`) : tr("Quiz complete","Підбір завершено");
-  el("question").textContent = !count ? tr("No games fit these conditions. Try a wider time or rating range.","За цих умов ігор немає. Спробуй збільшити час або знизити мінімальний рейтинг.") : q ? q[lang() === "uk" ? "question" : "en"] :
-    tr("Your shortlist is ready.","Твоя добірка готова.");
+  const top = results[0];
+  const canRefine = count > 0 && (refining || !!q);
+  el("refine").closest("section").hidden = !canRefine;
+  el("selection").classList.toggle("empty-list", !canRefine);
+  el("list").querySelector(".result-controls").hidden = !count;
+  el("refine").hidden = refining;
+  el("refine-help").hidden = refining;
+  el("quiz").hidden = !refining;
+  el("step").textContent = q ? tr(`Question ${history.length + 1} of up to ${maxQuestions}`, `Запитання ${history.length + 1} із максимум ${maxQuestions}`) : tr("Quiz complete","Опитування завершено");
+  el("question").textContent = q ? q[lang() === "uk" ? "question" : "en"] : tr("Your shortlist is ready.","Твоя добірка готова.");
+  const hints = {
+    is_light_game: tr("Think of rules you can explain in a few minutes.", "Уяви гру, правила якої можна пояснити за кілька хвилин."),
+    is_medium_weight: tr("A few rules to learn and room to plan your moves.", "Треба трохи часу на правила, зате є простір планувати ходи."),
+    is_heavy_game: tr("These games reward learning detailed rules and planning several moves ahead.", "У таких іграх детальні правила і треба продумувати кілька ходів наперед.")
+  };
+  el("hint").textContent = q ? hints[q.feature] || tr("Choose what sounds fun for this evening. Skip leaves your ranking as it is.", "Обери те, чого хочеться цього вечора. Якщо пропустиш, порядок ігор збережеться.") : "";
   el("answers").hidden = !q;
   el("answers").inert = false;
   el("back").hidden = !history.length;
-  el("restart").hidden = !!q || !count || (!history.length && !finished);
+  el("restart").hidden = !!q || !count;
   el("finish").hidden = !q;
   el("clear").hidden = !!count;
-  el("count").textContent = tr("Games matching your filters · ","Ігор за твоїми умовами · ") + number(count);
+  let feedback = "";
+  if (lastAnswer && top) {
+    if (lastAnswer.value === "s") feedback = tr("Question skipped. Your ranking stayed the same.", "Запитання пропущено. Порядок ігор зберігся.");
+    else if (lastAnswer.top === top.id) feedback = tr("List updated. Still first · ", "Добірку оновлено. Досі на першому місці · ") + top.name;
+    else feedback = tr("New first pick · ", "Нова гра на першому місці · ") + top.name;
+  }
+  el("feedback").textContent = feedback;
+  el("count").textContent = count ? tr("Games that fit your table · ", "Ігор за твоїми умовами · ") + number(count) :
+    tr("No games fit these settings. Allow more time or lower the minimum rating.", "За цих умов ігор немає. Збільш час на партію або знизь мінімальний рейтинг.");
   el("games").replaceChildren(...results.map(gameCard));
 }
 
@@ -105,12 +127,11 @@ function load() {
   if (worker) worker.terminate();
   failed = false; ready = false; progress = null;
   el("retry").hidden = true;
-  el("status").hidden = false;
-  el("finder").hidden = true;
+  el("status").hidden = !started;
   render();
   function error() {
     failed = true; ready = false;
-    el("finder").hidden = true;
+    el("selection").hidden = true;
     el("status").hidden = false;
     el("retry").hidden = false;
     render();
@@ -132,28 +153,64 @@ function load() {
     if (data.type === "ranked" && data.id === request) {
       const wasInAnswers = el("answers").contains(document.activeElement);
       result = data;
-      el("status").hidden = true; el("finder").hidden = false;
+      el("status").hidden = true; el("selection").hidden = false;
       render();
-      if (wasInAnswers && !data.next) el("question").focus();
+      if (focusTarget) { el(focusTarget).focus(); focusTarget = null; }
+      else if (wasInAnswers) el("question").focus({preventScroll:true});
     }
   };
   worker.postMessage({type:"load"});
 }
 
-for (const id of ["players","minutes","rating","weight","customPlayers","limit","model"])
-  el(id).addEventListener("change", update);
+function resetAnswers() {
+  history = []; finished = false; refining = false; lastAnswer = null;
+}
+
+for (const id of ["players","minutes","rating","weight","customPlayers"]) {
+  el(id).addEventListener("input", () => {
+    request++;
+    el("custom-size").hidden = el("players").value !== "custom";
+    el("customPlayers").disabled = el("custom-size").hidden;
+    el("selection").hidden = true;
+    el("status").hidden = !failed;
+    started = false; result = null; focusTarget = null;
+    resetAnswers();
+  });
+}
+el("customPlayers").required = true;
+el("customPlayers").disabled = el("players").value !== "custom";
+el("finder").addEventListener("submit", event => {
+  event.preventDefault();
+  started = true; focusTarget = "results-title";
+  if (failed) load();
+  else if (ready) update();
+  else render();
+});
+for (const id of ["model","limit"]) el(id).addEventListener("change", () => {
+  lastAnswer = null; update();
+});
+el("refine").addEventListener("click", () => {
+  refining = true; render(); el("question").focus();
+});
 el("answers").addEventListener("click", e => {
   const button = e.target.closest("[data-answer]");
   if (!button || !result?.next || el("answers").inert) return;
+  lastAnswer = {top:result.results[0]?.id, value:button.dataset.answer};
   history.push({feature:result.next, value:button.dataset.answer});
   update();
 });
-el("finish").addEventListener("click", () => { finished = true; update(); el("results-title").focus(); });
-el("back").addEventListener("click", () => { history.pop(); finished = false; update(); el("question").focus(); });
-el("restart").addEventListener("click", () => { history = []; finished = false; update(); el("question").focus(); });
+el("finish").addEventListener("click", () => {
+  finished = true; lastAnswer = null; focusTarget = "list"; update();
+});
+el("back").addEventListener("click", () => {
+  history.pop(); finished = false; lastAnswer = null; focusTarget = "question"; update();
+});
+el("restart").addEventListener("click", () => {
+  resetAnswers(); refining = true; focusTarget = "question"; update();
+});
 el("clear").addEventListener("click", () => {
   for (const id of ["players","minutes","weight","rating"]) el(id).value = "0";
-  finished = false; update(); el("players").focus();
+  resetAnswers(); focusTarget = "results-title"; update();
 });
 el("retry").addEventListener("click",load);
 document.addEventListener("portfolio-language",render);
