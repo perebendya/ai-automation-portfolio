@@ -52,15 +52,11 @@
   background-position:center,top left,top right,bottom left,bottom right; background-size:100% 100%,50% 50%,50% 50%,50% 50%,50% 50%; background-repeat:no-repeat; }
 .die.two { transform:translateY(.7rem) rotate(14deg); background-image:radial-gradient(circle at 27% 27%,#253e30 0 8%,transparent 9%),radial-gradient(circle at 73% 73%,#253e30 0 8%,transparent 9%); }
 
-.casework .case-example-link {
-  display:inline-block;
-  margin:0 .3rem 1.25rem;
-  padding:.55rem .85rem;
+.casework .case-screen {
+  display:block;
+  width:100%;
+  height:auto;
+  margin:0 0 1.25rem;
   border:1px solid var(--line);
-  border-radius:6px;
-  background:var(--surface);
-  color:var(--pine);
-  font-weight:600;
-  text-underline-offset:.2em;
+  border-radius:8px;
 }
-.casework .case-example-link:hover { border-color:var(--pine); }
