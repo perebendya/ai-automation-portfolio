@@ -1,16 +1,41 @@
 <!doctype html>
-<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Weekly alert report · Dariia Kukla</title>
-<style>
-:root{font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#1e3330;background:#f6f5ef;font-size:16px;line-height:1.5}*{box-sizing:border-box}body{margin:0}main,header>div{width:min(1120px,92%);margin:auto}header{border-bottom:1px solid #ccd2c9;background:#fffefa}header>div{display:flex;justify-content:space-between;align-items:center;padding:15px 0;font-weight:650}a{color:#176254;text-underline-offset:3px}h1,h2,p{margin:0}h1{font-family:Georgia,serif;font-weight:500;font-size:clamp(2.35rem,6vw,4.8rem);line-height:1.05;letter-spacing:-.055em;margin:36px 0 12px}h2{font-size:1.25rem;margin-bottom:12px}main>p{max-width:640px;color:#455b54}.settings,.panels,footer{margin:24px 0}.settings{display:flex;flex-wrap:wrap;align-items:end;gap:14px}.settings label{display:grid;gap:4px;font-size:.85rem;font-weight:650}button,select{font:inherit;padding:10px 15px;border:1px solid #8caaa0;border-radius:8px;color:inherit;background:white;cursor:pointer}button.run{background:#155948;border-color:#155948;color:white;font-weight:650}.panels{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}.panel{background:#fffefa;border:1px solid #cbd4c9;border-radius:14px;padding:22px}.item{border-top:1px solid #dae0d8;padding:9px 0;font-size:.93rem}.item small,figcaption,small,.muted{color:#52665e}.id{font:600 .8rem ui-monospace,monospace;color:#176254}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:12px 0 17px}.stats>div{background:#e6f2e8;border-radius:6px;padding:10px}.stats strong{display:block;font-size:1.7rem;line-height:1.15}.stats span{font-size:.76rem}.draft{margin:14px 0;border-left:3px solid #d69f52;padding-left:12px}.draft strong{display:block;font-size:.85rem;margin-bottom:4px}section button.small{font-size:.85rem;padding:5px 9px;margin-top:4px}details{padding:12px 0}summary{font-weight:650;cursor:pointer}details p{margin:8px 0}footer{border-top:1px solid #cbd4c9;padding:15px 0 25px}.empty{padding:16px 0;color:#52665e}.action{display:inline-block;font-weight:650}button:focus-visible,select:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #be7e20;outline-offset:3px}@media(max-width:700px){.panels{grid-template-columns:1fr}.panel{padding:16px}header>div{gap:10px;font-size:.9rem}.settings{align-items:stretch}.settings>*{flex:auto}h1{margin-top:24px}}
+<html lang="en"><head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Turn fictional moderation alerts into a weekly report. Inspect the counts, change a reaction, and try the downloadable n8n workflow.">
+  <title>Weekly moderation report · Dariia Kukla</title>
+  <link rel="stylesheet" href="demo.css"><link rel="stylesheet" href="report.css">
+</head><body>
+<a class="skip" href="#week">Skip to report controls</a>
+<header class="masthead"><div class="wrap">
+  <a class="signature" href="https://github.com/perebendya/ai-automation-portfolio"><span class="monogram" aria-hidden="true">dk</span><span>Dariia Kukla</span></a>
+  <nav aria-label="Portfolio"><a href="rental.html?lang=en">Rental assistant</a><a href="https://github.com/perebendya/ai-automation-portfolio">Portfolio ↗</a></nav>
+</div></header>
+<main class="wrap">
+  <section class="hero" aria-labelledby="title">
+    <div><p class="kicker">n8n workflow</p><h1 id="title">Weekly moderation<br><em>report</em></h1>
+    <p class="intro">Six fictional alerts, one week of moderator notes. Run the report to see what needs review, then change a reaction to see how the numbers move.</p></div>
+    <figure class="mix"><figcaption><strong>Incoming alerts</strong><span id="mix-period"></span></figcaption>
+      <ul id="mix-bars" aria-label="Messages by alert type"></ul>
+    </figure>
+  </section>
+  <div class="settings">
+    <label for="week">Report period<select id="week"><option value="pilot">6–12 November</option><option value="followup">13–19 November</option></select></label>
+    <button class="primary" id="run" type="button">Run report</button>
+    <a class="download" href="weekly-report.json" download>Download n8n workflow <span aria-hidden="true">↓</span></a>
+  </div>
+  <div id="announcement" class="sronly" role="status"></div>
+  <div class="panels">
+    <section class="panel results-panel" aria-labelledby="report-heading"><div class="panel-head"><h2 id="report-heading" tabindex="-1">Weekly report</h2><span id="run-state"></span></div><div id="out"></div></section>
+    <section class="panel inbox-panel" aria-labelledby="inbox-heading"><div class="panel-head"><h2 id="inbox-heading">Alert messages</h2><span>Sample inbox</span></div><div id="inbox"></div></section>
+  </div>
+  <section class="method" aria-label="Workflow notes">
+    <details><summary>How the original workflow worked</summary><p>The original workflow read Slack alerts, reactions and replies. JavaScript calculated the counts. Claude summarized moderator notes and checked unmarked text and audio alerts for possible false positives.</p><p>Here, each sample week includes a saved local model draft. Changing a reaction updates the counts and hides the saved draft until the original data is restored.</p></details>
+    <details><summary>Run it in n8n</summary><p>Download the workflow, select <b>Import from File</b> in n8n, then <b>Execute workflow</b>. Open <b>Review report</b> for the four sections. The default run works offline with fictional messages.</p><p>In <b>Fictional messages</b>, select <code>followup</code> for the second week or <code>local-llm</code> to draft a summary with Ollama. For that option, serve <code>qwen2.5:0.5b</code> locally and set the HTTP node address if n8n runs in a container.</p></details>
+  </section>
+</main>
+<footer class="footer"><div class="wrap"><p>Weekly moderation report · Dariia Kukla</p><a href="https://github.com/perebendya/ai-automation-portfolio#weekly-moderation-report-in-n8n">Read the case study ↗</a></div></footer>
 
-.output{margin-bottom:22px}h3{margin:22px 0 5px;font-size:1rem}.output dl{margin:0}.output dl div{padding:6px 0;border-bottom:1px solid #dae0d8}.output dt{font-size:.83rem;color:#52665e}.output dd{margin:0}.item .muted{margin:4px 0}.settings small{align-self:center}@media(max-width:700px){.panels>section:nth-child(2){grid-row:1}}</style><header><div>Dariia Kukla <a href="https://github.com/perebendya/ai-automation-portfolio">Portfolio</a></div></header><main>
-<h1>Weekly moderation report</h1><p>Which alerts were false positives, and why? Run a week of fictional messages, then mark one alert and see its section change.</p>
-<div class="settings"><label>Report period<select id="week"><option value="pilot">6–12 November · sample week</option><option value="followup">13–19 November · sample week</option></select></label><button class="run" id="run">Run report</button><a href="weekly-report.json" download>Download n8n workflow</a></div>
-<div class="panels"><section class="panel"><h2>Alert messages</h2><div id="inbox"></div></section><section class="panel" aria-live="polite"><h2>Weekly report</h2><div id="out"></div></section></div>
-<details><summary>How this relates to the original workflow</summary><p>The original read Slack alerts, reactions and replies. JavaScript calculated counts for four sections. Claude summarized moderator notes and separately reviewed unmarked text and audio alerts for possible false positives.</p><p>This browser demo shows the offline report using sample messages and moderator notes. Unmarked items stay open for review. Each original sample week also includes a saved local model draft. Changing a reaction updates the counts and clears that draft.</p></details>
-<details><summary>Run it in n8n</summary><p>Download the workflow, select <b>Import from File</b> in n8n, then <b>Execute workflow</b>. Open <b>Review report</b> for the four sections. The default run works without accounts or keys for Slack or a model.</p><p>In <b>Fictional messages</b>, select <code>followup</code> for the second week or <code>local-llm</code> to draft a summary of moderator notes with Ollama. For that option, serve <code>qwen2.5:0.5b</code> locally and set the HTTP node address if n8n runs in a container.</p></details>
-</main><script>const samples={
+<script>const samples={
   "pilot": [
     {"id":"T1","kind":"Text","key":"t1","type":"Possible contact details","body":"The paint swatch on my desk is 445566.","note":"False positive: the digits are a paint colour.","thumb":true},
     {"id":"T2","kind":"Text","key":"t1","type":"Possible contact details","body":"The paint swatch on my desk is 445566."},
@@ -90,38 +115,123 @@ function savedDraft(week,messages) {
   return saved && JSON.stringify(saved.rows) === JSON.stringify(messages) ? saved.draft : null;
 }
 
-let messages;
+const kinds = ['Text', 'Audio', 'Photo', 'Expert blocks'];
+let messages = [];
+let hasRun = false;
+
+function drawMix() {
+  const counts = kinds.map(kind => messages.filter(row => row.kind === kind).length);
+  const max = Math.max(1, ...counts);
+  byId('mix-period').textContent = byId('week').selectedOptions[0].textContent;
+  byId('mix-bars').replaceChildren(...kinds.map((kind, i) => {
+    const item = el('li', '');
+    const track = el('span', '', 'bar-track');
+    const fill = el('span', '', 'bar-fill');
+    fill.style.width = (100 * counts[i] / max) + '%';
+    track.setAttribute('aria-hidden', 'true');
+    track.append(fill);
+    item.append(el('span', kind), track, el('span', String(counts[i]), 'bar-count'));
+    return item;
+  }));
+}
+
 function drawInbox() {
-  const inbox=byId('inbox'); inbox.replaceChildren();
-  for(const row of messages) {
-    const item=el('div','','item');
-    item.append(el('small',row.id+' · '+row.kind),el('p',row.body));
-    if(row.note) item.append(el('p','Thread · '+row.note,'muted'));
-    if(row.thumb) item.append(el('small','👍 Marked as a false positive'));
-    if(['T3','A3'].includes(row.id) && !row.thumb) {
-      const button=el('button','Mark as false positive','small');
-      button.onclick=()=>{row.thumb=true;drawInbox();drawReport()};item.append(button);
+  const inbox = byId('inbox');
+  inbox.replaceChildren();
+  for (const row of messages) {
+    const item = el('article', '', 'item');
+    const header = el('div', '', 'item-head');
+    header.append(el('span', row.id, 'item-id'), el('small', row.kind));
+    item.append(header, el('p', row.body));
+    if (row.note) item.append(el('p', 'Thread · ' + row.note, 'muted'));
+    if (['T3', 'A3'].includes(row.id)) {
+      const button = el('button', row.thumb ? 'Undo false positive' : 'Mark as false positive', 'mark');
+      button.type = 'button';
+      button.setAttribute('aria-label', button.textContent + ' · ' + row.id);
+      button.setAttribute('aria-pressed', String(Boolean(row.thumb)));
+      button.onclick = () => {
+        if (row.thumb) delete row.thumb;
+        else row.thumb = true;
+        button.textContent = row.thumb ? 'Undo false positive' : 'Mark as false positive';
+        button.setAttribute('aria-label', button.textContent + ' · ' + row.id);
+        button.setAttribute('aria-pressed', String(Boolean(row.thumb)));
+        drawReport(row.kind);
+        jump.hidden = false;
+        byId('announcement').textContent = row.id + (row.thumb ? ' marked as a false positive.' : ' mark removed.') + ' Weekly report updated.';
+      };
+      const jump = el('a', 'View updated report', 'jump');
+      jump.href = '#report-heading';
+      jump.hidden = true;
+      item.append(button, jump);
+    } else if (row.thumb) {
+      item.append(el('small', 'Marked as a false positive'));
     }
     inbox.append(item);
   }
 }
-function drawReport() {
-  const out=byId('out');out.replaceChildren();
-  const draft=savedDraft(byId('week').value,messages);
-  for(const s of summarize(messages)) {
-    const article=el('article','','output'),list=el('dl','');
-    article.append(el('h3',s.kind),list);
-    for(const [label,value] of reportLines(s)) {
-      const line=el('div','');line.append(el('dt',label),el('dd',value));list.append(line);
+
+function drawReport(changedKind) {
+  const out = byId('out');
+  const open = new Set([...out.querySelectorAll('.output[open]')].map(node => node.dataset.kind));
+  if (!hasRun) open.add('Text');
+  if (changedKind) open.add(changedKind);
+  hasRun = true;
+  const sections = summarize(messages);
+  const draft = savedDraft(byId('week').value, messages);
+  const metrics = el('div', '', 'metrics');
+  const totals = [
+    ['Distinct alerts', sections.reduce((n, s) => n + s.total, 0)],
+    ['False positives', sections.reduce((n, s) => n + s.falsePositives, 0)],
+    ['Awaiting review', sections.reduce((n, s) => n + s.review.length, 0)]
+  ];
+  for (const [label, n] of totals) {
+    const block = el('div', '', 'metric');
+    block.append(el('strong', String(n)), el('span', label));
+    metrics.append(block);
+  }
+  out.replaceChildren(metrics);
+  byId('run-state').textContent = byId('week').selectedOptions[0].textContent;
+  for (const section of sections) {
+    const article = el('details', '', 'output');
+    article.dataset.kind = section.kind;
+    article.open = open.has(section.kind);
+    const summary = el('summary', section.kind);
+    summary.append(el('span', section.total + (section.total === 1 ? ' distinct alert' : ' distinct alerts'), 'row-total'));
+    const list = el('dl', '');
+    for (const [label, value] of reportLines(section)) {
+      const line = el('div', '');
+      line.append(el('dt', label), el('dd', value));
+      list.append(line);
     }
+    article.append(summary, list);
     out.append(article);
   }
-  if(draft){
-    const detail=el('details','');
-    detail.append(el('summary','Read the saved model draft'),el('p',draft),el('small','Local Qwen output for the original sample week. The counts above come from code.'));
+  if (draft) {
+    const detail = el('details', '', 'draft');
+    detail.append(el('summary', 'Read the saved model draft'), el('p', draft), el('small', 'Generated locally with Qwen for this sample week. Counts are calculated in code.'));
     out.append(detail);
+  } else {
+    out.append(el('p', 'The sample changed. Undo the reaction to see its original model draft.', 'draft muted'));
   }
 }
-function loadWeek(){messages=samples[byId('week').value].map(row=>({...row}));drawInbox();byId('out').replaceChildren(el('p','Run the report to see the week by alert type.','muted'));}
-byId('week').onchange=loadWeek;byId('run').onclick=drawReport;loadWeek();
-</script></html>
+
+function loadWeek() {
+  hasRun = false;
+  messages = samples[byId('week').value].map(row => ({...row}));
+  drawMix();
+  drawInbox();
+  byId('run-state').textContent = 'Ready to run';
+  const empty = el('div', '', 'empty');
+  empty.append(el('strong', 'Your report for ' + byId('week').selectedOptions[0].textContent),
+    el('p', 'Run the report to merge duplicate messages, count false positives and find alerts awaiting review.'));
+  byId('out').replaceChildren(empty);
+  byId('announcement').textContent = byId('run-state').textContent + ' · ' + byId('mix-period').textContent;
+}
+byId('week').addEventListener('change', loadWeek);
+byId('run').addEventListener('click', () => {
+  drawReport();
+  if (matchMedia('(max-width:720px)').matches) byId('report-heading').focus();
+  byId('announcement').textContent = 'Weekly report ready for ' + byId('mix-period').textContent + '.';
+});
+loadWeek();
+</script></body></html>
