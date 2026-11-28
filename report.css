@@ -51,7 +51,7 @@ h1 em { color: #9d3934; font-weight: 400; }
 .panel-head h3 { font: 400 clamp(1.35rem, 2vw, 1.65rem)/1.2 var(--serif); }
 .panel-head span { font-size: .85rem; color: var(--muted); }
 .report-body { padding: 1rem 1.25rem; }
-.metrics { display: grid; grid-template-columns: repeat(3, 1fr); margin-bottom: 1rem; }
+.metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-bottom: 1rem; }
 .metric { padding-inline: .85rem; }
 .metric:first-child { padding-inline-start: 0; }
 .metric + .metric { border-inline-start: 1px solid var(--line); }
@@ -80,9 +80,9 @@ details summary { cursor: pointer; font-weight: 600; text-wrap: pretty; }
 .output dl div:first-child { border-top: 0; }
 .output dt { color: var(--muted); }
 .output dd { margin: 0; overflow-wrap: anywhere; }
-.draft { margin-top: 1rem; border-inline-start: 3px solid #a27950; padding: .55rem .8rem; background: #f4f0e6; }
+.draft { margin: .5rem 0 1rem; border-inline-start: 3px solid #a27950; padding: .55rem .8rem; background: #f4f0e6; }
 .draft p { margin: .4rem 0; font-size: .92rem; }
-#inbox { padding: 0 1.25rem; }
+#inbox, #more-messages { padding: 0 1.25rem; }
 .item { padding: .75rem 0; }
 .item + .item { border-top: 1px solid #e5d7d0; }
 .item p { margin-top: .2rem; font-size: .95rem; }
@@ -92,6 +92,9 @@ details summary { cursor: pointer; font-weight: 600; text-wrap: pretty; }
 .method details { padding: .8rem .15rem; }
 .method details + details { border-top: 1px solid var(--line); }
 .method p { max-width: 75ch; margin: .5rem 0; color: var(--muted); }
+.draft ul { padding-inline-start: 1.2rem; font-size: .92rem; }
+.draft li + li { margin-top: .35rem; }
+#more-messages > summary { padding-block: .8rem; border-top: 1px solid var(--line); color: var(--pine); }
 @media (max-width: 760px) {
   .hero, .panels { grid-template-columns: 1fr; gap: 1rem; }
   .hero { margin-block: 1.6rem; }
@@ -104,7 +107,9 @@ details summary { cursor: pointer; font-weight: 600; text-wrap: pretty; }
   .demo-head label { width: 100%; }
   .panel-head, .report-body { padding: 1rem; }
   #inbox { padding-inline: 1rem; }
-  .metric { padding-inline: .45rem; }
+  .metrics { grid-template-columns: repeat(2, minmax(0,1fr)); row-gap: .8rem; }
+  .metric { padding-inline: .65rem; }
+  .metric:nth-child(odd) { border: 0; padding-inline-start: 0; }
   .metric span { font-size: .8rem; overflow-wrap: anywhere; }
   .output dl div { grid-template-columns: 1fr; gap: .1rem; }
 }

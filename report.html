@@ -4,7 +4,7 @@
   <meta name="description" content="How I automated a manager’s weekly moderation report in n8n. Review a fictional Slack alert and see how your decision changes the report." data-uk-description="Як я автоматизувала щотижневий звіт про модерацію в n8n. Перевір вигадане сповіщення зі Slack і подивись, як твоє рішення вплине на звіт.">
   <title data-uk="Щотижневий звіт про модерацію · Дарія Кукла">Weekly moderation report · Dariia Kukla</title>
   <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48 64x64" type="image/x-icon">
-  <link rel="stylesheet" href="demo.css?v=footer2"><link rel="stylesheet" href="report.css?v=weekly-review">
+  <link rel="stylesheet" href="demo.css?v=footer2"><link rel="stylesheet" href="report.css?v=two-weeks">
 </head><body>
 <a class="skip" href="#week" data-uk="До вибору періоду">Skip to report controls</a>
 <header class="masthead"><div class="wrap">
@@ -33,35 +33,32 @@
   <section class="demo" aria-labelledby="demo-title">
     <div class="demo-head">
       <div><h2 id="demo-title" data-uk="Що бачить менеджер">What the manager sees</h2>
-        <p data-uk="Обери тиждень із вигаданими повідомленнями. Перевір сповіщення, яке система вважала підозрілим, і простеж, як твоє рішення змінює звіт.">Choose a week of fictional messages. Review an alert the system flagged and see how your decision changes the report.</p>
+        <p data-uk="У демо два тижні й 24 вигадані повідомлення зі Slack. Обери тиждень, переглянь, які повтори прибрав звіт, і розбери два випадки, що чекають на рішення.">Explore two weeks of fictional Slack activity, with 24 messages in all. Choose a week, see which alerts were duplicates and review the two cases that still need a decision.</p>
       </div>
       <label for="week"><span data-uk="Тиждень звіту">Report week</span><span class="select-control"><select id="week"><option value="pilot" data-uk="6–12 листопада">6–12 November</option><option value="followup" data-uk="13–19 листопада">13–19 November</option></select></span></label>
     </div>
     <div id="announcement" class="sronly" role="status"></div>
     <div class="panels">
       <section class="panel results-panel" aria-labelledby="report-heading">
-        <div class="panel-head"><h3 id="report-heading" data-uk="Підсумок тижня">Weekly summary</h3></div>
+        <div class="panel-head"><h3 id="report-heading" data-uk="Підсумок тижня">Weekly summary</h3><span id="volume"></span></div>
         <div class="report-body">
           <div id="metrics" class="metrics"></div>
-          <div class="review" id="review">
-            <div class="item-head"><h4 id="review-title"></h4><span class="item-id" id="review-id"></span></div>
-            <blockquote id="review-message"></blockquote>
-            <p id="review-context"></p>
-            <button type="button" class="mark" id="mark"></button>
-          </div>
+          <div id="manager-summary"></div>
+          <div id="reviews"></div>
           <div id="out"></div>
         </div>
       </section>
       <section class="panel inbox-panel" aria-labelledby="inbox-heading">
         <div class="panel-head"><h3 id="inbox-heading" data-uk="Що надійшло зі Slack">What came in from Slack</h3><span id="inbox-count"></span></div>
         <div id="inbox"></div>
+        <details id="more-messages"><summary></summary><div id="inbox-rest"></div></details>
       </section>
     </div>
   </section>
   <section class="method" aria-labelledby="original">
     <details><summary id="original" data-uk="Як я перевіряла сповіщення без реакцій">How I handled alerts with no reaction</summary>
       <p data-uk="Менеджер розповів, що перевіряє навіть повідомлення, на які ніхто не відреагував. Тому я додала окремий запит до Claude. Модель читала текст або розшифровку аудіо й позначала можливі хибні спрацювання для перевірки. Якщо Claude був недоступний, менеджер усе одно отримував показники й оригінальні коментарі.">The manager told me they also checked messages nobody had reacted to. I added a separate Claude call to read those messages or audio transcripts and flag possible false alarms for review. If Claude was unavailable, the manager still received the counts and the original comments.</p>
-      <p data-uk="Через політику OBRIO я відтворила процес на вигаданих повідомленнях. Для кожного тестового тижня збережено чернетку від локальної моделі. Якщо змінити реакцію, показники оновляться. Чернетка знову з’явиться, коли скасуєш зміну.">To respect OBRIO’s policy, I recreated the workflow with fictional messages. Each sample week includes a saved local model draft. Changing a reaction updates the counts and hides the saved draft until the original data is restored.</p>
+      <p data-uk="Через політику OBRIO я відтворила процес на вигаданих повідомленнях. Для кожного тестового тижня збережено чернетку від локальної моделі. Після твого рішення демо показує оновлені цифри й коментарі, на яких вони ґрунтуються.">To respect OBRIO’s policy, I recreated the workflow with fictional messages. Each sample week includes a saved local model draft. After a decision the demo shows the updated counts and the moderator notes behind them.</p>
       <p><a id="case-link" href="https://github.com/perebendya/ai-automation-portfolio/blob/main/README.md#weekly-moderation-report-in-n8n" data-uk="Прочитати кейс на GitHub">Read the case on GitHub</a></p>
     </details>
     <details><summary data-uk="Завантажити й запустити демо в n8n">Download and run the demo in n8n</summary>
@@ -84,7 +81,13 @@
     {"id":"T3","kind":"Text","key":"t3","type":"Possible contact details","body":"My parcel reference ends in 778899."},
     {"id":"A1","kind":"Audio","key":"a1","type":"Transcript keyword","body":"Please pause the recording.","note":"Tech issue: the transcript repeated the final phrase."},
     {"id":"P1","kind":"Photo","key":"p1","type":"Reference image","body":"A photo of a paint sample.","note":"Edge case: the handwritten colour code looks like a contact number."},
-    {"id":"B1","kind":"Expert blocks","key":"b1","type":"","body":"A user blocked an expert."}
+    {"id":"B1","kind":"Expert blocks","key":"b1","type":"","body":"A user blocked an expert."},
+    {"id":"A4","kind":"Audio","key":"a4","type":"External contact","body":"I’ll send you my private number so we can finish this outside the app."},
+    {"id":"T5","kind":"Text","key":"t5","type":"Payment request","body":"Please transfer the fee directly to me.","note":"Critical: the sender requested payment outside the app."},
+    {"id":"P3","kind":"Photo","key":"p3","type":"Document photo","body":"A shop receipt with the date and the shop name."},
+    {"id":"A5","kind":"Audio","key":"a4","type":"External contact","body":"I’ll send you my private number so we can finish this outside the app."},
+    {"id":"A6","kind":"Audio","key":"a6","type":"Possible contact details","body":"I’m reading the number on my library card.","note":"False positive: the number is a library card ID."},
+    {"id":"P4","kind":"Photo","key":"p3","type":"Document photo","body":"A shop receipt with the date and the shop name.","note":"The receipt contains no personal details."}
   ],
   "followup": [
     {"id":"T4","kind":"Text","key":"t4","type":"External contact","body":"An expert asked to move the conversation elsewhere.","note":"Critical: the expert shared a private contact."},
@@ -92,7 +95,13 @@
     {"id":"A3","kind":"Audio","key":"a3","type":"Transcript keyword","body":"The speaker describes an account in a history book."},
     {"id":"P2","kind":"Photo","key":"p2","type":"Document photo","body":"A picture of a blank receipt."},
     {"id":"B2","kind":"Expert blocks","key":"b2","type":"","body":"A user blocked an expert."},
-    {"id":"B3","kind":"Expert blocks","key":"b3","type":"","body":"A different user blocked an expert."}
+    {"id":"B3","kind":"Expert blocks","key":"b3","type":"","body":"A different user blocked an expert."},
+    {"id":"T7","kind":"Text","key":"t7","type":"Payment request","body":"Use my personal payment link to pay me directly."},
+    {"id":"A7","kind":"Audio","key":"a2","type":"Possible contact details","body":"The speaker reads out a ticket reference."},
+    {"id":"P5","kind":"Photo","key":"p5","type":"Reference image","body":"A photo of the opening hours at a museum.","note":"False positive: the numbers are museum opening hours."},
+    {"id":"T8","kind":"Text","key":"t8","type":"Possible contact details","body":"The delivery window is written as a single string of digits.","note":"Edge case: the delivery window resembles a phone number."},
+    {"id":"B4","kind":"Expert blocks","key":"b4","type":"Repeated contact request","body":"A user blocked an expert who kept asking for a private contact.","note":"Critical: the user blocked an expert after repeated requests for contact details."},
+    {"id":"P6","kind":"Photo","key":"p2","type":"Document photo","body":"A picture of a blank receipt."}
   ]
 };
 function summarize(messages) {
@@ -110,7 +119,8 @@ function summarize(messages) {
     const result = {kind, total: groups.size, duplicates: rows.length - groups.size,
       types: [], falsePositives: 0, critical: 0, edge: 0, tech: 0, reasons: [], notes: [], review: []};
     for (const {row, notes, thumb} of groups.values()) {
-      if (row.type) types.set(row.type, (types.get(row.type) || 0) + 1);
+      const type = row.type || (kind === 'Expert blocks' ? 'Block reason not provided' : '');
+      if (type) types.set(type, (types.get(type) || 0) + 1);
       const comments = [...notes];
       const reasons = comments.filter(note => /false positive/i.test(note));
       if (thumb || reasons.length) result.falsePositives++;
@@ -131,6 +141,48 @@ function summarize(messages) {
 // Keep the sample payload and workflow calculations in their original language.
 // Translate their output only when presenting it in the browser.
 const ukrainian = {
+  "I’ll send you my private number so we can finish this outside the app.": "Я надішлю свій особистий номер, щоб ми могли продовжити розмову поза застосунком.",
+  "A shop receipt with the date and the shop name.": "Магазинний чек із датою й назвою магазину.",
+  "Please transfer the fee directly to me.": "Переказуй оплату безпосередньо мені.",
+  "Critical: the sender requested payment outside the app.": "Критичний випадок. Відправник попросив заплатити поза застосунком.",
+  "I’m reading the number on my library card.": "Я зачитую номер свого читацького квитка.",
+  "False positive: the number is a library card ID.": "Хибне спрацювання. Це номер читацького квитка.",
+  "the number is a library card ID.": "Це номер читацького квитка.",
+  "The receipt contains no personal details.": "На чеку немає персональних даних.",
+  "Use my personal payment link to pay me directly.": "Оплати за моїм особистим посиланням, гроші надійдуть прямо мені.",
+  "A photo of the opening hours at a museum.": "Фото таблички з розкладом роботи музею.",
+  "False positive: the numbers are museum opening hours.": "Хибне спрацювання. Цифри на табличці позначають години роботи музею.",
+  "the numbers are museum opening hours.": "Цифри на табличці позначають години роботи музею.",
+  "The delivery window is written as a single string of digits.": "Час доставки записали кількома цифрами поспіль.",
+  "Edge case: the delivery window resembles a phone number.": "Неоднозначний випадок. Запис часу доставки нагадує номер телефону.",
+  "A user blocked an expert who kept asking for a private contact.": "Користувач заблокував експерта, який кілька разів просив особистий контакт.",
+  "Critical: the user blocked an expert after repeated requests for contact details.": "Критичний випадок. Користувач заблокував експерта після повторних запитів контактних даних.",
+  "Payment request": "Запит на оплату",
+  "Repeated contact request": "Повторний запит контактів",
+  "A sender asked for payment outside the app. Two false alarms came from a paint code and a library card number. A moderator also found a repeated phrase in an audio transcript.": "Відправник попросив заплатити поза застосунком. Код фарби й номер читацького квитка спричинили два хибні спрацювання. В одному аудіозаписі модератор також помітив, що в розшифровці повторилася фраза.",
+  "An expert shared a private contact. In a separate case, a user blocked an expert who kept asking for contact details. A ticket number and a photo of museum opening hours both triggered false alarms.": "Експерт поділився особистим контактом. В іншому випадку користувач заблокував експерта, який кілька разів просив контактні дані. Номер квитка й фото розкладу музею спричинили хибні спрацювання.",
+  "The system flagged six digits as possible contact details. What is the number used for?": "Система позначила шість цифр як можливий особистий контакт. Про який номер ідеться в повідомленні?",
+  "False positive: the digits are a parcel reference.": "Хибне спрацювання. Це номер посилки.",
+  "the digits are a parcel reference.": "Це номер посилки.",
+  "The speaker offers a private number to take the conversation outside the app. The same recording triggered two alerts.": "Людина пропонує особистий номер, щоб продовжити розмову поза застосунком. Той самий запис спричинив два сповіщення.",
+  "Critical: the speaker offered a private number to move the conversation outside the app.": "Критичний випадок. Людина запропонувала особистий номер для розмови поза застосунком.",
+  "The transcript matched the word “account”. Here it means a description of a historical event.": "У розшифровці спрацювало англійське слово account. Тут воно означає розповідь про історичну подію.",
+  "False positive: the speaker was describing a historical event.": "Хибне спрацювання. Людина розповідала про історичну подію.",
+  "the speaker was describing a historical event.": "Людина розповідала про історичну подію.",
+  "The sender offers a personal payment link. The payment would bypass the app.": "Відправник пропонує заплатити за особистим посиланням. Така оплата пройде поза застосунком.",
+  "Critical: the sender offered a personal payment link.": "Критичний випадок. Відправник запропонував особисте посилання для оплати.",
+  "Count as a violation": "Підтвердити порушення",
+  "Undo decision": "Скасувати рішення",
+  "Decision recorded": "Рішення у звіті",
+  "Manager’s weekly summary": "Підсумок тижня для менеджера",
+  "Drafted with a local Qwen model and edited against the sample moderator notes. The counts come from code.": "Це український переклад чернетки Qwen, відредагованої за коментарями модераторів. Показники рахує код.",
+  "Moderator notes including your decisions": "Коментарі модераторів із твоїми рішеннями",
+  "false alarm confirmed.": "хибне спрацювання підтверджено.",
+  "violation confirmed.": "порушення підтверджено.",
+  "Show the other 6 messages": "Показати ще 6 повідомлень",
+  "Hide the last 6 messages": "Згорнути останні 6 повідомлень",
+  "Block reason not provided": "Причину блокування не вказано",
+
   "Text": "Текст", "Audio": "Аудіо", "Photo": "Фото", "Expert blocks": "Блокування експертів",
   "Possible contact details": "Можливі контактні дані", "Transcript keyword": "Ключове слово в розшифровці",
   "Reference image": "Зображення-зразок", "External contact": "Сторонній контакт", "Document photo": "Фото документа",
@@ -159,16 +211,10 @@ const ukrainian = {
   "Technical issues": "Технічні проблеми", "Duplicates excluded": "Вилучені дублікати",
   "Awaiting context review": "Потребує перевірки контексту", "Distinct cases": "Випадки без повторів",
   "Awaiting review": "Чекають перевірки", "messages": "повідомлень", "Repeat of": "Повтор",
-  "Review complete": "Перевірку завершено", "A case to review": "Випадок для перевірки",
-  "Your decision is in the report. The false-positive count includes this case and the review queue is empty.": "Твоє рішення вже у звіті. Цей випадок зараховано до хибних спрацювань. Черга на перевірку порожня.",
-  "Mark as false positive": "Позначити як хибне спрацювання", "Undo false positive": "Скасувати позначку",
+  "A case to review": "Випадок для перевірки",
+  "Mark as false positive": "Позначити як хибне спрацювання",
   "Marked as a false positive": "Позначено як хибне спрацювання",
-  "Read the saved model draft": "Переглянути чернетку від моделі",
-  "Generated locally with Qwen for this sample week. Counts are calculated in code.": "Український переклад чернетки, яку локальна модель Qwen створила для цього тижня. Показники обчислює код.",
-  "The moderator's comments indicate that there is a false positive in the digit recognition system, a tech issue with the transcript repeating the final phrase, and an edge case where the handwritten colour code looks like a contact number.": "За коментарями модераторів, система розпізнавання цифр дала хибне спрацювання, у розшифровці повторилася остання фраза, а написаний від руки код кольору виявився схожим на номер телефону.",
-  "The expert shared a private contact, which is a critical note. The number belongs to a ticket, which is a false positive note.": "Експерт передав особисті контактні дані — це критичний випадок. Інший номер належить квитку — це хибне спрацювання.",
-  "The sample changed. Undo the reaction to see its original model draft.": "Тестові дані змінилися. Скасуй позначку, щоб знову побачити початкову чернетку.",
-  "Weekly report ready for": "Готовий звіт за", "marked as a false positive.": "позначено як хибне спрацювання.",
+  "Weekly report ready for": "Готовий звіт за",
   "mark removed.": "позначку скасовано."
 };
 function tr(value) {
@@ -183,54 +229,84 @@ function distinctCount(value) {
 
 function reportLines(section) {
   const types = section.types.map(([name, n]) => tr(name) + ' (' + n + ')').join(', ');
+  const duplicates = section.duplicates ? [['Duplicates excluded', String(section.duplicates)]] : [];
   if (section.kind === 'Expert blocks') return [
     ['Blocks', String(section.total)],
     ['Reasons', types || tr('Unspecified in the alerts')],
-    ['Critical / non-critical', section.critical + ' / ' + (section.total - section.critical)]
+    ['Critical / non-critical', section.critical + ' / ' + (section.total - section.critical)], ...duplicates
   ];
   if (section.kind === 'Photo') return [
     ['Sharing reasons', types || tr('None')], ['Critical cases', String(section.critical)],
-    ['Edge cases', String(section.edge)], ...section.notes.map(note => ['Moderator note', tr(note)])
+    ['Edge cases', String(section.edge)], ['False positives', String(section.falsePositives)], ...duplicates, ...section.notes.map(note => ['Moderator note', tr(note)])
   ];
   const lines = [['Frequent alert types', types || tr('None')],
     ['False positives', String(section.falsePositives)],
     ...section.reasons.map(note => ['Reason', tr(note.replace(/^False positive:\s*/i, ''))]),
     ['Critical / edge cases', section.critical + ' / ' + section.edge]];
   if (section.kind === 'Audio') lines.push(['Technical issues', String(section.tech)]);
-  if (section.duplicates) lines.push(['Duplicates excluded', String(section.duplicates)]);
+  lines.push(...duplicates);
   for (const item of section.review) lines.push(['Awaiting context review', item.id + ' · ' + tr(item.message)]);
   return lines;
 }
 
 const byId = id => document.getElementById(id);
 const el = (tag,text,cls) => {const node=document.createElement(tag); node.textContent=text; if(cls) node.className=cls; return node;};
-const recorded = {"pilot":{"rows":[{"id":"T1","kind":"Text","key":"t1","type":"Possible contact details","body":"The paint swatch on my desk is 445566.","note":"False positive: the digits are a paint colour.","thumb":true},{"id":"T2","kind":"Text","key":"t1","type":"Possible contact details","body":"The paint swatch on my desk is 445566."},{"id":"T3","kind":"Text","key":"t3","type":"Possible contact details","body":"My parcel reference ends in 778899."},{"id":"A1","kind":"Audio","key":"a1","type":"Transcript keyword","body":"Please pause the recording.","note":"Tech issue: the transcript repeated the final phrase."},{"id":"P1","kind":"Photo","key":"p1","type":"Reference image","body":"A photo of a paint sample.","note":"Edge case: the handwritten colour code looks like a contact number."},{"id":"B1","kind":"Expert blocks","key":"b1","type":"","body":"A user blocked an expert."}],"draft":"The moderator's comments indicate that there is a false positive in the digit recognition system, a tech issue with the transcript repeating the final phrase, and an edge case where the handwritten colour code looks like a contact number."},"followup":{"rows":[{"id":"T4","kind":"Text","key":"t4","type":"External contact","body":"An expert asked to move the conversation elsewhere.","note":"Critical: the expert shared a private contact."},{"id":"A2","kind":"Audio","key":"a2","type":"Possible contact details","body":"The speaker reads out a ticket reference.","note":"False positive: the number belongs to a ticket."},{"id":"A3","kind":"Audio","key":"a3","type":"Transcript keyword","body":"The speaker describes an account in a history book."},{"id":"P2","kind":"Photo","key":"p2","type":"Document photo","body":"A picture of a blank receipt."},{"id":"B2","kind":"Expert blocks","key":"b2","type":"","body":"A user blocked an expert."},{"id":"B3","kind":"Expert blocks","key":"b3","type":"","body":"A different user blocked an expert."}],"draft":"The expert shared a private contact, which is a critical note. The number belongs to a ticket, which is a false positive note."}};
+const recorded = {"pilot":{"rows":[{"id":"T1","kind":"Text","key":"t1","type":"Possible contact details","body":"The paint swatch on my desk is 445566.","note":"False positive: the digits are a paint colour.","thumb":true},{"id":"T2","kind":"Text","key":"t1","type":"Possible contact details","body":"The paint swatch on my desk is 445566."},{"id":"T3","kind":"Text","key":"t3","type":"Possible contact details","body":"My parcel reference ends in 778899."},{"id":"A1","kind":"Audio","key":"a1","type":"Transcript keyword","body":"Please pause the recording.","note":"Tech issue: the transcript repeated the final phrase."},{"id":"P1","kind":"Photo","key":"p1","type":"Reference image","body":"A photo of a paint sample.","note":"Edge case: the handwritten colour code looks like a contact number."},{"id":"B1","kind":"Expert blocks","key":"b1","type":"","body":"A user blocked an expert."},{"id":"A4","kind":"Audio","key":"a4","type":"External contact","body":"I’ll send you my private number so we can finish this outside the app."},{"id":"T5","kind":"Text","key":"t5","type":"Payment request","body":"Please transfer the fee directly to me.","note":"Critical: the sender requested payment outside the app."},{"id":"P3","kind":"Photo","key":"p3","type":"Document photo","body":"A shop receipt with the date and the shop name."},{"id":"A5","kind":"Audio","key":"a4","type":"External contact","body":"I’ll send you my private number so we can finish this outside the app."},{"id":"A6","kind":"Audio","key":"a6","type":"Possible contact details","body":"I’m reading the number on my library card.","note":"False positive: the number is a library card ID."},{"id":"P4","kind":"Photo","key":"p3","type":"Document photo","body":"A shop receipt with the date and the shop name.","note":"The receipt contains no personal details."}],"draft":"A sender asked for payment outside the app. Two false alarms came from a paint code and a library card number. A moderator also found a repeated phrase in an audio transcript."},"followup":{"rows":[{"id":"T4","kind":"Text","key":"t4","type":"External contact","body":"An expert asked to move the conversation elsewhere.","note":"Critical: the expert shared a private contact."},{"id":"A2","kind":"Audio","key":"a2","type":"Possible contact details","body":"The speaker reads out a ticket reference.","note":"False positive: the number belongs to a ticket."},{"id":"A3","kind":"Audio","key":"a3","type":"Transcript keyword","body":"The speaker describes an account in a history book."},{"id":"P2","kind":"Photo","key":"p2","type":"Document photo","body":"A picture of a blank receipt."},{"id":"B2","kind":"Expert blocks","key":"b2","type":"","body":"A user blocked an expert."},{"id":"B3","kind":"Expert blocks","key":"b3","type":"","body":"A different user blocked an expert."},{"id":"T7","kind":"Text","key":"t7","type":"Payment request","body":"Use my personal payment link to pay me directly."},{"id":"A7","kind":"Audio","key":"a2","type":"Possible contact details","body":"The speaker reads out a ticket reference."},{"id":"P5","kind":"Photo","key":"p5","type":"Reference image","body":"A photo of the opening hours at a museum.","note":"False positive: the numbers are museum opening hours."},{"id":"T8","kind":"Text","key":"t8","type":"Possible contact details","body":"The delivery window is written as a single string of digits.","note":"Edge case: the delivery window resembles a phone number."},{"id":"B4","kind":"Expert blocks","key":"b4","type":"Repeated contact request","body":"A user blocked an expert who kept asking for a private contact.","note":"Critical: the user blocked an expert after repeated requests for contact details."},{"id":"P6","kind":"Photo","key":"p2","type":"Document photo","body":"A picture of a blank receipt."}],"draft":"An expert shared a private contact. In a separate case, a user blocked an expert who kept asking for contact details. A ticket number and a photo of museum opening hours both triggered false alarms."}};
 function savedDraft(week,messages) {
   const saved = recorded[week];
   return saved && JSON.stringify(saved.rows) === JSON.stringify(messages) ? saved.draft : null;
 }
 
-// Each sample has one unmarked text or audio alert for the visitor to review.
+// Each decision adds a moderator note to one case, including any duplicate alerts.
 const reviewCases = {
-  pilot: {
-    id: 'T3',
-    en: 'The system flagged six digits as possible contact details. What does the sender say the number is for?',
-    uk: 'Система позначила шість цифр як можливий особистий контакт. Про який номер ідеться в повідомленні?'
+  T3: {
+    context: "The system flagged six digits as possible contact details. What is the number used for?",
+    note: "False positive: the digits are a parcel reference."
   },
-  followup: {
-    id: 'A3',
-    en: 'The transcript matched a keyword. Here “account” means a description of a historical event. Does this passage need moderation?',
-    uk: 'У розшифровці спрацювало ключове слово account. Тут воно означає «розповідь про подію». Чи потребує цей уривок модерації?'
+  A4: {
+    context: "The speaker offers a private number to take the conversation outside the app. The same recording triggered two alerts.",
+    note: "Critical: the speaker offered a private number to move the conversation outside the app."
+  },
+  A3: {
+    context: "The transcript matched the word “account”. Here it means a description of a historical event.",
+    note: "False positive: the speaker was describing a historical event."
+  },
+  T7: {
+    context: "The sender offers a personal payment link. The payment would bypass the app.",
+    note: "Critical: the sender offered a personal payment link."
   }
 };
-const markedWeeks = new Set();
+const reviewed = new Set();
+
+function drawReviews(messages) {
+  const list = byId('reviews');
+  list.replaceChildren();
+  for (const row of messages.filter(row => reviewCases[row.id])) {
+    const scenario = reviewCases[row.id];
+    const done = reviewed.has(row.id);
+    const card = el('article', '', done ? 'review resolved' : 'review');
+    const header = el('div', '', 'item-head');
+    header.append(el('h4', tr(done ? 'Decision recorded' : 'A case to review')),
+      el('span', row.id, 'item-id'), el('small', tr(row.kind)));
+    const action = scenario.note.startsWith('Critical:') ? 'Count as a violation' : 'Mark as false positive';
+    const button = el('button', tr(done ? 'Undo decision' : action), 'mark');
+    button.type = 'button';
+    button.id = 'decision-' + row.id;
+    button.dataset.caseId = row.id;
+    button.setAttribute('aria-label', button.textContent + ' · ' + row.id);
+    card.append(header, el('blockquote', tr(row.body)), el('p', tr(done ? scenario.note : scenario.context)), button);
+    list.append(card);
+  }
+}
 
 function drawInbox(messages) {
-  byId('inbox-count').textContent = messages.length + ' ' + tr('messages');
   const inbox = byId('inbox');
+  const rest = byId('inbox-rest');
   inbox.replaceChildren();
+  rest.replaceChildren();
+  byId('inbox-count').textContent = messages.length + ' ' + tr('messages');
   const originals = new Map();
-  for (const row of messages) {
+  for (const [index, row] of messages.entries()) {
     const item = el('article', '', 'item');
     const header = el('div', '', 'item-head');
     header.append(el('span', row.id, 'item-id'), el('small', tr(row.kind)));
@@ -242,18 +318,17 @@ function drawInbox(messages) {
     item.append(header, el('p', tr(row.body)));
     if (row.note) item.append(el('p', tr('Moderator note') + ' · ' + tr(row.note), 'muted'));
     else if (row.thumb) item.append(el('small', tr('Marked as a false positive')));
-    inbox.append(item);
+    (index < 6 ? inbox : rest).append(item);
   }
 }
 
 function drawView({newWeek = false} = {}) {
   const week = byId('week').value;
-  const scenario = reviewCases[week];
-  const marked = markedWeeks.has(week);
-  const messages = samples[week].map(row => row.id === scenario.id && marked ? {...row, thumb: true} : row);
-  const reviewRow = messages.find(row => row.id === scenario.id);
+  const messages = samples[week].map(row => reviewed.has(row.id)
+    ? {...row, note: reviewCases[row.id].note} : row);
   const out = byId('out');
-  const draftWasOpen = Boolean(out.querySelector('.draft[open]'));
+  const manager = byId('manager-summary');
+  const summaryWasOpen = Boolean(manager.querySelector('details[open]'));
   const open = new Set([...out.querySelectorAll('.output[open]')].map(node => node.dataset.kind));
   if (newWeek) open.clear();
   const sections = summarize(messages);
@@ -263,6 +338,7 @@ function drawView({newWeek = false} = {}) {
   const totals = [
     ['Distinct cases', sections.reduce((n, s) => n + s.total, 0)],
     ['False positives', sections.reduce((n, s) => n + s.falsePositives, 0)],
+    ['Critical cases', sections.reduce((n, s) => n + s.critical, 0)],
     ['Awaiting review', sections.reduce((n, s) => n + s.review.length, 0)]
   ];
   for (const [label, n] of totals) {
@@ -270,16 +346,15 @@ function drawView({newWeek = false} = {}) {
     block.append(el('strong', String(n)), el('span', tr(label)));
     metrics.append(block);
   }
-  byId('review-id').textContent = reviewRow.id;
-  byId('review-title').textContent = tr(reviewRow.thumb ? 'Review complete' : 'A case to review');
-  byId('review-message').textContent = tr(reviewRow.body);
-  byId('review-context').textContent = reviewRow.thumb
-    ? tr('Your decision is in the report. The false-positive count includes this case and the review queue is empty.')
-    : scenario[document.documentElement.lang];
-  const button = byId('mark');
-  button.textContent = tr(reviewRow.thumb ? 'Undo false positive' : 'Mark as false positive');
-  byId('review').classList.toggle('resolved', Boolean(reviewRow.thumb));
+  const duplicates = messages.length - totals[0][1];
+  const volume = document.documentElement.lang === 'uk'
+    ? messages.length + ' повідомлень · ' + duplicates + ' ' + ({one: 'повтор', few: 'повтори', many: 'повторів'}[new Intl.PluralRules('uk').select(duplicates)])
+    : messages.length + ' messages · ' + duplicates + (duplicates === 1 ? ' duplicate' : ' duplicates');
+  byId('volume').textContent = volume;
+  drawReviews(messages);
   drawInbox(messages);
+  if (newWeek) byId('more-messages').open = false;
+  labelInboxToggle();
   out.replaceChildren();
   for (const section of sections) {
     const article = el('details', '', 'output');
@@ -296,15 +371,26 @@ function drawView({newWeek = false} = {}) {
     article.append(summary, list);
     out.append(article);
   }
+  const detail = el('details', '', 'draft');
+  detail.open = !newWeek && summaryWasOpen;
+  detail.append(el('summary', tr(draft ? 'Manager’s weekly summary' : 'Moderator notes including your decisions')));
   if (draft) {
-    const detail = el('details', '', 'draft');
-    detail.open = !newWeek && draftWasOpen;
-    detail.append(el('summary', tr('Read the saved model draft')), el('p', tr(draft)), el('small', tr('Generated locally with Qwen for this sample week. Counts are calculated in code.')));
-    out.append(detail);
+    detail.append(el('p', tr(draft)), el('small', tr('Drafted with a local Qwen model and edited against the sample moderator notes. The counts come from code.')));
   } else {
-    out.append(el('p', tr('The sample changed. Undo the reaction to see its original model draft.'), 'draft muted'));
+    const notes = el('ul', '');
+    for (const section of sections) {
+      for (const note of section.notes) notes.append(el('li', tr(note)));
+    }
+    detail.append(notes);
   }
+  manager.replaceChildren(detail);
 }
+
+function labelInboxToggle() {
+  const details = byId('more-messages');
+  details.querySelector('summary').textContent = tr(details.open ? 'Hide the last 6 messages' : 'Show the other 6 messages');
+}
+byId('more-messages').addEventListener('toggle', labelInboxToggle);
 
 function refreshView() {
   byId('case-link').href = document.documentElement.lang === 'uk'
@@ -312,13 +398,16 @@ function refreshView() {
     : 'https://github.com/perebendya/ai-automation-portfolio/blob/main/README.md#weekly-moderation-report-in-n8n';
   drawView();
 }
-byId('mark').addEventListener('click', () => {
-  const week = byId('week').value;
-  const marked = !markedWeeks.has(week);
-  if (marked) markedWeeks.add(week);
-  else markedWeeks.delete(week);
+byId('reviews').addEventListener('click', event => {
+  const id = event.target.closest('button')?.dataset.caseId;
+  if (!id) return;
+  const done = !reviewed.has(id);
+  if (done) reviewed.add(id);
+  else reviewed.delete(id);
   drawView();
-  byId('announcement').textContent = [reviewCases[week].id, tr(marked ? 'marked as a false positive.' : 'mark removed.'),
+  byId('decision-' + id).focus({preventScroll: true});
+  const status = reviewCases[id].note.startsWith('Critical:') ? 'violation confirmed.' : 'false alarm confirmed.';
+  byId('announcement').textContent = [id, tr(done ? status : 'mark removed.'),
     byId('metrics').innerText.replace(/\s+/g, ' ')].join(' ');
 });
 byId('week').addEventListener('change', () => {

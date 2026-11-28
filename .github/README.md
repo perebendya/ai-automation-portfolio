@@ -18,7 +18,7 @@ I built the tool from profile import through search. In this fictional example, 
 
 ## Weekly moderation report in n8n
 
-In this example, six fictional messages become a weekly moderation report. Mark a paint colour as a false positive and see how the totals change.
+Explore two sample weeks with 12 fictional Slack messages each. Review a possible false alarm and a possible violation, then see how each decision changes the report.
 
 [Run the report](https://perebendya.github.io/ai-automation-portfolio/report.html?lang=en) · [n8n workflow](../weekly-report.json)
 
