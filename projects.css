@@ -10,17 +10,17 @@
 .rental-art img { display:block; width:100%; height:100%; object-fit:cover; object-position:50% 55%; }
 /* A small view of the moderation workflow, from the Slack channels to the report. */
 .report-art {
-  display:grid; place-items:center; background-color:#e5eae3;
-  background-image:radial-gradient(circle,#aebbb1 .7px,transparent .9px); background-size:14px 14px;
+  display:grid; place-items:center; background-color:#191919;
+  background-image:radial-gradient(circle,#464646 .7px,transparent .9px); background-size:14px 14px;
 }
 .report-flow {
   --node-size:clamp(2.55rem,4.6vw,3.65rem);
   position:relative; display:grid; grid-template-columns:repeat(3,minmax(0,1fr));
-  width:min(96%,24rem); color:#314b3e;
+  width:min(96%,24rem); color:#fafafa;
 }
 .report-flow::before {
   content:""; position:absolute; top:calc(var(--node-size) / 2); left:16.67%; right:16.67%;
-  border-top:2px solid #81988b;
+  border-top:2px solid #a4a4a4;
 }
 .flow-step {
   position:relative; display:flex; flex-direction:column; align-items:center; gap:.55rem;
@@ -28,17 +28,17 @@
 }
 .flow-node {
   position:relative; display:grid; place-items:center; width:var(--node-size); height:var(--node-size);
-  border:1.5px solid #93a79a; border-radius:.7rem; background:#fcfcf6;
+  border:1.5px solid #868686; border-radius:.7rem; background:#353535;
 }
 .flow-node::before, .flow-node::after {
-  content:""; position:absolute; top:50%; width:7px; height:7px; border:1.5px solid #81988b;
-  background:#f9faf3; border-radius:50%; transform:translateY(-50%);
+  content:""; position:absolute; top:50%; width:7px; height:7px; border:1.5px solid #a4a4a4;
+  background:#242424; border-radius:50%; transform:translateY(-50%);
 }
 .flow-node::before { left:-4px; }
 .flow-node::after { right:-4px; }
 .flow-step:first-child .flow-node::before, .flow-step:last-child .flow-node::after { display:none; }
 .flow-channel { font:650 calc(var(--node-size) * .57)/1 var(--mono); }
-.flow-code { background:#2f5242; color:#fffbed; border-color:#2f5242; font:500 calc(var(--node-size) * .43)/1 var(--mono); }
+.flow-code { background:#ff91ac; color:#191919; border-color:#ff91ac; font:500 calc(var(--node-size) * .43)/1 var(--mono); }
 .flow-page {
   width:36%; height:46%; border:1.7px solid currentColor; border-radius:2px;
   background:linear-gradient(currentColor,currentColor) 50% 34% / 60% 1.5px no-repeat,
