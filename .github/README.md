@@ -16,6 +16,8 @@ I built the tool from profile import through search. In this fictional example, 
 
 ![A recruiter’s query, fictional search results and the selected candidate’s experience.](../assets/candidate-search-en.png)
 
+[Compare the two search methods](https://perebendya.github.io/ai-automation-portfolio/?lang=en#search)
+
 ## Weekly moderation report in n8n
 
 Explore two sample weeks with 12 fictional Slack messages each. Review a possible false alarm and a possible violation, then see how each decision changes the report.

@@ -8,7 +8,7 @@ OBRIO’s policy prevents me from sharing live demos of its internal tools. I us
 
 ## From a Figma design to a live subscription funnel
 
-I built an MCP platform the growth team used daily. An AI agent turned a Figma design into a working funnel, including the quiz, navigation and paywall.
+I built most of the MCP platform our growth team used to turn Figma designs into subscription funnels. I developed the localization tools and changed how the platform retried a timed-out write so it would not create a duplicate funnel. An AI agent turned a Figma design into a working funnel, including the quiz, navigation and paywall.
 
 - **Before release** — automated checks caught broken screen links and missing translation mappings.
 - **In production** — the team walked through the tested funnel, approved it and published it. They could use the same platform to update it later.
@@ -27,6 +27,8 @@ I built the recruiter tool end to end, from importing and updating profiles to t
 ![Recruiter search for people who changed jobs in the last 90 days and have onboarding experience. Marta Lisova is selected in the results. Her profile on the right shows her work with new hires and a recent company move.](assets/candidate-search-en.png)
 
 *Recreated search screen. All profiles and companies in this example are fictional.*
+
+[Compare keyword search with the date and experience checks](https://perebendya.github.io/ai-automation-portfolio/?lang=en#search)
 
 ## Weekly moderation report in n8n
 

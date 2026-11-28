@@ -1,6 +1,8 @@
 .portfolio-intro { padding-block:clamp(2rem,5.2vw,4.8rem) clamp(1.9rem,3.5vw,3rem); }
 .portfolio-intro h1 { max-width: 19ch; }
 .portfolio-intro .intro { margin-top:1rem; max-width:64ch; color:var(--muted); font-size:clamp(1rem,1.4vw,1.15rem); }
+.portfolio-intro .intro-links { display:flex; flex-wrap:wrap; gap:.5rem 1.4rem; margin-top:1rem; }
+.intro-links a { color:var(--pine); font-weight:600; text-underline-offset:.2em; }
 #demo-heading, .casework h2 { margin-bottom:1rem; }
 .project-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:clamp(1rem,2.4vw,2rem); }
 .project-card { display:flex; flex-direction:column; overflow:hidden; border-radius:10px; color:var(--ink); background:var(--surface); box-shadow:var(--surface-shadow); text-decoration:none; }
@@ -61,6 +63,32 @@
 .casework article { border-top:1px solid var(--line); padding-block:clamp(1.4rem,3vw,2.5rem) 0; }
 .casework article h3 { font:400 clamp(1.45rem,2.7vw,2.2rem)/1.2 var(--serif); margin-bottom:.65rem; }
 .casework p { max-width:73ch; padding:0 .3rem 1.25rem; color:var(--muted); }
+.search-example {
+  margin:0 0 1.5rem; padding:clamp(1rem,2.6vw,2rem);
+  border:1px solid var(--line); border-radius:10px; background:var(--surface);
+}
+.search-example h4 {
+  max-width:46ch; margin:0 0 .55rem; text-wrap:balance;
+  font:400 clamp(1.3rem,2.3vw,1.8rem)/1.2 var(--serif);
+}
+.search-example p { margin:0; padding:0; }
+.search-method { margin:1.25rem 0 .6rem; padding:0; border:0; }
+.search-method legend { margin-bottom:.4rem; padding:0; font-weight:650; }
+.search-method label {
+  display:inline-flex; align-items:center; gap:.4rem; margin:0 .25rem .25rem 0; padding:.32rem .7rem;
+  border:1px solid var(--line); border-radius:.4rem; cursor:pointer;
+}
+.search-method label:has(:checked) { background:var(--pine-soft); border-color:var(--pine); }
+.search-method input { margin:0; accent-color:var(--pine); }
+.search-profiles { margin:0; padding:0 0 0 1.6rem; }
+.search-profiles li { margin:0 0 .65rem; }
+.search-profiles li::marker { color:var(--pine); font-weight:650; }
+.search-profiles q { display:block; }
+.search-profiles .move-date { margin-inline-start:.5rem; color:var(--muted); font-size:.88rem; }
+.search-results > p { margin:.85rem 0 0; border-top:1px solid var(--line); padding:.7rem 0 0; }
+@media(max-width:640px) {
+  .search-profiles .move-date { display:block; margin-inline-start:0; }
+}
 .profile-links { display:flex; column-gap:1rem; }
 @media(max-width:760px) {
   .project-grid { grid-template-columns:1fr; }

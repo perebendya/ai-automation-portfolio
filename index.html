@@ -4,7 +4,7 @@
   <title data-uk="Проєкти · Дарія Кукла">Projects · Dariia Kukla</title>
   <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48 64x64" type="image/x-icon">
   <meta name="description" content="Explore Dariia Kukla’s AI automation projects, interactive demos and work at OBRIO." data-uk-description="Проєкти Дарії Кукли з AI-автоматизації, інтерактивні демо й робочі кейси з OBRIO.">
-  <link rel="stylesheet" href="demo.css?v=soft-surfaces"><link rel="stylesheet" href="projects.css?v=soft-surfaces">
+  <link rel="stylesheet" href="demo.css?v=soft-surfaces"><link rel="stylesheet" href="projects.css?v=search-example">
 </head><body>
 <a class="skip" href="#projects" data-uk="До проєктів">Skip to projects</a>
 <header class="masthead"><div class="wrap">
@@ -20,7 +20,12 @@
 <main class="wrap">
   <header class="portfolio-intro">
     <h1 data-uk="Проєкти з AI-автоматизації">AI automation projects</h1>
-    <p class="intro" data-uk="Я збираю інструменти, які беруть на себе ручну роботу. Тут можна підібрати квартиру за фото, зібрати тижневий звіт із повідомлень модераторів або вибрати настільну гру для компанії.">I build tools that take care of repetitive work. Here you can find a flat using its photos, turn a week of moderator messages into a report, or find a board game for your group.</p>
+    <p class="intro" data-uk="В OBRIO я зібрала пошук кандидатів для рекрутерів, автоматизувала щотижневий звіт у n8n і зробила більшу частину платформи, через яку growth-команда запускала воронки підписки.">At OBRIO I built a search tool for recruiters, automated weekly reporting in n8n and built most of the platform the growth team used to launch subscription funnels.</p>
+    <div class="intro-links">
+      <a href="report.html#demo-title" data-site-link data-uk="Спробувати звіт у n8n">Try the n8n report</a>
+      <a href="#search" data-uk="Перевірити пошук кандидатів">Explore candidate search</a>
+      <a href="#funnels" data-uk="Переглянути перевірку воронки">See a funnel review</a>
+    </div>
   </header>
   <section id="projects" aria-labelledby="demo-heading">
     <h2 id="demo-heading" data-uk="Основні проєкти">Featured projects</h2>
@@ -41,7 +46,7 @@
           </div>
         </div>
         <div class="card-copy"><h3 data-uk="Тижневий звіт про модерацію">Weekly moderation report</h3>
-          <p data-uk="Раніше менеджер щоп’ятниці перечитував кілька каналів Slack. Я зібрала в n8n звіт, який рахує випадки без повторів і підсумовує коментарі модераторів. Це заощаджує команді близько 4 годин на тиждень.">Every Friday, the manager used to read through several Slack channels. I built an n8n report that counts each case once and summarizes the moderators’ notes. It saves the team about 4 hours a week.</p>
+          <p data-uk="Раніше менеджер щоп’ятниці перечитував кілька каналів Slack. Я зібрала в n8n звіт, який рахує випадки без повторів і підсумовує коментарі модераторів. За моєю оцінкою, це заощаджувало менеджеру близько 4 годин на тиждень.">Every Friday, the manager used to read through several Slack channels. I built an n8n report that counts each case once and summarizes the moderators’ notes. I estimate this saved the manager about 4 hours a week.</p>
           <span class="card-action" data-uk="Переглянути звіт">View the report</span>
         </div>
       </a>
@@ -59,7 +64,7 @@
     <p data-uk="Обидва сценарії я відтворила на вигаданих даних для портфоліо.">I recreated these two scenarios with fictional data for my portfolio.</p>
     <article id="funnels">
       <h3 data-uk="Від макета Figma до воронки підписки">From a Figma design to a subscription funnel</h3>
-      <p data-uk="Я зібрала більшу частину MCP-платформи для команди зростання. У цьому прикладі редакторка перевіряє, куди веде кнопка у квізі про читання і як вона підписана двома мовами.">I built most of the MCP platform for the growth team. In this example, an editor checks where a button leads in a reading quiz and reviews its label in two languages.</p>
+      <p data-uk="Я зібрала більшу частину MCP-платформи для growth-команди. Зокрема, розробила інструменти локалізації та додала перевірку після тайм-ауту, щоб повторний запит не створював дубль воронки. У цьому прикладі редакторка перевіряє, куди веде кнопка у квізі про читання і як вона підписана двома мовами.">I built most of the MCP platform for the growth team. I developed the localization tools and added a check that prevented duplicate funnels after a timeout. In this example, an editor checks where a button leads in a reading quiz and reviews its label in two languages.</p>
       <figure>
         <div class="screen-scroll" tabindex="0" role="group" aria-label="Screenshot"><img class="case-screen" src="assets/funnel-review-en.png" data-uk-src="assets/funnel-review-uk.png" alt="Reading quiz review showing the new route to book picks and the button text in two languages." data-uk-alt="Погодження квіза про читання. Видно новий перехід до добірки книжок і текст кнопки двома мовами." width="2840" height="1504" loading="lazy"></div>
         <figcaption class="pan-hint" data-uk="Проведи по зображенню, щоб роздивитися весь екран.">Swipe across the screenshot to see the full screen.</figcaption>
@@ -67,7 +72,37 @@
     </article>
     <article id="search">
       <h3 data-uk="Пошук кандидатів звичайною мовою">Candidate search in plain language</h3>
-      <p data-uk="Я зібрала інструмент від імпорту профілів до пошуку. На екрані рекрутерка шукає людей, які нещодавно змінили роботу й мають досвід онбордингу. У профілі праворуч вона бачить, чому кандидатка потрапила до добірки.">I built the tool from profile import through search. Here a recruiter looks for people who recently changed jobs and worked on onboarding. The profile on the right shows why the selected candidate made the shortlist.</p>
+      <p data-uk="Я зібрала інструмент від імпорту профілів до пошукового інтерфейсу. Модель виділяла точні умови запиту, а pgvector допомагав упорядкувати відібрані профілі за змістом досвіду. Разом із рекрутерами я перевіряла результати на їхніх запитах.">I built the tool from profile import to the search interface. A language model extracted the exact conditions, then pgvector ranked eligible profiles by the meaning of their experience. I checked the results with recruiters using their own queries.</p>
+      <section class="search-example" aria-labelledby="search-query">
+        <h4 id="search-query" data-uk="«Хто змінив компанію за останні 90 днів і має досвід онбордингу нових працівників?»">“Who changed companies in the last 90 days and has experience with employee onboarding?”</h4>
+        <p data-uk="Я взяла три вигадані профілі й заздалегідь визначила очікуваний порядок за змістом. Перемкни спосіб пошуку й порівняй, хто потрапить до добірки.">I used three fictional profiles and set the expected order by relevance for this example. Switch search methods to compare the shortlists.</p>
+        <fieldset class="search-method">
+          <legend data-uk="Спосіб пошуку">Search method</legend>
+          <label><input type="radio" name="search-method" value="keyword" checked> <span data-uk="За словом">Keyword only</span></label>
+          <label><input type="radio" name="search-method" value="meaning"> <span data-uk="Дата й зміст">Date and meaning</span></label>
+        </fieldset>
+        <div class="search-results" aria-live="polite" aria-atomic="true">
+          <ol class="search-profiles">
+            <li data-days-since-move="47" hidden>
+              <strong data-uk="Марта Лісова">Marta Lisova</strong>
+              <span class="move-date" data-uk="Змінила компанію 47 днів тому">Changed companies 47 days ago</span>
+              <q data-uk="Склала для нових колег план на перший місяць і підібрала кожному наставника.">I planned each new hire’s first month and paired them with a mentor.</q>
+            </li>
+            <li data-days-since-move="18" hidden>
+              <strong data-uk="Богдан Терен">Bohdan Teren</strong>
+              <span class="move-date" data-uk="Змінив компанію 18 днів тому">Changed companies 18 days ago</span>
+              <q data-uk="Готував щотижневі прогнози продажів і перевіряв їхню точність.">I prepared weekly sales forecasts and checked their accuracy.</q>
+            </li>
+            <li data-days-since-move="120">
+              <strong data-uk="Данило Яровий">Danylo Yarovyi</strong>
+              <span class="move-date" data-uk="Змінив компанію 120 днів тому">Changed companies 120 days ago</span>
+              <q data-uk="Вів онбординг нових працівників у двох командах.">I ran employee onboarding for two teams.</q>
+            </li>
+          </ol>
+          <p data-method-note="keyword" data-uk="Лише Данило вживає слово «онбординг». Пошук пропускає Марту, яка описала той самий досвід своїми словами, і показує людину, що змінила компанію понад 90 днів тому.">Only Danylo uses the word “onboarding.” The search misses Marta, who describes that work in her own words, and returns someone who moved more than 90 days ago.</p>
+          <p data-method-note="meaning" hidden data-uk="Данило вибуває за датою. З двох профілів, що залишилися, першою йде Марта. План першого місяця й наставництво показують, як вона допомагала новачкам освоїтися. Богдан описав роботу з продажами.">The date filter removes Danylo. Of the two remaining profiles, Marta comes first. Her first-month plans and mentoring show experience helping new hires settle in. Bohdan describes sales forecasting.</p>
+        </div>
+      </section>
       <figure>
         <div class="screen-scroll" tabindex="0" role="group" aria-label="Screenshot"><img class="case-screen" src="assets/candidate-search-en.png" data-uk-src="assets/candidate-search-uk.png" alt="Fictional search results with a selected candidate’s onboarding experience and recent job change." data-uk-alt="Список вигаданих кандидатів. Праворуч видно досвід онбордингу та недавній перехід обраної кандидатки." width="2768" height="1664" loading="lazy"></div>
         <figcaption class="pan-hint" data-uk="Проведи по зображенню, щоб роздивитися весь екран.">Swipe across the screenshot to see the full screen.</figcaption>
@@ -77,4 +112,22 @@
 </main>
 <footer class="footer"><div class="wrap"><p data-uk="Дарія Кукла · Київ">Dariia Kukla · Kyiv</p><div class="profile-links"><a href="https://github.com/perebendya/ai-automation-portfolio">GitHub</a><a href="https://www.linkedin.com/in/dariia-kukla">LinkedIn</a></div></div></footer>
 <script src="portfolio.js?v=3"></script>
+<script>
+  const searchExample = document.querySelector(".search-example");
+  function showSearchResults() {
+    const method = searchExample.querySelector("input:checked").value;
+    const keyword = document.documentElement.lang === "uk" ? "онбординг" : "onboarding";
+    for (const profile of searchExample.querySelectorAll("[data-days-since-move]")) {
+      profile.hidden = method === "keyword"
+        ? !profile.querySelector("q").textContent.toLowerCase().includes(keyword)
+        : Number(profile.dataset.daysSinceMove) > 90;
+    }
+    for (const note of searchExample.querySelectorAll("[data-method-note]")) {
+      note.hidden = note.dataset.methodNote !== method;
+    }
+  }
+  searchExample.addEventListener("change", showSearchResults);
+  document.addEventListener("portfolio-language", showSearchResults);
+  showSearchResults();
+</script>
 </body></html>
