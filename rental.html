@@ -7,7 +7,7 @@
   <title data-uk="Пошук житла · Дарія Кукла">AI Rental Assistant · Dariia Kukla</title>
   <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48 64x64" type="image/x-icon">
   <link rel="stylesheet" href="demo.css?v=footer2">
-  <link rel="stylesheet" href="rental.css?v=footer2">
+  <link rel="stylesheet" href="rental.css?v=preferences2">
 </head>
 <body>
 <a class="skip" href="#query" id="skip"></a>
@@ -30,7 +30,7 @@
     <label for="request" id="question"></label><div class="query-row"><textarea rows="2" maxlength="700" id="request" required></textarea><button class="primary" id="submit" type="submit"></button></div>
   </form><div class="samples"><small id="exampleLabel"></small><div id="examples" class="chips"></div></div></section>
   <section aria-labelledby="results"><div class="linehead"><h2 id="results" tabindex="-1"></h2><span id="filter"></span></div>
-    <p id="understood"></p><p id="unmatched"></p><p id="legend"></p><div id="status" class="sronly" role="status"></div><div class="grid" id="grid"></div>
+    <p id="understood"></p><p id="unmatched"></p><p id="coverage"></p><p id="legend"></p><div id="status" class="sronly" role="status"></div><div class="grid" id="grid"></div>
     <p class="rental-note" id="note"></p>
   </section>
 </main>
@@ -47,47 +47,9 @@
 </dialog>
 
 <script src="portfolio.js"></script>
-<script src="rental-catalogue.js"></script>
+<script src="rental-catalogue.js?v=preferences2"></script>
+<script src="rental-search.js?v=preferences2"></script>
 <script>
-const opposites = [
-  en("Килим на стіні","A rug on the wall"),
-  en("Яскрава кухня","A brightly coloured kitchen"),
-  en("Диван для сну","A sofa for sleeping"),
-  en("Без робочого столу","No desk"),
-  en("Без балкона","No balcony"),
-  en("Душова кабіна","A shower stall")
-];
-// Each expression names one visible preference. A positive direction agrees with
-// the corresponding fact in the listing; a negative direction favours its opposite.
-const phrases = [
-  [0,-1,/килим[а-яіїєґ]*|ков[её]р[а-я]*|ковр[а-я]*|carpets?|rugs?/gu],
-  [1,-1,/яскрав[а-яіїєґ]*|кислотн[а-яіїєґ]*|вирви[ -]?глаз[а-яіїєґ]*|вирви[ -]?око|кричущ[а-яіїєґ]*|салатов[а-яіїєґ]*|лаймов[а-яіїєґ]*|bright(?:ly)?|neon|loud|garish|flashy|lime.green/gu],
-  [1,1,/спокійн[а-яіїєґ]*|нейтральн[а-яіїєґ]*|стриман[а-яіїєґ]*|приглушен[а-яіїєґ]*|пастельн[а-яіїєґ]*|бежев[а-яіїєґ]*|muted|calm|neutral|understated|pastel|subdued/gu],
-  [2,1,/ліж[а-яіїєґ]*|матрац[а-яіїєґ]*|\bbeds?\b|mattress(?:es)?/gu],
-  [2,-1,/диван[а-яіїєґ]*|sofas?|couch(?:es)?/gu],
-  [3,1,/письмов[а-яіїєґ]*\s+ст[іо]л[а-яіїєґ]*|робоч[а-яіїєґ]*\s+місц[а-яіїєґ]*|(?:^|\s)ст(?:іл|олом|олу|ола)(?=\s|$)|працю[а-яіїєґ]*\s+(?:з\s+дому|вдома|за\s+ноутбуком)|\bdesks?\b|work(?:ing)? from home|\bworkstations?\b|\bworkspaces?\b/gu],
-  [4,1,/балкон[а-яіїєґ]*|лоджі[а-яіїєґ]*|balcon(?:y|ies)|loggia/gu],
-  [5,1,/ванн(?:у|а|ою|і|и)(?![а-яіїєґ]|\s+кімнат)|\bbathtubs?\b|\btub\b|(?:take|taking|have|having|love)\s+(?:a\s+)?baths?/gu],
-  [5,-1,/душ(?:ову|ова|овій|і|ем|у)?(?=\s|$)|shower(?:s|ing)?/gu]
-];
-const indifferent = /байдуж|все одно|неважлив|не важлив|не принципов|не заважа|не хвилю|не проти|мені ок|можна залишити|без різниці|don't (?:mind|care)|do not (?:mind|care)|doesn't matter|is fine|are fine|no preference|okay with|ok with/i;
-const negBefore = /(?<![\p{L}\p{N}_])(?:без|жодн[а-яіїєґ]*|уника[а-яіїєґ]*|не(?:\s+(?:хочу|люблю|треба|потріб[а-яіїєґ]*|має бути|мала бути|була|було|були|висів|висіли|було видно|подоба[а-яіїєґ]*))?|\b(?:without|no|avoid|not|don't want|don't like|hate|rather than))\s+(?:(?:бабусин[а-яіїєґ]*|радянськ[а-яіїєґ]*|совков[а-яіїєґ]*|стар[а-яіїєґ]*|ніяких|жодних|ніякого|настінних|цих|той|такого|на|спати|навіть|дуже|надто|занадто|яскрав[а-яіїєґ]*|any|a|an|the|sleeping|sleep|on|wall|wall-mounted|very|too)\s+)*$/iu;
-const negAfter = /^\s*(?:на\s+стіні\s+|на\s+стінах\s+)?(?:не було|не було видно|не висів|не хочу|не люблю|не треба|не підходить|не подоба|не потріб|мені не треба|is a dealbreaker|are a dealbreaker)/iu;
-// Require a currency marker so a distance or floor number cannot become a rent limit.
-const rentLimit = /(?<![\p{L}\d])(?:(?:мій бюджет|бюджет|my budget is|budget)\s+)?(не дорожче(?: за| ніж)?|менше ніж|до|максимум|up to|at most|less than|under|max(?:imum)?)\s*(₴\s*|uah\s+)?(\d+(?:[,\s]\d{3})*)(?:\s*(тис(?:яч[іу]?)?\.?|k))?(?:\s*(грн|гривень|₴|uah))?(?![\p{L}\d])(?:\s*(?:\/\s*(?:міс(?:яць)?|month)|на місяць|per month|a month))?/giu;
-function extractBudget(query) {
-  let budget=null;
-  const remainder=query.replace(rentLimit,(match,comparison,prefix,number,scale,suffix)=>{
-    if(!prefix && !suffix) return match;
-    const amount=Number(number.replace(/[,\s]/g,""))*(scale ? 1000 : 1);
-    if(!Number.isSafeInteger(amount)) return match;
-    const exclusive=/^(under|less than|менше ніж)/u.test(comparison);
-    const maxRent=amount-(exclusive ? 1 : 0);
-    if(!budget || maxRent<budget.maxRent) budget={amount,maxRent,exclusive};
-    return " ";
-  });
-  return {budget,remainder};
-}
 function formatRent(amount){
   const formatted=amount.toLocaleString(lang ? "en-US" : "uk-UA");
   return lang ? "₴"+formatted : formatted+" грн";
@@ -95,45 +57,6 @@ function formatRent(amount){
 function budgetLabel(budget){
   const prefix=budget.exclusive ? text("Менше ніж ","Under ") : text("До ","Up to ");
   return prefix+formatRent(budget.amount);
-}
-
-function parseRequest(raw) {
-  const choices = new Map();
-  const ignored = [];
-  const normalized = raw.toLowerCase().replace(/[’‘ʼ]/g,"'").replace(/нехай буде/g,"хочу");
-  // Keep the direction in contrast clauses such as "a bed rather than a sofa".
-  const {budget, remainder} = extractBudget(normalized);
-  const clauses = remainder.replace(/\b(rather than)\b/gu, ",not ").replace(/\sа не\s/gu,",не ").split(/[.,;!?\n]+|\s+(?:але|а от|проте|but|however)\s+|\s+(?:і|й|та|and)\s+(?=(?:без|не |хочу|колір|килим|мені|потріб|якщо|no |i |without|don't|not |want |need ))/iu);
-  for(const part of clauses.map(s=>s.trim()).filter(Boolean)) {
-    const found=[];
-    for(const [key,dir,pattern] of phrases) {
-      for(const match of part.matchAll(pattern)) {
-        if(key===1 && !/кух|фасад|кол[іь]ор|кольор|kitchen|cabinet|colou?r/u.test(normalized)) continue;
-        if(key===0 && /на підлозі|floor rug|floor carpet/u.test(part)) continue;
-        found.push({key,dir, start:match.index, end:match.index+match[0].length});
-      }
-    }
-    found.sort((a,b)=>a.start-b.start);
-    if(!found.length) {
-      if(!indifferent.test(part) && !/^(?:тож|і|й|та|мені|будь ласка|please|thanks|дякую|hello|hi|привіт)$/u.test(part)) ignored.push(part);
-      continue;
-    }
-    for(let pos=0;pos<found.length;pos++){
-      const f=found[pos];
-      const before=part.slice(pos?found[pos-1].end:0,f.start);
-      const after=part.slice(f.end,found[pos+1]?.start);
-      if(indifferent.test(before+" "+after)){choices.delete(f.key);continue}
-      const carriesNeg=pos>0 && /^\s*(?:і|й|та|або|and|or)\s*$/u.test(before) && found[pos-1].negated;
-      const sharedNeg=/(?:\bno|\bwithout|без)\s+(?:pets?|parking|тварин|паркінгу)\s+(?:or|and|і|й|або)\s*$/u.test(before);
-      const neg=carriesNeg || sharedNeg || negBefore.test(before.trimEnd()+" ") || negAfter.test(after) || /на\s*$/u.test(before)&&/спати не хочу|спати не буду/u.test(after);
-      f.negated=neg;
-      choices.set(f.key, f.dir*(neg?-1:1));
-    }
-    // Make unsupported location, budget and pet constraints visible even in mixed requests.
-    const unsupported = /метро|тварин|котом|кішк[а-яіїєґ]*|паркінг|поверх|двоспальн[а-яіїєґ]*|односпальн[а-яіїєґ]*|до\s+\d[\d\s]*\s*(?:грн|тисяч)|near (?:the )?metro|parking|pets?|\bcat\b|\b(?:double|single|king|queen|twin)(?:[ -]size[d]?)?(?=\s+bed\b)|under\s+[₴$£€]?\d+/giu;
-    for (const match of part.matchAll(unsupported)) ignored.push(match[0]);
-  }
-  return {choices,budget,ignored:[...new Set(ignored)]};
 }
 
 let lang = Number(document.documentElement.lang === "en");
@@ -146,8 +69,8 @@ function element(tag,cls,content){
   if(content!==undefined) node.textContent=content;
   return node;
 }
-let lastExample=0;
-let applied=t(examples[0].query);
+let lastExample=null;
+let applied="";
 let parsed=parseRequest(applied);
 let gallery=null;
 function photoName(flat,i){return t(flat.photos[i])}
@@ -156,8 +79,7 @@ function picture(flat,i){
  return img;
 }
 function observation(flat,i){
- const facts=flat.facts.filter(f=>f[1]===i&&f[0]!==0).map(f=>t(f[2]));
- return facts.length ? facts.join(". ")+".":text("На фото видно передпокій і вхідні двері.","The photo shows the entrance hall and front door.");
+ return photoDetails[flat.id][i].map(t).join(". ")+ ".";
 }
 function showPhoto(index){
  const flat=gallery.flat, n=flat.photos.length;
@@ -178,50 +100,79 @@ function openDetail(flat,index,trigger){
  });
  showPhoto(index);$("detail").showModal();$("close").focus();
 }
-function sum(flat){let total=parsed.budget ? 1 : 0;for(const [i,dir] of parsed.choices)total+=flat.facts[i][0]*dir;return total}
+function criterionLabel(c){
+  if(c.type==="trait") return t(c.dir>0 ? traits[c.key] : opposites[c.key]);
+  const label=c.type==="place" ? t(c.label) : c.label;
+  return (c.dir<0 ? text("Без: ","Without: ") : "")+label;
+}
 function drawResults(){
- const active=[...parsed.choices.keys()].sort((a,b)=>a-b);
- const conditions=active.map(i=>t(parsed.choices.get(i)>0 ? traits[i] : opposites[i]));
- const {budget}=parsed;
+ const {criteria,budget,ignored}=parsed;
+ const conditions=criteria.map(criterionLabel);
  if(budget) conditions.unshift(budgetLabel(budget));
- $("understood").textContent=conditions.length
-   ? text("Враховано: ","Using: ")+conditions.join(" · ")
-   : text("Спробуй вказати бюджет у гривнях або описати кухню, килим на стіні, спальне місце, стіл, балкон чи ванну.","Try a budget in hryvnias or describe the kitchen, wall rugs, sleeping area, desk, balcony or bath.");
- $("unmatched").textContent=parsed.ignored.length ? text("Поза можливостями демо: ","Outside this demo: ")+parsed.ignored.map(s=>"«"+s+"»").join(", ") : "";
- const order=flats.filter(flat=>!budget || flat.rent<=budget.maxRent)
-   .sort((a,b)=>sum(b)-sum(a) || a.rent-b.rent);
- $("grid").replaceChildren();
- const emptyMessage=text("У цьому бюджеті квартир немає. Найнижча оренда в добірці — ","No flats within this budget. The lowest rent is ")+formatRent(Math.min(...flats.map(f=>f.rent)))+".";
- if(!order.length) $("grid").append(element("p","",emptyMessage));
- for(const flat of order){
-   const points=sum(flat), cover=active.find(i=>flat.facts[i][0]*parsed.choices.get(i)<0)??active.find(i=>flat.facts[i][0]!==0)??active[0]??1;
-   const ix=flat.facts[cover][1],card=element("article","card"),shot=element("button","shot");
-   shot.type="button";shot.setAttribute("aria-label",text("Відкрити фото · ","Open photos · ")+t(flat.name));shot.onclick=()=>openDetail(flat,ix,shot);
+ const searched=Boolean(applied);
+ $("understood").textContent=conditions.length ? text("Враховано: ","Using: ")+conditions.join(" · ") : "";
+ $("unmatched").textContent=ignored.length ? text("Немає даних для перевірки: ","No catalogue evidence for: ")+ignored.map(s=>"«"+s+"»").join(", ") : "";
+ $("legend").hidden=!conditions.length;
+ const order=flats.filter(flat=>!budget || flat.rent<=budget.maxRent).map(flat=>{
+   const evidence=criteria.map(c=>evidenceFor(flat,c));
+   const inBudget=Number(Boolean(budget));
+   return {flat,evidence,points:evidence.reduce((sum,f)=>sum+f.value,inBudget),
+     matches:evidence.filter(f=>f.value>0).length+inBudget};
+ }).sort((a,b)=>b.points-a.points || b.matches-a.matches || a.flat.rent-b.flat.rent);
+ const grid=$("grid");
+ grid.replaceChildren();
+ let summary="";
+ if(searched && !conditions.length){
+   summary=text("Не вдалося перевірити жодну умову. Спробуй описати предмет, колір або деталь інтер’єру.","None of these wishes could be checked. Try an item, a colour or an interior detail.");
+ }else if(!order.length){
+   summary=text("У цьому бюджеті квартир немає. Найнижча оренда в добірці — ","No flats within this budget. The lowest rent is ")+formatRent(Math.min(...flats.map(f=>f.rent)))+".";
+ }else if(searched){
+   const best=Math.max(...order.map(row=>row.matches));
+   if(ignored.length || best<conditions.length){
+     summary=text("Повного збігу немає. Найкращий результат — ","No complete match. The closest flat meets ")+best+text(" з "," of ")+(conditions.length+ignored.length)+text(" умов"," preferences")+".";
+   }
+ }
+ $("coverage").textContent=summary;
+ $("status").textContent=[$("understood").textContent,$("unmatched").textContent,summary].filter(Boolean).join(". ");
+ if(searched && !conditions.length) return;
+ for(const {flat,points,evidence} of order){
+   const cover=evidence.find((f,i)=>f.value>0 && criteria[i].type==="detail")
+     || evidence.find(f=>f.value>0 && f.photo!=null) || evidence.find(f=>f.value<0 && f.photo!=null);
+   const ix=cover?.photo ?? 0;
+   const card=element("article","card"),shot=element("button","shot");
+   shot.type="button";shot.setAttribute("aria-label",text("Відкрити фото · ","Open photos · ")+t(flat.name));
+   shot.onclick=()=>openDetail(flat,ix,shot);
    shot.append(picture(flat,ix),element("span","photo-label",photoName(flat,ix)));
    const body=element("div","cardbody"),head=element("div","cardhead");head.append(element("h3","",t(flat.name)));
    if(conditions.length){
-     const score=element("span","points",(points>0?"+":"")+points);score.dataset.sign=points>0?"plus":points<0?"minus":"zero";head.append(score);
+     const score=element("span","points",(points>0?"+":"")+points);
+     score.dataset.sign=points>0?"plus":points<0?"minus":"zero";head.append(score);
    }
    const list=element("ul","signals");
    if(budget){
-     const row=element("li");
-     const icon=element("span","ico","✓");
-     icon.setAttribute("aria-label",text("Збіг","Match"));
-     row.append(icon,element("span","",flat.rent===budget.amount
-       ? text("Рівно в межах бюджету","Exactly on budget")
-       : formatRent(budget.amount-flat.rent)+text(" до ліміту"," below budget")));
-     list.append(row);
+     const saving=budget.amount-flat.rent;
+     const message=saving ? formatRent(saving)+text(" до ліміту"," below budget") : text("Рівно в межах бюджету","Exactly on budget");
+     list.append(signalRow(flat,1,message,null));
    }
-   for(const i of active){
-     const [value,,label]=flat.facts[i], contribution=value*parsed.choices.get(i), li=element("li");
-     const icon=element("span","ico "+(contribution<0?"bad":contribution===0?"unknown":""),contribution===0?"?":contribution>0?"✓":"×");
-     icon.setAttribute("aria-label",contribution===0?text("Невідомо","Unknown"):contribution>0?text("Збіг","Match"):text("Суперечність","Conflict"));
-     li.append(icon,element("span","",t(label)));list.append(li);
-   }
-   const inspect=element("button","inspect",text(`Переглянути ${flat.photos.length} фото`,`View ${flat.photos.length} photos`));inspect.onclick=()=>openDetail(flat,ix,inspect);
-   body.append(head,element("div","meta",formatRent(flat.rent)+text(" / місяць"," / month")),list,inspect);card.append(shot,body);$("grid").append(card);
+   for(const f of evidence) list.append(signalRow(flat,f.value,t(f.label),f.photo));
+   const inspect=element("button","inspect",text(`Переглянути ${flat.photos.length} фото`,`View ${flat.photos.length} photos`));
+   inspect.onclick=()=>openDetail(flat,ix,inspect);
+   body.append(head,element("div","meta",formatRent(flat.rent)+text(" / місяць"," / month")),list,inspect);
+   card.append(shot,body);grid.append(card);
  }
- $("status").textContent=$("understood").textContent+". "+(order.length ? order.map(f=>t(f.name)+" "+sum(f)).join(", ") : emptyMessage);
+}
+function signalRow(flat,value,label,photo){
+ const li=element("li");
+ const icon=element("span","ico "+(value<0?"bad":value===0?"unknown":""),value===0?"?":value>0?"✓":"×");
+ icon.setAttribute("aria-label",value===0?text("Невідомо","Unknown"):value>0?text("Збіг","Match"):text("Суперечність","Conflict"));
+ li.append(icon);
+ if(photo!=null && value!==0){
+   const proof=element("button","evidence-link",label);
+   proof.type="button";proof.onclick=()=>openDetail(flat,photo,proof);
+   proof.setAttribute("aria-label",label+text(" · відкрити фото"," · open photo"));
+   li.append(proof);
+ }else li.append(element("span","",label));
+ return li;
 }
 function applyQuery(query,example=null){
  $("request").setCustomValidity("");
@@ -240,17 +191,17 @@ function translate(){
   skip:en("До пошуку","Skip to search"),
   "cover-caption":en("Поділ · переглянути кухню","Podil · explore the kitchen"),
   intro:en("Серед дев’яти квартир знайди ту, де тобі буде зручно. Вкажи бюджет і що для тебе важливо вдома, а потім перевір збіги на фото.","Find your fit among nine Kyiv flats. Set a rent limit and describe what matters to you at home, then check the photos behind each match."),
-  question:en("Яку квартиру ти шукаєш?","What are you looking for in a flat?"),
+  question:en("Опиши своїми словами, яку квартиру шукаєш","Describe the flat you’re looking for in your own words"),
   submit:en("Підібрати квартири","Find my matches"),exampleLabel:en("Спробуй запит","Try a request"),
   results:en("Твоя добірка","Your shortlist"),filter:en("Київ · 1 кімната","Kyiv · 1 room"),
   legend:en("Збіг +1 · Суперечність −1 · Не видно на фото 0","Match +1 · Conflict −1 · Not visible 0"),
-  note:en("У Telegram-боті Gemini за фото визначає тип плити, спальне місце, наявність столу та стан санвузла. Килими й колір кухні я додала як приклади для демо. Тут запити розбираються локально, за підготовленими спостереженнями для вигаданих квартир.","In the Telegram bot, Gemini checks photos for the stove type, sleeping arrangement, a usable table and bathroom condition. I added wall rugs and kitchen colours as examples for this demo. It interprets requests locally using prepared observations for these fictional flats."),
+  note:en("У Telegram-боті ти своїми словами описуєш, що для тебе важливо. Gemini розбирає твій запит і аналізує фото оголошень для підбору квартир. Для цієї демки я заздалегідь описала фото дев’яти квартир. Пошук порівнює твої побажання з цими описами прямо у браузері, без підключення до ШІ-моделі.","In the Telegram bot, you describe what matters to you in your own words. Gemini interprets your request and analyses listing photos to help find a flat. For this demo, I wrote descriptions of the photos for nine flats. The search compares your wishes with those descriptions in your browser, without calling an AI model."),
   "photo-origin":en("Фото згенеровано для демо, щоб показати різні інтер’єри без публікації чужих знімків з оголошень.","I generated these interiors for the demo so I could show a range of flats without republishing anyone’s listing photos."),
   close:en("Закрити","Close")};
  for(const [id,label] of Object.entries(copy))$(id).textContent=t(label);
  const rents=flats.map(flat=>flat.rent);
  $("filter").textContent+=" · "+formatRent(Math.min(...rents))+" – "+formatRent(Math.max(...rents))+text("/міс.","/month");
- $("request").placeholder=t(examples[0].query);$("examples").replaceChildren();
+ $("request").placeholder=text("Наприклад, хочу письмовий стіл біля вікна і засклений балкон.","For example, I’d like a desk by the window and an enclosed balcony.");$("examples").replaceChildren();
  examples.forEach(({label,query},i)=>{
    const button=element("button","chip",t(label));button.type="button";
    button.onclick=()=>{

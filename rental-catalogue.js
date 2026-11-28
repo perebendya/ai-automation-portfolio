@@ -21,7 +21,7 @@ const flats = [
  {id:"b", name:en("Лук’янівка","Lukianivka"), rent:16500,
   photos:[en("Кухня","Kitchen"),en("Вітальня","Living room"),en("Душова","Shower room"),en("Відкритий балкон","Open balcony")],
   facts:[
- [1,1,en("Видимі стіни в кімнаті й кухні без килимів","The visible living room and kitchen walls are bare")],
+ [1,1,en("Видимі стіни в кімнаті й кухні без килимів","No wall rugs are visible in the living room or kitchen")],
  [-1,0,en("Лаймові фасади й яскраво-рожева плитка","Lime cabinets and a hot-pink backsplash")],
  [-1,1,en("На фото кімнати видно лише диван","The room photo shows only a sofa")],
  [1,1,en("Біля вікна є письмовий стіл зі стільцем","A desk and chair are visible by the window")],
@@ -118,3 +118,61 @@ const examples = [
     query: en("Хочу яскраву кухню, ванну для купання і без килимів на стінах.", "I want a bright kitchen, a bathtub and no rugs on the walls.")
   }
 ];
+// Each entry describes one visible object or relationship in one gallery photo.
+// A qualified request must match a single entry, so colours and materials stay with their object.
+const photoDetails = {
+  a: [
+    [en("Кремові кухонні шафи з дерев’яною стільницею","Cream kitchen cabinets with a wooden worktop"), en("Вазони на підвіконні кухні","Potted plants on the kitchen windowsill"), en("Біла плита з духовкою","White cooker with an oven")],
+    [en("Бордовий візерунчастий килим на стіні над дерев’яним ліжком","Burgundy patterned wall rug above the wooden bed"), en("Темна дерев’яна шафа біля ліжка","Dark wooden wardrobe beside the bed")],
+    [en("Біла ванна зі шторкою з блакитними квітами","White bathtub with a blue floral shower curtain"), en("Дзеркало над умивальником","Mirror above the bathroom sink")],
+    [en("Засклений балкон із кімнатними рослинами","Enclosed balcony with houseplants")]
+  ],
+  b: [
+    [en("Лаймова кухня з рожевою плиткою","Lime-green kitchen with pink tiles"), en("Круглий дерев’яний обідній стіл","Round wooden dining table"), en("Холодильник біля кухонних шаф","Fridge beside the kitchen cabinets")],
+    [en("Бірюзовий диван із подушками","Teal sofa with cushions"), en("Дві картини в рамках на стіні над диваном","Two framed pictures on the wall above the sofa"), en("Дерев’яний письмовий стіл біля вікна з лампою","Wooden desk by the window with a lamp"), en("Кімнатні рослини біля дивана","Houseplants beside the sofa"), en("Світлий килим на підлозі","Light-coloured floor rug")],
+    [en("Скляна душова кабіна","Glass shower enclosure"), en("Дзеркальна шафка над умивальником","Mirrored cabinet above the sink")],
+    [en("Відкритий балкон із металевими перилами та видом на місто","Open balcony with metal railings and a city view")]
+  ],
+  c: [
+    [en("Приглушена блакитна кухня з дерев’яною стільницею","Muted blue kitchen with a wooden worktop"), en("Ваза з квітами на стільниці","Vase of flowers on the worktop")],
+    [en("Ванна зі скляною перегородкою","Bathtub with a glass screen"), en("Оливкова плитка на стінах ванної кімнати","Olive-green wall tiles in the bathroom"), en("Прямокутне дзеркало над умивальником","Rectangular mirror above the sink")],
+    [en("Настінні гачки для одягу в передпокої","Wall-mounted coat hooks in the hallway"), en("Блакитні вхідні двері","Blue front door")],
+    [en("Дерев’яний письмовий стіл із шухлядами та лампою","Wooden writing desk with drawers and a lamp")]
+  ],
+  d: [
+    [en("Сіро-зелена кухня з газовою плитою","Grey-green kitchen with a gas stove"), en("Вазони на підвіконні","Potted plants on the windowsill")],
+    [en("Бірюзовий диван із пледом","Teal sofa with a throw"), en("Дерев’яний письмовий стіл біля вікна з лампою","Wooden desk by the window with a lamp"), en("Дерев’яна паркетна підлога","Wooden parquet flooring")],
+    [en("Біла ванна зі шторкою","White bathtub with a shower curtain"), en("Блакитна візерунчаста плитка у ванній кімнаті","Blue patterned bathroom tiles")],
+    [en("Відкритий балкон зі складними стільцями та видом на дерева","Open balcony with folding chairs overlooking trees")]
+  ],
+  e: [
+    [en("Червона глянцева кухня","Glossy red kitchen cabinets"), en("Газова плита з духовкою","Gas stove with an oven"), en("Білий холодильник біля вікна","White fridge by the window")],
+    [en("Дерев’яне ліжко з матрацом","Wooden bed with a mattress"), en("Письмовий стіл біля вікна з лампою","Desk by the window with a lamp"), en("Килим на підлозі біля ліжка","Floor rug beside the bed")],
+    [en("Скляна душова кабіна з низьким піддоном","Glass shower stall with a low tray"), en("Дзеркало над умивальником","Mirror above the sink")],
+    [en("Дерев’яна полиця для взуття","Wooden shoe rack"), en("Гачки для одягу біля вхідних дверей","Coat hooks beside the front door")]
+  ],
+  f: [
+    [en("Синя кухня з жовтою плиткою","Blue kitchen cabinets with yellow tiles"), en("Газова плита з духовкою","Gas stove with an oven"), en("Вазон на підвіконні","Potted plant on the windowsill")],
+    [en("Червоний візерунчастий килим на стіні над дерев’яним ліжком","Red patterned wall rug above the wooden bed"), en("Дерев’яна шафа біля ліжка","Wooden wardrobe beside the bed")],
+    [en("Біла ванна зі шторкою","White bathtub with a shower curtain"), en("М’ятна плитка на стіні у ванній кімнаті","Mint-green bathroom wall tiles")],
+    [en("Засклений балкон з рослинами та видом на воду","Enclosed balcony with houseplants and a water view"), en("Крісло біля вазонів на лоджії","Armchair beside potted plants on the loggia")]
+  ],
+  g: [
+    [en("Кремові кухонні шафи","Cream kitchen cabinets"), en("Газова плита з духовкою","Gas stove with an oven")],
+    [en("Коричневий тканинний диван","Brown fabric sofa"), en("Візерунчастий рудий килим на стіні над диваном","Rust-coloured patterned wall rug above the sofa"), en("Дерев’яна паркетна підлога","Wooden parquet flooring")],
+    [en("Скляна душова кабіна з білим піддоном","Glass shower enclosure with a white tray"), en("Арочне дзеркало над умивальником","Arched mirror above the sink")],
+    [en("Полиця для взуття у передпокої","Shoe rack in the hallway"), en("Високе настінне дзеркало","Tall wall mirror")]
+  ],
+  h: [
+    [en("Матова сіра кухня з дерев’яною стільницею","Matte grey kitchen with a wooden worktop"), en("Дерев’яний обідній стіл біля вікна","Wooden dining table by the window"), en("Вбудована духовка","Built-in oven")],
+    [en("Низьке дерев’яне ліжко з матрацом","Low wooden bed with a mattress")],
+    [en("Душ зі скляною перегородкою на рівні підлоги","Walk-in shower with a glass screen"), en("Велика кругла душова лійка","Large round shower head")],
+    [en("Письмовий стіл на заскленому балконі з видом на місто","Desk on an enclosed balcony with a city view"), en("Чорне офісне крісло біля панорамних вікон","Black office chair by panoramic windows")]
+  ],
+  i: [
+    [en("Жовта кухня з бірюзовою плиткою","Yellow kitchen with teal tiles"), en("Круглий дерев’яний обідній стіл","Round wooden dining table"), en("Вбудована духовка","Built-in oven")],
+    [en("Вінтажний оливковий оксамитовий диван із різьбленими дерев’яними ніжками","Vintage olive velvet sofa with carved wooden legs"), en("Червоний візерунчастий килим на підлозі","Red patterned floor rug"), en("Круглий журнальний столик із вазою квітів","Round coffee table with a vase of flowers"), en("Велика кімнатна рослина біля вікна","Large houseplant beside the window")],
+    [en("Біла ванна на ніжках","White claw-foot bathtub"), en("Плетений кошик у ванній кімнаті","Wicker basket in the bathroom")],
+    [en("Відкритий балкон із кованими перилами та видом у двір","Open balcony with wrought-iron railings and a courtyard view"), en("Круглий столик зі скляною стільницею на балконі","Round glass-topped table on the balcony")]
+  ]
+};

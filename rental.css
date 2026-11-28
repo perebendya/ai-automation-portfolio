@@ -70,3 +70,7 @@ dialog::backdrop { background:#14251dd1; }
   .gallery { padding:0 .7rem .7rem; }
   .stage img { height:37vh; }
 }
+#coverage { margin-top:.25rem; color:var(--ink); }
+#coverage:empty, #understood:empty { display:none; }
+.evidence-link { padding:0; border:0; background:none; color:inherit; text-align:start; font:inherit; text-decoration:underline; text-decoration-color:#adb9aa; text-underline-offset:.18em; }
+.evidence-link:hover { color:var(--pine); }
