@@ -1,10 +1,9 @@
 .hero { display:grid; grid-template-columns: 1.05fr 1fr; align-items:center; gap:clamp(1.5rem,5vw,5rem); margin:clamp(1.4rem,3.4vw,3.25rem) 0; }
 .hero h1 em { font-weight:400; color:#386345; }
 .hero .intro { max-width:49ch; margin-top:1.05rem; color:var(--muted); font-size:clamp(1rem,1.3vw,1.14rem); }
-.hero-image { position:relative; display:block; width:100%; padding:0; overflow:hidden; background:#d7d6c6; border:0; border-radius:4px 36px 4px 4px; text-align:start; }
-.hero-image img { display:block; width:100%; height:clamp(210px,20vw,284px); object-fit:cover; object-position:50% 52%; }
-.hero-image span { position:absolute; inset:auto 0 0; display:flex; justify-content:space-between; align-items:end; padding:2rem 1rem .7rem; background:linear-gradient(transparent, #101f18cc); color:white; font-size:.88rem; font-weight:550; }
-.hero-image span::after { content:"↗"; font-size:1.2rem; }
+.hero-image img { display:block; width:100%; height:clamp(210px,20vw,284px); object-fit:cover; object-position:50% 70%; border-radius:4px 36px 4px 4px; }
+.hero-image figcaption { margin-top:.35rem; color:var(--muted); font-size:.78rem; }
+.hero-image figcaption a { color:inherit; }
 .controls { background:#e6ece1; border:1px solid #c8d6c4; border-radius:12px; padding:clamp(1rem,2.3vw,1.8rem); }
 #question { display:block; margin:0 0 .65rem; font-size:1.08rem; font-weight:650; }
 .query-row { display:flex; align-items:stretch; gap:.65rem; }
