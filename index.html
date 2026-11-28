@@ -4,7 +4,7 @@
   <title data-uk="Проєкти · Дарія Кукла">Projects · Dariia Kukla</title>
   <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48 64x64" type="image/x-icon">
   <meta name="description" content="Explore Dariia Kukla’s AI automation projects, interactive demos and work at OBRIO." data-uk-description="Проєкти Дарії Кукли з AI-автоматизації, інтерактивні демо й робочі кейси з OBRIO.">
-  <link rel="stylesheet" href="demo.css?v=footer2"><link rel="stylesheet" href="projects.css?v=3">
+  <link rel="stylesheet" href="demo.css?v=footer2"><link rel="stylesheet" href="projects.css?v=report-card4">
 </head><body>
 <a class="skip" href="#projects" data-uk="До проєктів">Skip to projects</a>
 <header class="masthead"><div class="wrap">
@@ -33,13 +33,17 @@
         </div>
       </a>
       <a class="project-card" href="report.html" data-site-link>
-        <div class="card-art report-art" aria-hidden="true">
-          <div class="sheet-preview"><div class="sheet-head"><span data-uk="Звіт за тиждень">Weekly report</span><span data-uk="6–12 листопада">6–12 Nov</span></div>
-          <div class="sheet-metrics"><div><b>9</b><span data-uk="Унікальних">Distinct alerts</span></div><div><b>2</b><span data-uk="Хибних">False positives</span></div><div><b>2</b><span data-uk="На перевірці">Awaiting review</span></div></div></div>
+        <div class="card-art report-art">
+          <div class="sheet-preview">
+            <p class="sheet-period" data-uk="Модерація · 6–12 листопада">Moderation · 6–12 November</p>
+            <p class="sheet-volume" data-uk="12 сповіщень зі Slack">12 Slack alerts</p>
+            <p class="sheet-result" data-uk="Після вилучення повторів залишилося 9 випадків.">After merging duplicates, 9 cases remained.</p>
+            <p class="sheet-findings" data-uk="У 2 випадках система помилково запідозрила порушення. Ще 2 має перевірити модератор.">Two were false alarms. Two more need a moderator’s review.</p>
+          </div>
         </div>
         <div class="card-copy"><h3 data-uk="Звіт про модерацію в n8n">Moderation report in n8n</h3>
-          <p data-uk="Вибери тиждень, переглянь повідомлення й познач хибне спрацювання. Звіт одразу перерахує показники.">Choose a week, inspect the alerts and mark a false positive. See the report update with your decision.</p>
-          <span class="card-action" data-uk="Зібрати звіт">Build a report</span>
+          <p data-uk="Раніше менеджер вручну зводив сповіщення й коментарі зі Slack. Я автоматизувала цей звіт у n8n і заощадила команді близько 4 годин на тиждень.">Our manager used to compile Slack alerts and moderator notes by hand. I automated the weekly report in n8n, saving the team about 4 hours a week.</p>
+          <span class="card-action" data-uk="Спробувати демо звіту">Try the report demo</span>
         </div>
       </a>
       <a class="project-card" href="boardgames.html" data-site-link>
