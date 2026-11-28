@@ -4,7 +4,7 @@
   <meta name="description" content="How I automated a manager’s weekly moderation report in n8n. Review a fictional Slack alert and see how your decision changes the report." data-uk-description="Як я автоматизувала щотижневий звіт про модерацію в n8n. Перевір вигадане сповіщення зі Slack і подивись, як твоє рішення вплине на звіт.">
   <title data-uk="Щотижневий звіт про модерацію · Дарія Кукла">Weekly moderation report · Dariia Kukla</title>
   <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48 64x64" type="image/x-icon">
-  <link rel="stylesheet" href="demo.css?v=footer2"><link rel="stylesheet" href="report.css?v=n8n-palette">
+  <link rel="stylesheet" href="demo.css?v=footer2"><link rel="stylesheet" href="report.css?v=slack-thread">
 </head><body>
 <a class="skip" href="#week" data-uk="До вибору періоду">Skip to report controls</a>
 <header class="masthead"><div class="wrap">
@@ -49,7 +49,10 @@
         </div>
       </section>
       <section class="panel inbox-panel" aria-labelledby="inbox-heading">
-        <div class="panel-head"><h3 id="inbox-heading" data-uk="Що надійшло зі Slack">What came in from Slack</h3><span id="inbox-count"></span></div>
+        <header class="channel-head">
+          <p data-uk="Демоканал Slack">Slack demo channel</p>
+          <div><h3 id="inbox-heading"><span aria-hidden="true">#</span> <span data-uk="модерація">moderation</span></h3><span id="inbox-count"></span></div>
+        </header>
         <div id="inbox"></div>
         <details id="more-messages"><summary></summary><div id="inbox-rest"></div></details>
       </section>
@@ -179,8 +182,18 @@ const ukrainian = {
   "Moderator notes including your decisions": "Коментарі модераторів із твоїми рішеннями",
   "false alarm confirmed.": "хибне спрацювання підтверджено.",
   "violation confirmed.": "порушення підтверджено.",
-  "Show the other 6 messages": "Показати ще 6 повідомлень",
-  "Hide the last 6 messages": "Згорнути останні 6 повідомлень",
+  "Show 6 more alerts": "Показати ще 6 сповіщень",
+  "Hide the last 6 alerts": "Згорнути останні 6 сповіщень",
+  "alerts": "сповіщень", "Moderation bot": "Бот модерації", "Moderator": "Модератор",
+  "App": "Застосунок", "Your reply": "Твоя відповідь", "View in report": "Перевірити у звіті",
+  "Merged in the report with": "У звіті об’єднано з",
+  "Message excerpt": "Фрагмент повідомлення", "Audio transcript": "Розшифровка аудіо", "Photo description": "Опис фото",
+  "This may contain contact details.": "Тут можуть бути особисті контактні дані.",
+  "A keyword was flagged in the transcript.": "У розшифровці спрацювало ключове слово.",
+  "A reference photo was shared.": "Надіслано фото для прикладу.",
+  "This may be an attempt to move the conversation outside the app.": "Схоже, розмову хочуть перенести за межі застосунку.",
+  "This may be a photo of a document.": "Схоже, на фото документ.",
+  "This may be a request for payment outside the app.": "Схоже, співрозмовник просить оплату поза застосунком.",
   "Block reason not provided": "Причину блокування не вказано",
 
   "Text": "Текст", "Audio": "Аудіо", "Photo": "Фото", "Expert blocks": "Блокування експертів",
@@ -299,26 +312,73 @@ function drawReviews(messages) {
   }
 }
 
+const alertText = {
+  'Possible contact details': 'This may contain contact details.',
+  'Transcript keyword': 'A keyword was flagged in the transcript.',
+  'Reference image': 'A reference photo was shared.',
+  'External contact': 'This may be an attempt to move the conversation outside the app.',
+  'Document photo': 'This may be a photo of a document.',
+  'Payment request': 'This may be a request for payment outside the app.'
+};
+const excerptLabels = {Text: 'Message excerpt', Audio: 'Audio transcript', Photo: 'Photo description'};
+
+function avatar(role) {
+  const icon = el('span', '', 'avatar avatar-' + role);
+  icon.setAttribute('aria-hidden', 'true');
+  return icon;
+}
+
+function channelMessage(row, original) {
+  const post = el('article', '', 'channel-post');
+  post.id = 'slack-' + row.id;
+  post.tabIndex = -1;
+  const body = el('div', '', 'post-body');
+  const byline = el('div', '', 'post-byline');
+  byline.append(el('strong', tr('Moderation bot')), el('span', tr('App'), 'app-tag'), el('small', row.id, 'post-id'));
+  body.append(byline);
+  if (row.kind === 'Expert blocks') {
+    body.append(el('p', tr(row.body)));
+  } else {
+    body.append(el('p', tr(alertText[row.type] || row.type)));
+    const excerpt = el('div', '', 'post-excerpt');
+    excerpt.append(el('small', tr(excerptLabels[row.kind])), el('p', tr(row.body)));
+    body.append(excerpt);
+  }
+  if (original) {
+    const merged = el('p', tr('Merged in the report with') + ' ', 'post-info');
+    const link = el('a', original);
+    link.href = '#slack-' + original;
+    merged.append(link);
+    body.append(merged);
+  }
+  if (row.note) {
+    const reply = el('div', '', 'thread-reply');
+    const response = el('div', '');
+    response.append(el('strong', tr(reviewed.has(row.id) ? 'Your reply' : 'Moderator')), el('p', tr(row.note)));
+    reply.append(avatar('moderator'), response);
+    body.append(reply);
+  } else if (row.thumb) {
+    body.append(el('small', tr('Marked as a false positive')));
+  } else if (reviewCases[row.id]) {
+    const review = el('a', tr('View in report'), 'post-review');
+    review.href = '#decision-' + row.id;
+    body.append(review);
+  }
+  post.append(avatar('bot'), body);
+  return post;
+}
+
 function drawInbox(messages) {
   const inbox = byId('inbox');
   const rest = byId('inbox-rest');
   inbox.replaceChildren();
   rest.replaceChildren();
-  byId('inbox-count').textContent = messages.length + ' ' + tr('messages');
+  byId('inbox-count').textContent = messages.length + ' ' + tr('alerts');
   const originals = new Map();
   for (const [index, row] of messages.entries()) {
-    const item = el('article', '', 'item');
-    const header = el('div', '', 'item-head');
-    header.append(el('span', row.id, 'item-id'), el('small', tr(row.kind)));
-    if (originals.has(row.key)) {
-      header.append(el('small', tr('Repeat of') + ' ' + originals.get(row.key), 'duplicate'));
-    } else {
-      originals.set(row.key, row.id);
-    }
-    item.append(header, el('p', tr(row.body)));
-    if (row.note) item.append(el('p', tr('Moderator note') + ' · ' + tr(row.note), 'muted'));
-    else if (row.thumb) item.append(el('small', tr('Marked as a false positive')));
-    (index < 6 ? inbox : rest).append(item);
+    const original = originals.get(row.key);
+    (index < 6 ? inbox : rest).append(channelMessage(row, original));
+    if (!original) originals.set(row.key, row.id);
   }
 }
 
@@ -388,7 +448,7 @@ function drawView({newWeek = false} = {}) {
 
 function labelInboxToggle() {
   const details = byId('more-messages');
-  details.querySelector('summary').textContent = tr(details.open ? 'Hide the last 6 messages' : 'Show the other 6 messages');
+  details.querySelector('summary').textContent = tr(details.open ? 'Hide the last 6 alerts' : 'Show 6 more alerts');
 }
 byId('more-messages').addEventListener('toggle', labelInboxToggle);
 
