@@ -67,7 +67,7 @@ function relatedObjects(tokens){
 
 // Prices, ordering and visual evidence have different semantics. Consume price expressions
 // first so their words never become a requested object or a point in the photo score.
-const UAH_AMOUNT=String.raw`(?:₴\s*|uah\s+)?\d+(?:[ ,.]\d{3})*(?:[.,]\d{1,2})?(?:\s*(?:тис(?:яч[уаі]?)?\.?|[кk]))?(?:\s*(?:грн\.?|гривень|гривні|uah|₴))?`;
+const UAH_AMOUNT=String.raw`(?:₴\s*|uah\s+)?\d+(?:[ ,.]\d{3})*(?:[.,]\d{1,2})?(?:\s*(?:тис(?:яч[уаі]?)?\.?|thousand|[кk]))?(?:\s*(?:грн\.?|гривень|гривні|hryvnias?|uah|₴))?`;
 const foreignOrOtherUnit=/^\s*(?:[$€£]|usd|eur|gbp|долар|євро|bucks?|dollars?|euros?|хвилин|метр|кілометр|поверх|кімнат|minutes?|metres?|floors?|rooms?)/iu;
 const moneyExpression=source=>new RegExp("(?<![\\p{L}\\d$€£])(?:"+source+")(?![\\p{L}\\d])","giu");
 const rentRange=moneyExpression(
@@ -79,14 +79,39 @@ const rentBound=moneyExpression(String.raw`(?:(?:мій бюджет|бюдже�
 const rentOrdering=[
   ["asc", /від\s+(?:най)?дешев[а-яіїєґ]*\s+до\s+(?:най)?дорож[а-яіїєґ]*|(?:price|rent)?\s*low to high/gu],
   ["desc", /від\s+(?:най)?дорож[а-яіїєґ]*\s+до\s+(?:най)?дешев[а-яіїєґ]*|(?:price|rent)?\s*high to low/gu],
-  ["asc", /(?:якнай|най|якомога\s+)?дешев(?:ше|ш[а-яіїєґ]*|[а-яіїєґ]*)|подешевше|недорог[а-яіїєґ]*|бюджетн(?:а|ий|у|е|і)|за зростанням ціни|від нижчої ціни|(?:найменш[ау]|найнижч[ау]|мінімальн[ау]) (?:ціна|ціну|оренда|оренду)|(?:as )?cheap as possible|(?:the )?(?:cheapest|least expensive|most affordable|lowest (?:price|rent))|(?:cheap|affordable|budget-friendly)(?=\s+(?:flat|rent|apartment)\b|\s*$)/gu],
-  ["desc", /(?:якнай|най)дорожч[а-яіїєґ]*|(?:спочатку|спершу)\s+дорожч[а-яіїєґ]*|за спаданням ціни|(?:найвищ[ау]|максимальн[ау]) (?:ціна|ціну|оренда|оренду)|(?:the )?(?:most expensive|highest (?:price|rent)|priciest)/gu]
+  ["asc", /(?:якнай|най|якомога\s+)?дешев(?:ше|ш[а-яіїєґ]*|[а-яіїєґ]*)|подешевше|недорог[а-яіїєґ]*|бюджетн(?:а|ий|у|е|і)|за зростанням ціни|(?:ціна|ціною) (?:за зростанням|по зростанню)|від нижчої ціни|(?:найменш[ау]|найнижч[ау]|мінімальн[ау]) (?:ціна|ціну|оренда|оренду)|(?:as )?cheap as possible|(?:the )?(?:cheapest|least expensive|most affordable|lowest (?:price|rent))|(?:cheap|affordable|budget-friendly)(?=\s+(?:flat|rent|apartment)\b|\s*$)/gu],
+  ["desc", /(?:якнай|най)дорожч[а-яіїєґ]*|(?:спочатку|спершу)\s+дорожч[а-яіїєґ]*|за спаданням ціни|(?:ціна|ціною) (?:за спаданням|по спаданню)|(?:найвищ[ау]|максимальн[ау]) (?:ціна|ціну|оренда|оренду)|(?:the )?(?:most expensive|highest (?:price|rent)|priciest)/gu]
 ];
 function readAmount(raw){
-  const scaled=/(?:тис|[кk])/iu.test(raw);
-  const marked=scaled || /₴|uah|грн|грив/iu.test(raw);
+  const scaled=/(?:тис|thousand|[кk])/iu.test(raw);
+  const marked=scaled || /₴|uah|грн|грив|hryvnia/iu.test(raw);
   const digits=raw.match(/\d[\d., ]*/u)[0].trim().replace(/\s/g,"").replace(/[.,](?=\d{3}(?:\D|$))/g,"").replace(",",".");
   return {value:Number(digits)*(scaled?1000:1),marked,scaled};
+}
+// Normalize written thousands only inside a money expression.
+const moneyNumbers=[
+  [1,"одна одну однієї one"],[2,"дві двох two"],[3,"три трьох three"],[4,"чотири чотирьох four"],
+  [5,"п'ять п'яти five"],[6,"шість шести six"],[7,"сім семи seven"],[8,"вісім восьми eight"],[9,"дев'ять дев'яти nine"],
+  [10,"десять десяти ten"],[11,"одинадцять одинадцяти eleven"],[12,"дванадцять дванадцяти twelve"],
+  [13,"тринадцять тринадцяти thirteen"],[14,"чотирнадцять чотирнадцяти fourteen"],[15,"п'ятнадцять п'ятнадцяти fifteen"],
+  [16,"шістнадцять шістнадцяти sixteen"],[17,"сімнадцять сімнадцяти seventeen"],[18,"вісімнадцять вісімнадцяти eighteen"],
+  [19,"дев'ятнадцять дев'ятнадцяти nineteen"],[20,"двадцять двадцяти twenty"],[30,"тридцять тридцяти thirty"],
+  [40,"сорок сорока forty"],[50,"п'ятдесят п'ятдесяти fifty"],[60,"шістдесят шістдесяти sixty"],
+  [70,"сімдесят сімдесяти seventy"],[80,"вісімдесят вісімдесяти eighty"],[90,"дев'яносто дев'яноста ninety"],[100,"сто ста hundred"]
+];
+const writtenNumbers=new Map(moneyNumbers.flatMap(([n,forms])=>forms.split(" ").map(word=>[word,n])));
+const numberForms=[...writtenNumbers.keys()].sort((a,b)=>b.length-a.length).join("|");
+const counterWord="(?:тис|thousand)";
+const writtenOperand="(?:"+numberForms+")";
+const writtenMoney=new RegExp("(?<![\\p{L}])("+writtenOperand+")(?:(?: |-)("+writtenOperand+"))?"+
+  "(?=\\s*(?:"+counterWord+"|(?:до|to|and)\\s+(?:[\\d]+|"+writtenOperand+"(?: "+writtenOperand+")?)\\s*"+counterWord+"))","gu");
+function normalizeMoneyWords(query){
+  return query.replace(writtenMoney,(full,first,second)=>{
+    const value=writtenNumbers.get(first);
+    if(!second) return String(value);
+    const units=writtenNumbers.get(second);
+    return value>=20 && value%10===0 && units<10 ? String(value+units) : full;
+  });
 }
 function parsePrice(query){
   let budget=null,sort="match",anyRent=false;
@@ -105,7 +130,7 @@ function parsePrice(query){
     if(foreignOrOtherUnit.test(input.slice(offset+full.length)) || /(?:[$€£]|usd|eur|gbp)\s*$/iu.test(input.slice(0,offset))) return false;
     return amounts.every(a=>Number.isSafeInteger(a.value)) && amounts.some(a=>a.marked || a.value>=1000);
   }
-  let remainder=query.replace(priceAside,()=>{anyRent=true;return ","});
+  let remainder=normalizeMoneyWords(query).replace(priceAside,()=>{anyRent=true;return ","});
   remainder=remainder.replace(rentRange,(full,left,right,offset,input)=>{
     const a=readAmount(left),b=readAmount(right);
     if(!inHryvnias(full,offset,input,[a,b])) return full;
@@ -171,8 +196,8 @@ const vocabulary = [
   ["frame", /^(?:рам[кц].*|рамі|framed|frames?)$/u],
   ["velvet", /^(?:оксамит.*|велюр.*|velvet)$/u]
 ];
-const neutralWords=new Set(("я ми мені нам мене оренда оренди район районі райончику хотілось хочеться можна знайти оселю треба потрібен потрібна потрібне потрібні потрібний потрібно хочу тільки лише щось шось покажи показати підбери знайди давай максимально десь таке якомусь якомога от там реально просто прям прямо дуже хочеться хотіла хотів б би щоб щоби аби була був було були буде бути є мав мала мали має мають шукаю шукаємо квартиру квартира квартирі квартири житло помешкання орендувати бажано подобається подобаються люблю вітаю привіт будь ласка ще також тільки тож і й та а з зі із на над у в до за під для біля поруч коло від при там де що який яка яке які цей ця це ці " +
-  "i i'd i’d id would like want need looking for am we my me a an the it its with at on of in to by and or please that has have is be prefer flat flats apartment apartments rental also really just something somewhere very some any i'm we're rent renting love somewhere ideally hoping find show give nice should can could get beside near above next there so " +
+const neutralWords=new Set(("я ми мені нам мене оренда оренди район районі райончику хотілось хочеться можна знайти оселю треба потрібен потрібна потрібне потрібні потрібний потрібно хочу тільки лише щось шось покажи показати підбери знайди давай максимально десь таке якомусь якомога от там реально просто прям прямо дуже хочеться хотіла хотів б би щоб щоби аби була був було були буде бути є мав мала мали має мають шукаю шукаємо зняти винайняти варіант варіанти варіантів однушку однокімнатну однокімнатна квартиру квартира квартирі квартири житло помешкання орендувати бажано подобається подобаються люблю вітаю привіт будь ласка ще також тільки тож і й та а з зі із на над у в до за під для біля поруч коло від при там де що який яка яке які цей ця це ці " +
+  "i i'd i’d id would like want need looking for am we my me a an the it its with at on of in to by and or please that has have is be prefer options listings flat flats apartment apartments rental also really just something somewhere very some any i'm we're rent renting love somewhere ideally hoping find show give nice should can could get beside near above next there so " +
   "без не жодних жодного жодної жоден ніяких уникаю without no not avoid hate don't rather than").split(/\s+/u));
 function words(value){
   return value.toLowerCase().normalize("NFKC").replace(/[’‘ʼ]/gu,"'").match(/[\p{L}\d]+(?:'[\p{L}]+)*/gu)||[];

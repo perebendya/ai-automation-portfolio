@@ -92,3 +92,27 @@ test("offer a catalogue spelling while preserving the other wishes and exact bud
   assert.equal(spellingSuggestion("до 15000, рожева плитка"), null);
   assert.equal(spellingSuggestion("ліфт і метро"), null);
 });
+
+test("spoken budgets support compound amounts and do not convert unrelated quantities", () => {
+  for (const [query,min,max] of [
+    ["до двадцяти тисяч із балконом",0,20000],
+    ["від п’ятнадцяти до двадцяти двох тисяч",15000,22000],
+    ["up to twenty-one thousand hryvnias",0,21000],
+    ["between fifteen and twenty thousand UAH",15000,20000]
+  ]) {
+    const {budget} = parseRequest(query);
+    assert.equal(budget.minRent,min,query);
+    assert.equal(budget.maxRent,max,query);
+  }
+  assert.equal(parseRequest("до двадцяти хвилин від метро").budget, null);
+  assert.equal(parseRequest("до двадцяти тисяч доларів").budget, null);
+});
+test("ordinary introductions and sort directions preserve the requested item", () => {
+  const pink = parseRequest("покажи варіанти з рожевою плиткою до 17000 гривень");
+  assert.equal(pink.ignored.length,0);
+  assert.equal(rankRentals(pink)[0].flat.id,"b");
+  assert.equal(rankRentals(pink)[0].matches,2);
+  const balcony = parseRequest("зняти однушку до 20000 з балконом");
+  assert.equal(rankRentals(balcony)[0].matches,2);
+  assert.equal(parseRequest("килим, балкон, ціна по зростанню").sort,"asc");
+});
