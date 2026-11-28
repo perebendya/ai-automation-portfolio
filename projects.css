@@ -7,7 +7,8 @@
 .project-card:hover { border-color:var(--pine); }
 .project-card:hover .card-action { text-decoration-thickness:2px; }
 .card-art { height:clamp(10rem,17vw,14.5rem); overflow:hidden; }
-.rental-art img { display:block; width:100%; height:100%; object-fit:cover; object-position:50% 55%; }
+.card-art > img { display:block; width:100%; height:100%; object-fit:cover; object-position:50% 55%; }
+.game-art > img { object-position:60% 48%; }
 /* A small view of the moderation workflow, from the Slack channels to the report. */
 .report-art {
   display:grid; place-items:center; background-color:#191919;
@@ -57,22 +58,6 @@
 @media(max-width:760px) {
   .project-grid { grid-template-columns:1fr; }
 }
-
-
-.game-art {
-  display:flex; align-items:center; justify-content:center; gap:1.05rem;
-  background-color:#233d47;
-  background-image:conic-gradient(#2c4c58 25%,transparent 0 50%,#2c4c58 0 75%,transparent 0);
-  background-size:3.75rem 3.75rem;
-}
-.die {
-  --pip:radial-gradient(circle,#233d47 0 9%,transparent 10%);
-  width:3.9rem; height:3.9rem; border-radius:.7rem; background-color:#fff9e6;
-  box-shadow:0 .32rem 0 #b7c2bf,0 .65rem .8rem #11232960;
-}
-.die.five { transform:rotate(-14deg); background-image:var(--pip),var(--pip),var(--pip),var(--pip),var(--pip);
-  background-position:center,top left,top right,bottom left,bottom right; background-size:100% 100%,50% 50%,50% 50%,50% 50%,50% 50%; background-repeat:no-repeat; }
-.die.two { transform:translateY(.7rem) rotate(14deg); background-image:radial-gradient(circle at 27% 27%,#233d47 0 8%,transparent 9%),radial-gradient(circle at 73% 73%,#233d47 0 8%,transparent 9%); }
 
 .casework .case-screen {
   display:block;
