@@ -3,9 +3,16 @@
 .portfolio-intro .intro { margin-top:1rem; max-width:64ch; color:var(--muted); font-size:clamp(1rem,1.4vw,1.15rem); }
 #demo-heading, .casework h2 { margin-bottom:1rem; }
 .project-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:clamp(1rem,2.4vw,2rem); }
-.project-card { display:flex; flex-direction:column; overflow:hidden; border:1px solid var(--line); border-radius:10px; color:var(--ink); background:var(--surface); text-decoration:none; }
-.project-card:hover { border-color:var(--pine); }
-.project-card:hover .card-action { text-decoration-thickness:2px; }
+.project-card { display:flex; flex-direction:column; overflow:hidden; border-radius:10px; color:var(--ink); background:var(--surface); box-shadow:var(--surface-shadow); text-decoration:none; }
+.project-card:has(.report-art) { --glow-rgb: 121 69 84; }
+.project-card:has(.game-art) { --glow-rgb: 135 93 44; }
+@media (hover: hover) and (pointer: fine) {
+  .project-card { transition: box-shadow 360ms var(--hover-ease), transform 360ms var(--hover-ease); }
+  .project-card:hover { box-shadow: 0 3px 9px rgb(var(--glow-rgb) / 9%), 0 12px 32px rgb(var(--glow-rgb) / 13%); }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .project-card:hover { transform: translateY(-2px); }
+}
 .card-art { height:clamp(10rem,17vw,14.5rem); overflow:hidden; }
 .card-art > img { display:block; width:100%; height:100%; object-fit:cover; object-position:50% 55%; }
 .rental-art > img { object-position:50% 72%; }
@@ -65,14 +72,13 @@
   width:100%;
   height:auto;
   margin:0 0 1.25rem;
-  border:1px solid var(--line);
   border-radius:8px;
 }
 .screen-scroll { border-radius:8px; }
 .pan-hint { display:none; }
 @media(max-width:640px) {
-  .screen-scroll { overflow-x:auto; border:1px solid var(--line); }
+  .screen-scroll { overflow-x:auto; }
   .screen-scroll:focus-visible { outline-offset:2px; }
-  .casework .case-screen { width:66rem; max-width:none; margin:0; border:0; border-radius:0; }
+  .casework .case-screen { width:66rem; max-width:none; margin:0; border-radius:0; }
   .pan-hint { display:block; color:var(--muted); margin:.4rem 0 1rem; font-size:.83rem; }
 }
