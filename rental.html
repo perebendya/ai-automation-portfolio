@@ -7,7 +7,7 @@
   <title data-uk="Пошук житла · Дарія Кукла">AI Rental Assistant · Dariia Kukla</title>
   <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48 64x64" type="image/x-icon">
   <link rel="stylesheet" href="demo.css?v=footer2">
-  <link rel="stylesheet" href="rental.css?v=preferences2">
+  <link rel="stylesheet" href="rental.css?v=rentplan4">
 </head>
 <body>
 <a class="skip" href="#query" id="skip"></a>
@@ -30,7 +30,21 @@
     <label for="request" id="question"></label><div class="query-row"><textarea rows="2" maxlength="700" id="request" required></textarea><button class="primary" id="submit" type="submit"></button></div>
   </form><div class="samples"><small id="exampleLabel"></small><div id="examples" class="chips"></div></div></section>
   <section aria-labelledby="results"><div class="linehead"><h2 id="results" tabindex="-1"></h2><span id="filter"></span></div>
-    <p id="understood"></p><p id="unmatched"></p><p id="coverage"></p><div id="related" class="chips" hidden></div><p id="legend"></p><div id="status" class="sronly" role="status"></div><div class="grid" id="grid"></div>
+    <p id="understood"></p><p id="unmatched"></p><p id="coverage"></p>
+    <details class="refine" id="refine">
+      <summary id="refine-title"></summary>
+      <form id="refine-form">
+        <div class="refine-fields">
+          <label><span id="min-label"></span><input id="min-rent" type="number" min="0" step="1" inputmode="numeric"></label>
+          <label><span id="max-label"></span><input id="max-rent" type="number" min="0" step="1" inputmode="numeric"></label>
+          <label><span id="sort-label"></span><select id="rent-sort"></select></label>
+          <label><span id="add-label"></span><select id="add-criterion"></select></label>
+        </div>
+        <div id="active-criteria" class="active-criteria"></div>
+        <button type="submit" class="chip" id="refine-apply"></button>
+      </form>
+    </details>
+    <div id="spelling" class="chips" hidden></div><div id="related" class="chips" hidden></div><p id="legend"></p><div id="status" class="sronly" role="status"></div><div class="grid" id="grid"></div>
     <p class="rental-note" id="note"></p>
   </section>
 </main>
@@ -47,16 +61,19 @@
 </dialog>
 
 <script src="portfolio.js"></script>
-<script src="rental-catalogue.js?v=conversations3"></script>
-<script src="rental-search.js?v=conversations3"></script>
+<script src="rental-catalogue.js?v=rentplan4"></script>
+<script src="rental-search.js?v=rentplan4"></script>
 <script>
 function formatRent(amount){
   const formatted=amount.toLocaleString(lang ? "en-US" : "uk-UA");
   return lang ? "₴"+formatted : formatted+" грн";
 }
 function budgetLabel(budget){
-  const prefix=budget.exclusive ? text("Менше ніж ","Under ") : text("До ","Up to ");
-  return prefix+formatRent(budget.amount);
+  const {lower,upper}=budget;
+  const parts=[];
+  if(lower) parts.push((lower.exclusive?text("Понад ","Over "):text("Від ","From "))+formatRent(lower.amount));
+  if(upper) parts.push((upper.exclusive?text("Менше ніж ","Under "):text("До ","Up to "))+formatRent(upper.amount));
+  return parts.join(" · ");
 }
 
 let lang = Number(document.documentElement.lang === "en");
@@ -101,6 +118,7 @@ function openDetail(flat,index,trigger){
  showPhoto(index);$("detail").showModal();$("close").focus();
 }
 function criterionLabel(c){
+  if(c.type==="any") return c.options.map(criterionLabel).join(text(" або "," or "));
   if(c.type==="trait") return t(c.dir>0 ? traits[c.key] : opposites[c.key]);
   const label=c.type==="place" ? t(c.label) : c.label;
   return (c.dir<0 ? text("Без: ","Without: ") : "")+label;
@@ -109,19 +127,23 @@ function drawResults(){
  const {criteria,budget,anyRent,ignored}=parsed;
  const conditions=criteria.map(criterionLabel);
  if(budget) conditions.unshift(budgetLabel(budget));
- const searched=Boolean(applied);
- const interpreted=anyRent ? [...conditions,text("Без обмеження за ціною","No rent limit")] : conditions;
+ const searched=Boolean(applied || conditions.length || parsed.sort!=="match");
+ const unrecognized=searched && !conditions.length && parsed.sort==="match" && (ignored.length>0 || (!anyRent && !parsed.manuallyAdjusted));
+ const interpreted=anyRent ? [...conditions,text("Без обмеження за ціною","No rent limit")] : [...conditions];
+ if(parsed.sort!=="match") interpreted.push(t(sortLabels[parsed.sort]));
  $("understood").textContent=interpreted.length ? text("Враховано: ","Using: ")+interpreted.join(" · ") : "";
  const unsupported=[...ignored,...criteria.filter(c=>c.approximate).map(c=>c.label)];
  $("unmatched").textContent=unsupported.length ? text("Немає повного підтвердження: ","No full evidence for: ")+unsupported.map(s=>"«"+s+"»").join(", ") : "";
  $("legend").hidden=!conditions.length;
- const order=flats.filter(flat=>!budget || flat.rent<=budget.maxRent).map(flat=>{
-   const evidence=criteria.map(c=>evidenceFor(flat,c));
-   const inBudget=Number(Boolean(budget));
-   return {flat,evidence,points:evidence.reduce((sum,f)=>sum+f.value,inBudget),
-     matches:evidence.filter(f=>f.value===1).length+inBudget,
-     support:evidence.reduce((sum,f)=>sum+(f.support||0),0)};
- }).sort((a,b)=>b.points-a.points || b.matches-a.matches || b.support-a.support || a.flat.rent-b.flat.rent);
+ const order=rankRentals(parsed);
+ const spelling=$("spelling");
+ const correction=unsupported.length && !parsed.manuallyAdjusted ? spellingSuggestion(applied) : null;
+ spelling.replaceChildren();spelling.hidden=!correction;
+ if(correction){
+   const button=element("button","chip",correction);button.type="button";
+   button.onclick=()=>{$("request").value=correction;applyQuery(correction);$("results").focus()};
+   spelling.append(element("span","",text("Можливо, йдеться про","Did you mean")),button);
+ }
  const related=$("related");
  related.replaceChildren();
  related.hidden=conditions.length>0 || !parsed.suggestions.length;
@@ -137,10 +159,11 @@ function drawResults(){
  const grid=$("grid");
  grid.replaceChildren();
  let summary="";
- if(searched && !conditions.length && (!anyRent || ignored.length>0)){
+ if(unrecognized){
    summary=text("Не вдалося перевірити жодну умову. Спробуй описати предмет, колір або деталь інтер’єру.","None of these wishes could be checked. Try an item, a colour or an interior detail.");
  }else if(!order.length){
-   summary=text("У цьому бюджеті квартир немає. Найнижча оренда в добірці — ","No flats within this budget. The lowest rent is ")+formatRent(Math.min(...flats.map(f=>f.rent)))+".";
+   summary=text("У цьому бюджеті квартир немає. ","No flats within this budget. ")+
+     (budget.maxRent<Math.min(...flats.map(f=>f.rent)) ? text("Найнижча оренда — ","The lowest rent is ")+formatRent(Math.min(...flats.map(f=>f.rent)))+"." : text("Зміни межі оренди в уточненнях.","Adjust the rent range below."));
  }else if(searched){
    const best=Math.max(...order.map(row=>row.matches));
    const hasPartial=order.some(row=>row.evidence.some(f=>f.value===0.5));
@@ -153,11 +176,16 @@ function drawResults(){
      }
    }else if(ignored.length || best<conditions.length){
      summary=text("Повного збігу немає. Найкращий результат — ","No complete match. The closest flat meets ")+best+text(" з "," of ")+(conditions.length+ignored.length)+text(" умов"," preferences")+".";
+   }else if(parsed.sort!=="match"){
+     const full=order.filter(row=>row.matches===conditions.length);
+     const leader=full[0].flat;
+     const prefix=parsed.sort==="asc" ? text("Найнижча оренда","Lowest rent") : text("Найвища оренда","Highest rent");
+     summary=prefix+(criteria.length ? text(" серед повних збігів"," among full matches") : "")+" — "+formatRent(leader.rent)+text("/міс. · ","/month · ")+t(leader.name)+".";
    }
  }
  $("coverage").textContent=summary;
  $("status").textContent=[$("understood").textContent,$("unmatched").textContent,summary].filter(Boolean).join(". ");
- if(searched && !conditions.length && (!anyRent || ignored.length>0)) return;
+ if(unrecognized) return;
  for(const {flat,points,evidence} of order){
    const cover=evidence.find((f,i)=>f.value===1 && criteria[i].type==="detail")
      || evidence.find(f=>f.value>0 && f.photo!=null) || evidence.find(f=>f.value<0 && f.photo!=null);
@@ -173,8 +201,8 @@ function drawResults(){
    }
    const list=element("ul","signals");
    if(budget){
-     const saving=budget.amount-flat.rent;
-     const message=saving ? formatRent(saving)+text(" до ліміту"," below budget") : text("Рівно в межах бюджету","Exactly on budget");
+     const saving=budget.upper ? budget.upper.amount-flat.rent : 0;
+     const message=budget.lower ? budgetLabel(budget) : saving ? formatRent(saving)+text(" до ліміту"," below budget") : text("Рівно в межах бюджету","Exactly on budget");
      list.append(signalRow(flat,1,message,null));
    }
    for(const f of evidence) list.append(signalRow(flat,f.value,t(f.label),f.photo));
@@ -199,7 +227,7 @@ function signalRow(flat,value,label,photo){
 }
 function applyQuery(query,example=null){
  $("request").setCustomValidity("");
- lastExample=example;applied=query.trim();parsed=parseRequest(applied);drawResults();
+ lastExample=example;applied=query.trim();parsed=parseRequest(applied);drawResults();syncRefinements();
  markExample();
 }
 function focusShortlist(){
@@ -208,9 +236,88 @@ function focusShortlist(){
 function markExample(){
  [...$("examples").children].forEach((button,i)=>button.setAttribute("aria-pressed",String(i===lastExample)));
 }
+const sortLabels={
+  match:en("За збігом із запитом","Best match"),
+  asc:en("Спочатку дешевші серед збігів","Cheapest matching flats first"),
+  desc:en("Спочатку дорожчі серед збігів","Priciest matching flats first")
+};
+const detailChoices=[
+  en("Рожева плитка","Pink tiles"),en("Картини на стіні","Wall art"),en("Вінтажний диван","Vintage sofa"),
+  en("Стіл біля вікна","Desk by the window"),en("Засклений балкон","Enclosed balcony"),
+  en("Вид на воду","Water view"),en("Рослини","Plants"),en("Білий холодильник","White fridge")
+];
+function syncRefinements(){
+  $("min-rent").value=parsed.budget?.lower ? parsed.budget.minRent : "";
+  $("max-rent").value=parsed.budget?.upper ? parsed.budget.maxRent : "";
+  $("max-rent").setCustomValidity("");
+  $("rent-sort").replaceChildren(...Object.entries(sortLabels).map(([value,pair])=>new Option(t(pair),value)));
+  $("rent-sort").value=parsed.sort;
+  const add=$("add-criterion");
+  add.replaceChildren(new Option(text("Обери за потреби","Choose if needed"),""));
+  const addGroup=(groupLabel,options)=>{
+    const group=element("optgroup");group.label=groupLabel;
+    for(const [key,label] of options) group.append(new Option(label,key));
+    add.append(group);
+  };
+  const photoOptions=traits.flatMap((pair,i)=>[
+    ["trait/"+i+"/1",t(pair)],["trait/"+i+"/-1",t(opposites[i])]
+  ]);
+  addGroup(text("Деталі на фото","Photo details"),photoOptions);
+  addGroup(text("Предмети та деталі інтер’єру","Interior details"),detailChoices.map((label,i)=>["detail/"+i,t(label)]));
+  addGroup(text("Район","Neighbourhood"),flats.map(f=>["place/"+f.id,t(f.name)]));
+  const current=$("active-criteria");
+  current.replaceChildren();
+  for(const [i,label] of [...parsed.criteria.map(criterionLabel),...parsed.ignored].entries()){
+    const check=element("input");check.type="checkbox";check.value=String(i);check.checked=true;
+    const row=element("label");row.append(check,document.createTextNode(label));current.append(row);
+  }
+}
+$("refine-form").onsubmit=event=>{
+  event.preventDefault();
+  const minText=$("min-rent").value,maxText=$("max-rent").value;
+  const min=Number(minText),max=maxText==="" ? Infinity : Number(maxText);
+  if(min>max){
+    $("max-rent").setCustomValidity(text("Максимум має бути не меншим за мінімум.","Maximum rent must be at least the minimum."));
+    $("max-rent").reportValidity();return;
+  }
+  const oldMin=parsed.budget?.lower ? String(parsed.budget.minRent) : "";
+  const oldMax=parsed.budget?.upper ? String(parsed.budget.maxRent) : "";
+  if(minText!==oldMin || maxText!==oldMax){
+    parsed.budget=minText || maxText ? {minRent:min,maxRent:max,
+      lower:minText ? {amount:min,exclusive:false} : null,upper:maxText ? {amount:max,exclusive:false} : null} : null;
+    parsed.anyRent=!parsed.budget;
+  }
+  parsed.manuallyAdjusted=true;
+  parsed.sort=$("rent-sort").value;
+  const checks=[...$("active-criteria").querySelectorAll("input")];
+  const offset=parsed.criteria.length;
+  parsed.criteria=parsed.criteria.filter((_,i)=>checks[i].checked);
+  parsed.ignored=parsed.ignored.filter((_,i)=>checks[offset+i].checked);
+  if(!parsed.ignored.length) parsed.suggestions=[];
+  if($("add-criterion").value){
+    const [kind,key,dir]=$("add-criterion").value.split("/");
+    if(kind==="detail"){
+      const [choice]=parseRequest(t(detailChoices[Number(key)])).criteria;
+      if(choice && !parsed.criteria.some(c=>c.type===choice.type && criterionLabel(c)===criterionLabel(choice))) parsed.criteria.push(choice);
+    }else if(kind==="place"){
+      if(!parsed.criteria.some(c=>c.type==="place" && c.id===key && c.dir===1))
+        parsed.criteria.push({type:"place",id:key,dir:1,label:flats.find(f=>f.id===key).name});
+    }else if(!parsed.criteria.some(c=>c.type==="trait" && c.key===Number(key) && c.dir===Number(dir))){
+      parsed.criteria.push({type:"trait",key:Number(key),dir:Number(dir)});
+    }
+  }
+  lastExample=null;markExample();drawResults();syncRefinements();
+  $("refine").open=false;$("results").focus();
+};
+for(const id of ["min-rent","max-rent"]) $(id).oninput=()=>$("max-rent").setCustomValidity("");
+
 function translate(){
  const copy={
   title1:en("Квартира в Києві","A flat in Kyiv"),title2:en("під твій запит","that fits your life"),
+  "refine-title":en("Уточнити умови й порядок","Adjust preferences and order"),
+  "min-label":en("Оренда від, грн","Min rent, UAH"),"max-label":en("Оренда до, грн","Max rent, UAH"),
+  "sort-label":en("Порядок у добірці","Shortlist order"),"add-label":en("Додати побажання","Add a preference"),
+  "refine-apply":en("Оновити добірку","Update shortlist"),
   skip:en("До пошуку","Skip to search"),
   "cover-caption":en("Поділ · переглянути кухню","Podil · explore the kitchen"),
   intro:en("Серед дев’яти квартир знайди ту, де тобі буде зручно. Вкажи бюджет і що для тебе важливо вдома, а потім перевір збіги на фото.","Find your fit among nine Kyiv flats. Set a rent limit and describe what matters to you at home, then check the photos behind each match."),
@@ -233,7 +340,7 @@ function translate(){
    $("examples").append(button);
  });
  $("prev").setAttribute("aria-label",text("Попереднє фото","Previous photo"));$("next").setAttribute("aria-label",text("Наступне фото","Next photo"));
- markExample();drawResults();
+ markExample();drawResults();syncRefinements();
 }
 $("request").value=applied;
 $("query").onsubmit=e=>{

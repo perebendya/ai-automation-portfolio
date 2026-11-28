@@ -65,22 +65,76 @@ function relatedObjects(tokens){
   return [...bestByFlat.values()];
 }
 
-// Require a currency marker so a distance or floor number cannot become a rent limit.
-const rentLimit = /(?<![\p{L}\d])(?:(?:мій бюджет|бюджет|my budget is|budget)\s+)?(не дорожче(?: за| ніж)?|менше ніж|до|максимум|up to|at most|less than|under|max(?:imum)?)\s*(₴\s*|uah\s+)?(\d+(?:[,\s]\d{3})*)(?:\s*(тис(?:яч[іу]?)?\.?|k))?(?:\s*(грн|гривень|₴|uah))?(?![\p{L}\d])(?:\s*(?:\/\s*(?:міс(?:яць)?|month)|на місяць|per month|a month))?/giu;
-function extractBudget(query) {
-  let budget=null;
-  const remainder=query.replace(rentLimit,(match,comparison,prefix,number,scale,suffix,offset)=>{
-    if(!prefix && !suffix && !scale) return match;
-    if(!prefix && !suffix && /^(?:\s*(?:usd|eur|dollars?|euros?|долар|євро))/iu.test(query.slice(offset + match.length))) return match;
-    const amount=Number(number.replace(/[,\s]/g,""))*(scale ? 1000 : 1);
-    if(!Number.isSafeInteger(amount)) return match;
-    const exclusive=/^(under|less than|менше ніж)/u.test(comparison);
-    const maxRent=amount-(exclusive ? 1 : 0);
-    if(!budget || maxRent<budget.maxRent) budget={amount,maxRent,exclusive};
+// Prices, ordering and visual evidence have different semantics. Consume price expressions
+// first so their words never become a requested object or a point in the photo score.
+const UAH_AMOUNT=String.raw`(?:₴\s*|uah\s+)?\d+(?:[ ,.]\d{3})*(?:[.,]\d{1,2})?(?:\s*(?:тис(?:яч[уаі]?)?\.?|[кk]))?(?:\s*(?:грн\.?|гривень|гривні|uah|₴))?`;
+const foreignOrOtherUnit=/^\s*(?:[$€£]|usd|eur|gbp|долар|євро|bucks?|dollars?|euros?|хвилин|метр|кілометр|поверх|кімнат|minutes?|metres?|floors?|rooms?)/iu;
+const moneyExpression=source=>new RegExp("(?<![\\p{L}\\d$€£])(?:"+source+")(?![\\p{L}\\d])","giu");
+const rentRange=moneyExpression(
+  String.raw`(?:(?:бюджет(?:ом)?|оренда|budget)\s+)?(?:від\s+|from\s+|between\s+)?(?<low>${UAH_AMOUNT})\s*(?:[–—-]|до|to|and(?=[\s₴\d]))\s*(?<high>${UAH_AMOUNT})`
+);
+const upper=String.raw`не дорожче(?:\s+(?:за|ніж))?|не більше(?:\s+(?:за|ніж))?|не вище|[ув]кластися\s+[ву]|дешевше\s+(?:за|ніж)|менше(?:\s+(?:ніж|за))?|максимум|до|under|less than|cheaper than|no more than|up to|at most|max(?:imum)?|budget(?: of)?|бюджет`;
+const lower=String.raw`від|мінімум|не менше(?: ніж| за)?|дорожче\s+(?:за|ніж)|понад|at least|from|over|more than|above`;
+const rentBound=moneyExpression(String.raw`(?:(?:мій бюджет|бюджет|ціна|оренда|my budget is|budget)\s+)?(?<op>${upper}|${lower})\s*[:=]?\s*(?<raw>${UAH_AMOUNT})(?:\s*(?:\/\s*(?:міс(?:яць)?|month)|на місяць|per month|a month))?`);
+const rentOrdering=[
+  ["asc", /від\s+(?:най)?дешев[а-яіїєґ]*\s+до\s+(?:най)?дорож[а-яіїєґ]*|(?:price|rent)?\s*low to high/gu],
+  ["desc", /від\s+(?:най)?дорож[а-яіїєґ]*\s+до\s+(?:най)?дешев[а-яіїєґ]*|(?:price|rent)?\s*high to low/gu],
+  ["asc", /(?:якнай|най|якомога\s+)?дешев(?:ше|ш[а-яіїєґ]*|[а-яіїєґ]*)|подешевше|недорог[а-яіїєґ]*|бюджетн(?:а|ий|у|е|і)|за зростанням ціни|від нижчої ціни|(?:найменш[ау]|найнижч[ау]|мінімальн[ау]) (?:ціна|ціну|оренда|оренду)|(?:as )?cheap as possible|(?:the )?(?:cheapest|least expensive|most affordable|lowest (?:price|rent))|(?:cheap|affordable|budget-friendly)(?=\s+(?:flat|rent|apartment)\b|\s*$)/gu],
+  ["desc", /(?:якнай|най)дорожч[а-яіїєґ]*|(?:спочатку|спершу)\s+дорожч[а-яіїєґ]*|за спаданням ціни|(?:найвищ[ау]|максимальн[ау]) (?:ціна|ціну|оренда|оренду)|(?:the )?(?:most expensive|highest (?:price|rent)|priciest)/gu]
+];
+function readAmount(raw){
+  const scaled=/(?:тис|[кk])/iu.test(raw);
+  const marked=scaled || /₴|uah|грн|грив/iu.test(raw);
+  const digits=raw.match(/\d[\d., ]*/u)[0].trim().replace(/\s/g,"").replace(/[.,](?=\d{3}(?:\D|$))/g,"").replace(",",".");
+  return {value:Number(digits)*(scaled?1000:1),marked,scaled};
+}
+function parsePrice(query){
+  let budget=null,sort="match",anyRent=false;
+  function setBound(side,amount,exclusive=false){
+    budget??={minRent:0,maxRent:Infinity,lower:null,upper:null};
+    const bound={amount,exclusive};
+    if(side==="lower"){
+      const value=amount+Number(exclusive);
+      if(!budget.lower || value>budget.minRent){budget.lower=bound;budget.minRent=value}
+    }else{
+      const value=amount-Number(exclusive);
+      if(value<budget.maxRent){budget.upper=bound;budget.maxRent=value}
+    }
+  }
+  function inHryvnias(full,offset,input,amounts){
+    if(foreignOrOtherUnit.test(input.slice(offset+full.length)) || /(?:[$€£]|usd|eur|gbp)\s*$/iu.test(input.slice(0,offset))) return false;
+    return amounts.every(a=>Number.isSafeInteger(a.value)) && amounts.some(a=>a.marked || a.value>=1000);
+  }
+  let remainder=query.replace(priceAside,()=>{anyRent=true;return ","});
+  remainder=remainder.replace(rentRange,(full,left,right,offset,input)=>{
+    const a=readAmount(left),b=readAmount(right);
+    if(!inHryvnias(full,offset,input,[a,b])) return full;
+    if(!a.marked && a.value<1000 && b.scaled) a.value*=1000;
+    if(!b.marked && b.value<1000 && a.scaled) b.value*=1000;
+    setBound("lower",a.value);setBound("upper",b.value);
     return " ";
   });
-  return {budget,remainder};
+  remainder=remainder.replace(rentBound,(full,op,raw,offset,input)=>{
+    const a=readAmount(raw);
+    if(!inHryvnias(full,offset,input,[a])) return full;
+    const floor=/^(?:від|мінімум|не менше|дорожче|понад|at least|from|over|more than|above)/u.test(op);
+    const strict=/^(?:дешевше|менше|дорожче|понад|under|less than|cheaper than|over|more than|above)/u.test(op);
+    setBound(floor?"lower":"upper",a.value,strict);
+    return " ";
+  });
+  for(const [direction,pattern] of rentOrdering){
+    remainder=remainder.replace(pattern,(match,offset,input)=>{
+      const before=input.slice(0,offset),after=input.slice(offset+match.length);
+      if(/[\p{L}\d]$/u.test(before) || /^[\p{L}\d]/u.test(after) || /(?:^|\s)(?:не|not)\s*$/u.test(before)) return match;
+      if(/^\s*(?:за|ніж|than)?\s*[$€£\d]/u.test(after)) return match;
+      if(/^\s+(?:диван|ремонт|стіл|мебл|килим|ліжк|sofa|couch|bed|rug|desk|furniture)/u.test(after)) return match;
+      sort=direction;return " ";
+    });
+  }
+  if(sort!=="match") remainder=remainder.replace(/(?<![\p{L}])(?:спочатку|спершу|варіант(?:и)?|краще|first|options?|one(?=\s+with|\s*$))(?![\p{L}])/gu," ");
+  return {budget,sort,anyRent:anyRent && !budget,remainder};
 }
+
 // The same normalization is used for a visitor's words and the bilingual photo index.
 const vocabulary = [
   ["sofa", /^(?:диван.*|соф[аиуіою]|канап.*|sofas?|couch(?:es)?)$/u],
@@ -117,8 +171,8 @@ const vocabulary = [
   ["frame", /^(?:рам[кц].*|рамі|framed|frames?)$/u],
   ["velvet", /^(?:оксамит.*|велюр.*|velvet)$/u]
 ];
-const neutralWords=new Set(("я ми мені нам мене оренда оренди район районі райончику хотілось хочеться можна знайти оселю треба потрібен потрібна потрібне потрібні потрібний потрібно хочу щось шось покажи показати підбери знайди давай максимально десь таке якомусь якомога от там реально просто прям прямо дуже хочеться хотіла хотів б би щоб щоби аби була був було були буде бути є мав мала мали має мають шукаю шукаємо квартиру квартира квартирі житло помешкання орендувати бажано подобається подобаються люблю вітаю привіт будь ласка ще також тільки тож і й та а з зі із на над у в до за під для біля поруч коло від при там де що який яка яке які цей ця це ці " +
-  "i i'd i’d id would like want need looking for am we my me a an the it its with at on of in to by and or please that has have is be prefer flat apartment rental also really just something somewhere very some any i'm we're rent renting love somewhere ideally hoping find show give nice should can could get beside near above next there so " +
+const neutralWords=new Set(("я ми мені нам мене оренда оренди район районі райончику хотілось хочеться можна знайти оселю треба потрібен потрібна потрібне потрібні потрібний потрібно хочу тільки лише щось шось покажи показати підбери знайди давай максимально десь таке якомусь якомога от там реально просто прям прямо дуже хочеться хотіла хотів б би щоб щоби аби була був було були буде бути є мав мала мали має мають шукаю шукаємо квартиру квартира квартирі квартири житло помешкання орендувати бажано подобається подобаються люблю вітаю привіт будь ласка ще також тільки тож і й та а з зі із на над у в до за під для біля поруч коло від при там де що який яка яке які цей ця це ці " +
+  "i i'd i’d id would like want need looking for am we my me a an the it its with at on of in to by and or please that has have is be prefer flat flats apartment apartments rental also really just something somewhere very some any i'm we're rent renting love somewhere ideally hoping find show give nice should can could get beside near above next there so " +
   "без не жодних жодного жодної жоден ніяких уникаю without no not avoid hate don't rather than").split(/\s+/u));
 function words(value){
   return value.toLowerCase().normalize("NFKC").replace(/[’‘ʼ]/gu,"'").match(/[\p{L}\d]+(?:'[\p{L}]+)*/gu)||[];
@@ -151,6 +205,35 @@ const placeForms={
  f:/русанів(?:ка|ці|ку)|rusanivka/u, g:/теремк(?:и|ах)|teremky/u, h:/позняк(?:и|ах)|pozniaky/u,
  i:/золот(?:і ворота|их воріт|их воротах)|zoloti vorota/u
 };
+// Offer a correction from the catalogue only when one spelling concept fits.
+const spellingWords=new Map();
+for(const entry of [...evidenceIndex.map(e=>e.label),...flats.map(f=>f.name),...traits,...opposites]){
+  for(const label of entry) for(const word of words(label)){
+    const key=term(word);
+    if(word.length>=5 && (vocabulary.some(([k])=>k===key) || colours.some(([k])=>k===key) ||
+      Object.values(placeForms).some(pattern=>pattern.test(word)))) spellingWords.set(word,key);
+  }
+}
+function oneEditApart(word,candidate){
+  if(Math.abs(word.length-candidate.length)>1) return false;
+  let i=0;
+  while(i<word.length && word[i]===candidate[i]) i++;
+  if(word.length<candidate.length) return word.slice(i)===candidate.slice(i+1);
+  if(word.length>candidate.length) return word.slice(i+1)===candidate.slice(i);
+  return word.slice(i+1)===candidate.slice(i+1) ||
+    (word[i]===candidate[i+1] && word[i+1]===candidate[i] && word.slice(i+2)===candidate.slice(i+2));
+}
+function spellingSuggestion(raw){
+  for(const hit of raw.matchAll(/[\p{L}]+(?:['’ʼ][\p{L}]+)*/gu)){
+    const word=words(hit[0])[0];
+    if(word.length<5 || spellingWords.has(word) || neutralWords.has(word) || indexedTerms.has(term(word))) continue;
+    const near=[...spellingWords].filter(([candidate])=>oneEditApart(word,candidate));
+    if(near.length && new Set(near.map(([,key])=>key)).size===1){
+      return raw.slice(0,hit.index)+near[0][0]+raw.slice(hit.index+hit[0].length);
+    }
+  }
+  return null;
+}
 function detailMatch(tokens,clause){
   // With an explicit relationship ("art above a sofa"), search the full observation.
   // Otherwise keep modifiers on their object ("red rug above a sofa" is not a red sofa).
@@ -186,22 +269,25 @@ const contextual = [
 function parseRequest(raw){
   const normalized=raw.normalize("NFKC").toLowerCase().replace(/[’‘ʼ]/gu,"'")
     .replace(/,\s*(щоб|щоби)\s+/gu," $1 ").replace(/не хочу\s*щоб/gu,"не хочу щоб");
-  let anyRent=false;
-  const visualRequest=normalized.replace(priceAside,()=>{
-    anyRent=true;
-    return ",";
-  }).replace(asideWords," ").replace(/\s+/gu," ").trim();
-  const {budget,remainder}=extractBudget(visualRequest);
+  const {budget,sort,anyRent,remainder}=parsePrice(normalized.replace(asideWords," ").replace(/\s+/gu," ").trim());
   const selected=new Map(), ignored=new Set(), suggestions=new Map();
   // The separators are kept so shared negation can apply to a coordinated list.
   const chunks=remainder.replace(/\brather than\b/gu,",not ").replace(/\sа не\s/gu,",не ")
-    .split(/([,.;!?+&\n]+|\s+(?:але|проте|однак|головне|а ще|but|however|though|та|і|й|або|ні|and|or)\s+)/iu);
+    .split(/([,.;!?+&\n]+|\s+(?:але|проте|однак|головне|а ще|but|however|though|та|і|й|або|ні|чи|and|or)\s+)/iu);
   let previousNegative=false;
+  const segments=[];
+  let segment;
+  function record(key,criterion){
+    selected.set(key,criterion);
+    segment.keys.add(key);
+  }
   function choose(key,criterion,indifferentHere){
     if(indifferentHere) selected.delete(key);
-    else selected.set(key,criterion);
+    else record(key,criterion);
   }
   for(let n=0;n<chunks.length;n+=2){
+    segment={join:(chunks[n-1]||"").trim(),keys:new Set(),positive:false};
+    segments.push(segment);
     let clause=chunks[n].trim();
     if(!clause){previousNegative=false;continue}
     const conjunction=(chunks[n-1]||"").trim();
@@ -210,6 +296,7 @@ function parseRequest(raw){
     const indifferentHere=indifferent.test(clause);
     const negative=carry || /(?:^|\s)(?:без|жодн[а-яіїєґ]*|не|уникаю|without|no|not|avoid|hate|don't|is a dealbreaker|are a dealbreaker)(?:\s|$)/u.test(clause);
     previousNegative=negative && !indifferentHere;
+    segment.positive=!negative && !indifferentHere;
     const dir=negative ? -1 : 1;
     for(const flat of flats){
       const place=clause.match(placeForms[flat.id]);
@@ -245,7 +332,7 @@ function parseRequest(raw){
           selected.delete("trait:"+key+":1");
           selected.delete("trait:"+key+":-1");
         }else{
-          selected.set("trait:"+key+":"+direction,{type:"trait",key,dir:direction});
+          record("trait:"+key+":"+direction,{type:"trait",key,dir:direction});
         }
       }
       continue;
@@ -275,9 +362,23 @@ function parseRequest(raw){
       }
     }
   }
-  return {criteria:[...selected.values()],budget,anyRent:anyRent && !budget,ignored:[...ignored],suggestions:[...suggestions.values()].slice(0,3)};
+  // Join only adjacent positive alternatives. "Without a bed or a desk" keeps two exclusions.
+  let previousKey=null;
+  for(const {join,keys,positive} of segments){
+    const key=positive && keys.size===1 ? [...keys][0] : null;
+    if(key && previousKey && key!==previousKey && /^(або|чи|or)$/u.test(join) && selected.has(key) && selected.has(previousKey)){
+      const left=selected.get(previousKey);
+      selected.set(previousKey,{type:"any",options:[...(left.options||[left]),selected.get(key)]});
+      selected.delete(key);
+    }else previousKey=key;
+  }
+  return {criteria:[...selected.values()],budget,sort,anyRent,ignored:[...ignored],suggestions:[...suggestions.values()].slice(0,3)};
 }
 function evidenceFor(flat,criterion){
+  if(criterion.type==="any"){
+    const alternatives=criterion.options.map(option=>evidenceFor(flat,option));
+    return alternatives.reduce((best,item)=>item.value>best.value ? item : best);
+  }
   if(criterion.type==="trait"){
     const [value,photo,label]=flat.facts[criterion.key];
     return {value:value*criterion.dir,photo,label};
@@ -297,4 +398,23 @@ function evidenceFor(flat,criterion){
     return {value:criterion.dir,photo:match.photo,label:match.label};
   }
   return {value:0,photo:null,label:en("Фото не підтверджують «"+criterion.label+"»","Photos do not confirm “"+criterion.label+"”")};
+}
+
+function rankRentals(plan){
+  const {criteria,budget,sort}=plan;
+  if(!criteria.length && !budget && sort==="match" && plan.ignored.length) return [];
+  const rows=flats.filter(flat=>!budget || (flat.rent>=budget.minRent && flat.rent<=budget.maxRent)).map(flat=>{
+    const evidence=criteria.map(c=>evidenceFor(flat,c));
+    const inBudget=Number(Boolean(budget));
+    return {flat,evidence,points:evidence.reduce((sum,f)=>sum+f.value,inBudget),
+      matches:evidence.filter(f=>f.value===1).length+inBudget,
+      support:evidence.reduce((sum,f)=>sum+(f.support||0),0)};
+  });
+  return rows.sort((a,b)=>{
+    const relevance=b.points-a.points || b.matches-a.matches;
+    if(relevance) return relevance;
+    const rent=a.flat.rent-b.flat.rent;
+    if(sort==="asc" || sort==="desc") return sort==="asc" ? rent : -rent;
+    return b.support-a.support || rent;
+  });
 }
