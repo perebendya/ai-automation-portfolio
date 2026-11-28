@@ -100,7 +100,7 @@ function render() {
   el("preferences").hidden = !showQuestions;
   el("selection").classList.toggle("empty-list", !showQuestions);
   el("list").querySelector(".rank-settings").hidden = !count;
-  el("refine-help").hidden = !q;
+  el("quiz-intro").hidden = !q || history.length > 0;
   el("step").textContent = q ? tr(`Question ${history.length + 1} of up to ${maxQuestions}`, `Запитання ${history.length + 1} із максимум ${maxQuestions}`) : tr("Quiz complete","Опитування завершено");
   el("question").textContent = q ? q[lang() === "uk" ? "question" : "en"] : tr("Your shortlist is ready.","Твоя добірка готова.");
   const hints = {
@@ -202,6 +202,7 @@ el("answers").addEventListener("click", e => {
   if (!button || !result?.next || el("answers").inert) return;
   lastAnswer = {top:result.results[0]?.id, value:button.dataset.answer};
   history.push({feature:result.next, value:button.dataset.answer});
+  focusTarget = "question";
   update();
 });
 el("finish").addEventListener("click", () => {

@@ -4,7 +4,7 @@
   <title data-uk="Підбір настільної гри · Дарія Кукла">Board Game Finder · Dariia Kukla</title>
   <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48 64x64" type="image/x-icon">
   <meta name="description" content="Find a game for your table with Dariia Kukla’s adaptive board-game recommender." data-uk-description="Підбери настільну гру для своєї компанії за допомогою рекомендаційної системи Дарії Кукли.">
-  <link rel="stylesheet" href="demo.css?v=footer2"><link rel="stylesheet" href="boardgames.css?v=6">
+  <link rel="stylesheet" href="demo.css?v=footer2"><link rel="stylesheet" href="boardgames.css?v=7">
 </head><body>
 <a class="skip" href="#main-content" data-uk="До підбору гри">Skip to the finder</a>
 <header class="masthead"><div class="wrap">
@@ -22,7 +22,7 @@
     <header class="intro">
       <h1><span data-uk="У що зіграти">What should we play</span> <em data-uk="сьогодні?">tonight?</em></h1>
       <p data-uk="Обери, скільки вас за столом і скільки маєте часу на гру. Із 30 224 настільних ігор у добірку потраплять лише ті, що підходять за обома умовами.">Choose how many people are playing and how much time you have. From a catalogue of 30,224 board games, only games that fit both conditions make your shortlist.</p>
-      <p data-uk="Любите вигравати разом чи змагатися між собою? Кілька простих відповідей та оцінка моделі машинного навчання допоможуть знайти гру до смаку без довгих пошуків.">Would you rather win as a team or compete with your friends? A few answers like that, together with a machine learning model, help you find a game without reading through dozens of rulebooks.</p>
+      <p data-uk="Любите вигравати разом? Якщо відповіси «так», командні ігри отримають більше балів. Щоб вирішити, які ігри показати першими, підбір також враховує оцінку моделі машинного навчання.">Do you like winning as a team? Say yes and cooperative games earn more points. The finder also uses a machine learning model to help decide which games to show first.</p>
       <button class="primary" type="button" id="start" hidden aria-controls="finder" aria-expanded="false" data-uk="Почати підбір">Find my game</button>
     </header>
     <img class="game-night" src="assets/game-night.webp" alt="" width="1200" height="800" fetchpriority="high">
@@ -74,11 +74,13 @@
   <p id="status" hidden role="status"></p>
   <button id="retry" hidden type="button" data-uk="Повторити завантаження">Retry loading</button>
   <section id="selection" hidden aria-labelledby="results-title">
-    <header class="selection-head"><h2 id="results-title" tabindex="-1" data-uk="Ігри для твого вечора">Games for your table</h2><p id="count" role="status"></p><a href="#setup-title" data-uk="Змінити умови гри">Change table settings</a></header>
+    <header class="selection-head"><h2 id="results-title" tabindex="-1" data-uk="Ігри для твого вечора">Games for your table</h2><p id="count" role="status"></p><a href="#setup-title" data-uk="Змінити базові умови гри">Change basic game settings</a></header>
     <div class="workspace">
-      <section class="quiz-panel" id="preferences" aria-labelledby="refine-title">
-        <h3 id="refine-title" data-uk="Що вам до смаку?">What does your group enjoy?</h3>
-        <p id="refine-help" data-uk="Ці запитання змінюють порядок ігор у добірці. Можна пропустити будь-яке або одразу перейти до ігор.">These questions change the order of your shortlist. Skip any question or go straight to your games.</p>
+      <section class="quiz-panel" id="preferences" aria-labelledby="question">
+        <header id="quiz-intro">
+          <h3 id="refine-title" data-uk="Що вам до смаку?">What does your group enjoy?</h3>
+          <p id="refine-help" data-uk="Ці запитання змінюють порядок ігор у добірці. Можна пропустити будь-яке або одразу перейти до ігор.">These questions change the order of your shortlist. Skip any question or go straight to your games.</p>
+        </header>
         <div class="question-area"><p id="step"></p><h3 id="question" tabindex="-1"></h3><p id="hint"></p></div>
         <div class="answers" id="answers">
           <button type="button" data-answer="y" data-uk="Так">Yes</button>
@@ -98,9 +100,10 @@
         <button type="button" id="clear" hidden data-uk="Скинути умови гри">Clear table settings</button>
         <details class="rank-settings"><summary data-uk="Налаштування добірки">Shortlist settings</summary>
         <div class="result-controls">
-          <label class="model"><input type="checkbox" id="model" checked><span data-uk="Урахувати ML-модель">Include the ML model</span></label>
+          <label class="model"><input type="checkbox" id="model" aria-describedby="model-help" checked><span data-uk="Враховувати оцінку моделі">Use the model’s score</span></label>
           <label class="limit"><span data-uk="Показати">Show</span><span class="select-shell"><select id="limit"><option>5</option><option selected>10</option><option>15</option><option>20</option></select></span></label>
         </div>
+        <p id="model-help" data-uk="Модель оцінює ігри за їхніми характеристиками, зокрема тривалістю партії та складністю правил. Вимкни її, і місце гри у списку залежатиме лише від рейтингу на BoardGameGeek і твоїх відповідей.">The model scores games using details such as playing time and how hard the rules are to learn. Turn it off and each game’s place on the list depends only on its BoardGameGeek ranking and your answers.</p>
         </details>
         <ol id="games"></ol>
       </div>
@@ -118,5 +121,5 @@
     <p data-uk="Дарія Кукла · Київ">Dariia Kukla · Kyiv</p>
   </div>
 </footer>
-<script src="portfolio.js?v=3"></script><script type="module" src="board-game-finder/site.js?v=4"></script>
+<script src="portfolio.js?v=3"></script><script type="module" src="board-game-finder/site.js?v=5"></script>
 </body></html>
