@@ -4,7 +4,7 @@
   <title data-uk="Проєкти · Дарія Кукла">Projects · Dariia Kukla</title>
   <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48 64x64" type="image/x-icon">
   <meta name="description" content="Explore Dariia Kukla’s AI automation projects, interactive demos and work at OBRIO." data-uk-description="Проєкти Дарії Кукли з AI-автоматизації, інтерактивні демо й робочі кейси з OBRIO.">
-  <link rel="stylesheet" href="demo.css?v=footer2"><link rel="stylesheet" href="projects.css?v=report-cover">
+  <link rel="stylesheet" href="demo.css?v=footer2"><link rel="stylesheet" href="projects.css?v=report-flow">
 </head><body>
 <a class="skip" href="#projects" data-uk="До проєктів">Skip to projects</a>
 <header class="masthead"><div class="wrap">
@@ -33,10 +33,16 @@
         </div>
       </a>
       <a class="project-card" href="report.html#demo-title" data-site-link>
-        <div class="card-art report-art"><img src="assets/moderation-report.webp" alt="" width="1200" height="706"></div>
+        <div class="card-art report-art" aria-hidden="true">
+          <div class="report-flow">
+            <span class="flow-step"><span class="flow-node flow-channel">#</span><span data-uk="Канали Slack">Slack channels</span></span>
+            <span class="flow-step"><span class="flow-node flow-code">{ }</span><span data-uk="Прибрати повтори">Merge duplicates</span></span>
+            <span class="flow-step"><span class="flow-node"><span class="flow-page"></span></span><span data-uk="Звіт за тиждень">Weekly report</span></span>
+          </div>
+        </div>
         <div class="card-copy"><h3 data-uk="Тижневий звіт про модерацію">Weekly moderation report</h3>
-          <p data-uk="Перевір, чому система сплутала номер посилки з телефоном. Я зібрала в n8n звіт, який об’єднує повторні сповіщення зі Slack і заощаджує менеджеру близько 4 годин ручної роботи щотижня.">See why a parcel reference triggered a phone-number alert. I built an n8n report that merges duplicate Slack alerts and saves the manager about 4 hours of manual work each week.</p>
-          <span class="card-action" data-uk="Перевірити сповіщення">Review the alert</span>
+          <p data-uk="Раніше менеджер щоп’ятниці перечитував кілька каналів Slack. Я зібрала в n8n звіт, який рахує випадки без повторів і підсумовує коментарі модераторів. Це заощаджує команді близько 4 годин на тиждень.">Every Friday, the manager used to read through several Slack channels. I built an n8n report that counts each case once and summarizes the moderators’ notes. It saves the team about 4 hours a week.</p>
+          <span class="card-action" data-uk="Переглянути звіт">View the report</span>
         </div>
       </a>
       <a class="project-card" href="boardgames.html" data-site-link>
