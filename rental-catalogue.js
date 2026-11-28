@@ -128,7 +128,7 @@ const photoDetails = {
     [en("Засклений балкон із кімнатними рослинами","Enclosed balcony with houseplants")]
   ],
   b: [
-    [en("Лаймова кухня з рожевою плиткою","Lime-green kitchen with pink tiles"), en("Круглий дерев’яний обідній стіл","Round wooden dining table"), en("Холодильник біля кухонних шаф","Fridge beside the kitchen cabinets")],
+    [en("Лаймова кухня з яскраво-рожевою плиткою вздовж двох стін","Lime-green kitchen with a bright pink tiled backsplash along two walls"), en("Круглий дерев’яний обідній стіл","Round wooden dining table"), en("Холодильник біля кухонних шаф","Fridge beside the kitchen cabinets")],
     [en("Бірюзовий диван із подушками","Teal sofa with cushions"), en("Дві картини в рамках на стіні над диваном","Two framed pictures on the wall above the sofa"), en("Дерев’яний письмовий стіл біля вікна з лампою","Wooden desk by the window with a lamp"), en("Кімнатні рослини біля дивана","Houseplants beside the sofa"), en("Світлий килим на підлозі","Light-coloured floor rug")],
     [en("Скляна душова кабіна","Glass shower enclosure"), en("Дзеркальна шафка над умивальником","Mirrored cabinet above the sink")],
     [en("Відкритий балкон із металевими перилами та видом на місто","Open balcony with metal railings and a city view")]

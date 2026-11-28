@@ -39,9 +39,14 @@ test("unseen combinations search individual observations and point to the source
 
 test("unknown details are visible, including unknown modifiers of a known item", () => {
   const {criteria, ignored} = parseRequest("фіолетовий диван, душ і сауна");
-  assert.equal(criteria.length, 1);
-  assert.deepEqual(Array.from(ignored), ["фіолетовий диван", "сауна"]);
-  assert.equal(parseRequest("рудий диван").criteria.length, 0);
+  assert.equal(criteria.length, 2);
+  assert.deepEqual(Array.from(ignored), ["сауна"]);
+  for (const query of ["фіолетовий диван", "рудий диван"]) {
+    const [sofa] = parseRequest(query).criteria;
+    assert.equal(sofa.approximate, true);
+    assert.equal(sofa.label, query);
+    assert.equal(Math.max(...flats.map(flat => evidenceFor(flat,sofa).value)), 0.5);
+  }
   assert.equal(parseRequest("приватний вертолітний майданчик").criteria.length, 0);
 });
 
@@ -77,4 +82,61 @@ test("both languages of every preset still express the same three criteria", () 
 test("asking for two sleeping options does not silently overwrite either one", () => {
   assert.equal(parseRequest("ліжко і диван").criteria.length, 2);
   assert.equal(parseRequest("a bed rather than a sofa").criteria.length, 1);
+});
+
+test("informal colour and quantity requests survive an independent price aside", () => {
+  for (const query of [
+    "бля хочу багато рожевого похуй за які гроші",
+    "ціна мені взагалі неважлива, ну хочу побільше рожевого",
+    "Покажи щось у рожевих тонах, за будь-які гроші",
+    "Damn, lots of pink whatever the rent",
+    "money is no object, I want plenty of pink"
+  ]) {
+    const {criteria, budget, anyRent, ignored} = parseRequest(query);
+    assert.equal(criteria.length, 1, query);
+    assert.equal(budget, null, query);
+    assert.equal(anyRent, true, query);
+    assert.equal(ignored.length, 0, query);
+    const candidates = flats.filter(flat => evidenceFor(flat, criteria[0]).value > 0);
+    assert.deepEqual(Array.from(candidates, flat => flat.id), ["b"], query);
+    const photo = evidenceFor(candidates[0], criteria[0]);
+    assert.equal(photo.photo, 0);
+    assert.match(photo.label[0], /рожевою плиткою/);
+    assert.equal(photo.value, criteria[0].abundance ? 0.5 : 1);
+  }
+});
+
+test("abundance applies across colours and objects without fabricating a measurement", () => {
+  for (const query of ["хочу більше зеленого","якомога більше рослин","lots of wood","plenty of blue"]) {
+    const parsed = parseRequest(query);
+    assert.equal(parsed.ignored.length, 0);
+    const [wish] = parsed.criteria;
+    assert.equal(wish.abundance, true, query);
+    const evidence = flats.map(flat => evidenceFor(flat,wish));
+    assert.equal(Math.max(...evidence.map(e => e.value)), 0.5);
+    assert(evidence.some(e => e.support > 0));
+  }
+});
+
+test("price indifference neither negates a visual wish nor removes an explicit cap", () => {
+  const noCap = parseRequest("Пофіг на ціну, без рожевого");
+  assert.equal(noCap.anyRent, true);
+  assert.equal(noCap.criteria[0].dir, -1);
+  const capped = parseRequest("пофіг на ціну але до 15 000 грн і хочу рожеву плитку");
+  assert.equal(capped.budget.maxRent, 15000);
+  assert.equal(capped.anyRent, false);
+  assert.equal(capped.criteria.length, 1);
+  assert.equal(parseRequest("рожевий слон").criteria.length, 0);
+  assert.equal(parseRequest("без фіолетового дивана").criteria.length, 0);
+  const justPrice = parseRequest("any price");
+  assert.equal(justPrice.anyRent, true);
+  assert.equal(justPrice.criteria.length, 0);
+});
+
+test("an unverified phrase can offer a known word as an explicit narrower search", () => {
+  const miss=parseRequest("рожевий слон");
+  assert.equal(miss.criteria.length,0);
+  assert.deepEqual(Array.from(miss.suggestions),["рожевий"]);
+  assert.deepEqual(confirmed(miss.suggestions[0]),[["b"]]);
+  assert.equal(parseRequest("без рожевого слона").suggestions.length,0);
 });
