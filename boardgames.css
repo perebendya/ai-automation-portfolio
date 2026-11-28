@@ -53,6 +53,8 @@
 .intro .primary { margin-top:.65rem; }
 .intro .primary:hover { background:#19323d; }
 .game-night { display:block; width:100%; height:auto; aspect-ratio:3/2; object-fit:cover; border-radius:.4rem 2rem .4rem .4rem; }
+.photo-credit { margin-top:.35rem; font-size:.78rem; color:var(--muted); }
+.photo-credit a { color:inherit; }
 .setup { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:clamp(1.2rem,5vw,4rem); align-items:start; padding:clamp(1.5rem,3vw,2.4rem) 0; border-top:1px solid var(--line); scroll-margin-top:1rem; }
 .setup-copy p { margin:.65rem 0 0; max-width:50ch; color:var(--muted); }
 .filters { border:0; padding:0; margin:0 0 1.1rem; grid-template-columns:repeat(2,minmax(0,1fr)); }
@@ -81,7 +83,7 @@
 .method { border-top:1px solid var(--line); padding-top:1.4rem; }
 @media(max-width:760px) {
   .opening,.setup { grid-template-columns:1fr; gap:1.3rem; }
-  .game-night { max-height:18rem; object-position:50% 58%; }
+  .game-night { aspect-ratio:1.8; }
   .workspace { grid-template-columns:1fr; grid-template-areas:"quiz" "list"; }
   .intro h1 { max-width:19ch; }
 }
